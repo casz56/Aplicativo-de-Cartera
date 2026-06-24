@@ -1,3 +1,7 @@
+# Validación de fuentes – Versión 1.1
+
+Actualización funcional del aplicativo con logo oficial y pestañas operativas para despliegue en GitHub Pages.
+
 # Validación de fuentes anexas
 
 Fuentes revisadas del ZIP `proyecto erika.zip`:

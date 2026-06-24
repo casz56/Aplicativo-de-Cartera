@@ -2,6 +2,12 @@
 
 Aplicativo web prototipo en **HTML5 + JavaScript + CSS** para manejo, seguimiento, validación y gestión integral de la cartera institucional del INFIHUILA.
 
+## Novedades versión 1.1
+
+- Se reemplazó la imagen de encabezado por el **logo oficial de INFIHUILA** cargado en las fuentes del proyecto.
+- Se corrigió y activó la **funcionalidad real de las pestañas** del módulo principal, permitiendo navegación completa entre Dashboard, Validación, Saldos, Pagos y Recaudos, Desembolsos, Riesgo y Provisión, Edad de Cartera, Concentración, Formato 514 y Detalle por Cliente.
+- Se dejó la navegación preparada para GitHub Pages, incluyendo soporte por hash en la URL (por ejemplo: `#dashboard`, `#concentracion`, `#formato514`).
+
 ## Cómo usar
 
 1. Abra `index.html` en un navegador moderno.
@@ -50,6 +56,7 @@ cartera_infihuila_app/
 ├── styles.css
 ├── app.js
 ├── assets/
+│   ├── logo-infihuila-oficial.png
 │   ├── logo-infihuila.svg
 │   └── icons/
 ├── data/

@@ -31,7 +31,7 @@
     formato514: clone(window.DEMO_DATA?.formato514 || []),
     resultados: clone(window.DEMO_DATA?.resultados || []),
     filtros: { search:'', line:'', rating:'', sector:'', mora:'', amount:'' },
-    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '1.0.0', demo: true },
+    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '1.1.0', demo: true },
     charts: {},
     tables: {},
     validations: [],
@@ -48,6 +48,8 @@
     bindEvents();
     initializeState();
     renderAll();
+    syncTabFromHash();
+    window.addEventListener('hashchange', syncTabFromHash);
   }
 
   function cacheDom(){
@@ -103,6 +105,38 @@
     renderClientCards();
   }
 
+  function switchTab(tabName, updateHash = true){
+    const safeTab = String(tabName || 'dashboard').trim();
+    const tabs = document.querySelectorAll('.tab');
+    const pages = document.querySelectorAll('.tab-page');
+    let targetButton = document.querySelector(`.tab[data-tab="${safeTab}"]`);
+    let targetPage = document.getElementById(`tab-${safeTab}`);
+
+    if(!targetButton || !targetPage){
+      targetButton = document.querySelector('.tab[data-tab="dashboard"]');
+      targetPage = document.getElementById('tab-dashboard');
+    }
+
+    tabs.forEach(btn => btn.classList.toggle('active', btn === targetButton));
+    pages.forEach(page => page.classList.toggle('active', page === targetPage));
+
+    if(updateHash && targetButton){
+      const newHash = `#${targetButton.dataset.tab}`;
+      if(window.location.hash !== newHash){
+        history.replaceState(null, '', newHash);
+      }
+    }
+  }
+
+  function syncTabFromHash(){
+    const hash = window.location.hash.replace('#', '').trim();
+    if(hash && document.getElementById(`tab-${hash}`)){
+      switchTab(hash, false);
+    } else {
+      switchTab('dashboard', false);
+    }
+  }
+
   function renderStatus(){
     dom.fechaCorte.textContent = formatDate(findFechaCorte());
     dom.sourceMode.textContent = state.metadata.demo ? 'Demo validado con fuentes anexas' : 'Archivos cargados por el usuario';
@@ -134,7 +168,7 @@
       concentracion: clone(window.DEMO_DATA.concentracion), edadCartera: clone(window.DEMO_DATA.edadCartera), saldos: clone(window.DEMO_DATA.saldos),
       indicadoresCalidad: clone(window.DEMO_DATA.indicadoresCalidad), formato514: clone(window.DEMO_DATA.formato514), resultados: clone(window.DEMO_DATA.resultados)
     });
-    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'1.0.0', demo:true };
+    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'1.1.0', demo:true };
     clearFilters();
   }
 
