@@ -1,5 +1,13 @@
 # Sistema de Gestión de Cartera INFIHUILA
 
+## Novedades versión 1.2
+
+- Se incrustó el **logo institucional oficial de INFIHUILA directamente en `index.html` como Base64**, por lo que GitHub Pages no depende de rutas externas para mostrarlo.
+- Se agregó un **controlador independiente de pestañas** compatible con GitHub Pages, con navegación por hash y funcionamiento aun si una librería CDN tarda en cargar.
+- Se adicionó cache-busting en `styles.css`, `app.js` y `demo-data.js` para evitar que GitHub Pages muestre versiones anteriores por caché.
+- Se añadieron guardas para Chart.js y SheetJS, evitando que una falla de CDN bloquee la navegación principal del aplicativo.
+
+
 Aplicativo web prototipo en **HTML5 + JavaScript + CSS** para manejo, seguimiento, validación y gestión integral de la cartera institucional del INFIHUILA.
 
 ## Novedades versión 1.1
@@ -56,6 +64,7 @@ cartera_infihuila_app/
 ├── styles.css
 ├── app.js
 ├── assets/
+│   ├── logo-infihuila-oficial-v12.png
 │   ├── logo-infihuila-oficial.png
 │   ├── logo-infihuila.svg
 │   └── icons/
@@ -74,3 +83,7 @@ cartera_infihuila_app/
 ## Nota técnica
 
 El prototipo funciona sin backend y está preparado para evolucionar a una versión con autenticación, roles, base de datos, trazabilidad y API.
+
+## Despliegue recomendado en GitHub Pages
+
+Suba el contenido de la carpeta `cartera_infihuila_app/` al root del repositorio o a la rama/carpeta configurada para Pages. La versión 1.2 no requiere ruta de imagen para el logo del encabezado porque está incrustado en el HTML.

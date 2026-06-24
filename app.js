@@ -31,7 +31,7 @@
     formato514: clone(window.DEMO_DATA?.formato514 || []),
     resultados: clone(window.DEMO_DATA?.resultados || []),
     filtros: { search:'', line:'', rating:'', sector:'', mora:'', amount:'' },
-    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '1.1.0', demo: true },
+    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '1.2.0', demo: true },
     charts: {},
     tables: {},
     validations: [],
@@ -73,7 +73,7 @@
     dom.resetBtn.addEventListener('click', resetDemo);
     dom.exportExcelBtn.addEventListener('click', exportToExcel);
     dom.exportPdfBtn.addEventListener('click', exportToPDF);
-    dom.tabs.addEventListener('click', e => { if(e.target.matches('.tab')) switchTab(e.target.dataset.tab); });
+    dom.tabs.addEventListener('click', e => { const btn = e.target.closest('.tab[data-tab]'); if(btn){ e.preventDefault(); switchTab(btn.dataset.tab); } });
     document.body.addEventListener('click', e => {
       const exportBtn = e.target.closest('[data-export-table]');
       if(exportBtn) exportSingleTable(exportBtn.dataset.exportTable);
@@ -106,35 +106,40 @@
   }
 
   function switchTab(tabName, updateHash = true){
-    const safeTab = String(tabName || 'dashboard').trim();
-    const tabs = document.querySelectorAll('.tab');
-    const pages = document.querySelectorAll('.tab-page');
-    let targetButton = document.querySelector(`.tab[data-tab="${safeTab}"]`);
-    let targetPage = document.getElementById(`tab-${safeTab}`);
-
-    if(!targetButton || !targetPage){
-      targetButton = document.querySelector('.tab[data-tab="dashboard"]');
-      targetPage = document.getElementById('tab-dashboard');
+    if(typeof window.activateCarteraTab === 'function'){
+      window.activateCarteraTab(tabName || 'dashboard', { updateHash });
+      return;
     }
+    const safeTab = String(tabName || 'dashboard').replace(/^#/, '').trim();
+    const tabs = document.querySelectorAll('.tab[data-tab]');
+    const pages = document.querySelectorAll('.tab-page');
+    let targetButton = Array.from(tabs).find(btn => btn.dataset.tab === safeTab) || document.querySelector('.tab[data-tab="dashboard"]') || tabs[0];
+    if(!targetButton) return;
+    let targetPage = document.getElementById(`tab-${targetButton.dataset.tab}`);
 
-    tabs.forEach(btn => btn.classList.toggle('active', btn === targetButton));
-    pages.forEach(page => page.classList.toggle('active', page === targetPage));
+    tabs.forEach(btn => {
+      const active = btn === targetButton;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    pages.forEach(page => {
+      const active = page === targetPage;
+      page.classList.toggle('active', active);
+      page.hidden = !active;
+    });
 
     if(updateHash && targetButton){
       const newHash = `#${targetButton.dataset.tab}`;
-      if(window.location.hash !== newHash){
-        history.replaceState(null, '', newHash);
+      try{
+        if(window.location.hash !== newHash) history.replaceState(null, '', newHash);
+      }catch(err){
+        window.location.hash = targetButton.dataset.tab;
       }
     }
   }
 
   function syncTabFromHash(){
-    const hash = window.location.hash.replace('#', '').trim();
-    if(hash && document.getElementById(`tab-${hash}`)){
-      switchTab(hash, false);
-    } else {
-      switchTab('dashboard', false);
-    }
+    switchTab(window.location.hash || 'dashboard', false);
   }
 
   function renderStatus(){
@@ -168,7 +173,7 @@
       concentracion: clone(window.DEMO_DATA.concentracion), edadCartera: clone(window.DEMO_DATA.edadCartera), saldos: clone(window.DEMO_DATA.saldos),
       indicadoresCalidad: clone(window.DEMO_DATA.indicadoresCalidad), formato514: clone(window.DEMO_DATA.formato514), resultados: clone(window.DEMO_DATA.resultados)
     });
-    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'1.1.0', demo:true };
+    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'1.2.0', demo:true };
     clearFilters();
   }
 
@@ -176,6 +181,10 @@
      PARSERS: lectura Excel en browser
      =============================== */
   async function handleFiles(fileList){
+    if(typeof XLSX === 'undefined'){
+      alert('No se pudo cargar SheetJS/XLSX. Verifique conexión a internet para cargar archivos Excel.');
+      return;
+    }
     const files = Array.from(fileList || []);
     if(!files.length) return;
     const loaded = [];
@@ -466,6 +475,18 @@
   function renderChart(canvasId, type, labels, data, label){
     const el = document.getElementById(canvasId);
     if(!el) return;
+
+    if(typeof Chart === 'undefined'){
+      const card = el.closest('.chart-card');
+      if(card && !card.querySelector('.chart-fallback')){
+        card.insertAdjacentHTML('beforeend', '<p class="empty-state chart-fallback">Gráfico pendiente de cargar. Verifique la conexión a internet para Chart.js.</p>');
+      }
+      return;
+    }
+
+    const fallback = el.closest('.chart-card')?.querySelector('.chart-fallback');
+    if(fallback) fallback.remove();
+
     if(state.charts[canvasId]) state.charts[canvasId].destroy();
     state.charts[canvasId] = new Chart(el, {
       type,
@@ -720,6 +741,10 @@
   }
 
   function exportSingleTable(tableId){
+    if(typeof XLSX === 'undefined'){
+      alert('No se pudo cargar SheetJS/XLSX. Verifique conexión a internet para exportar esta tabla.');
+      return;
+    }
     const t = state.tables[tableId];
     if(!t) return;
     const wb = XLSX.utils.book_new();

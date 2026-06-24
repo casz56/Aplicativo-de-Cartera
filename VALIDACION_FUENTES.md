@@ -1,3 +1,7 @@
+# Validación funcional – Versión 1.2
+
+Actualización aplicada para GitHub Pages: logo oficial incrustado en HTML, pestañas funcionales mediante controlador independiente, cache-busting de recursos y guardas frente a fallas de CDN.
+
 # Validación de fuentes – Versión 1.1
 
 Actualización funcional del aplicativo con logo oficial y pestañas operativas para despliegue en GitHub Pages.
