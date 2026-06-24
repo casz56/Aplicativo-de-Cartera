@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sistema de Gestión de Cartera INFIHUILA" />
+  <title>Sistema de Gestión de Cartera | INFIHUILA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/demo-data.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero-card" id="top">
+      <div class="brand-block">
+        <img src="assets/logo-infihuila.svg" alt="Logo INFIHUILA" class="brand-logo" />
+      </div>
+      <div class="hero-title">
+        <span class="eyebrow">Cartera institucional</span>
+        <h1>SISTEMA DE GESTIÓN DE CARTERA</h1>
+        <p>Gestión Financiera y Comercial - INFIHUILA</p>
+      </div>
+      <div class="hero-actions">
+        <label class="btn btn-lime" for="fileInput">Cargar Excel</label>
+        <input id="fileInput" type="file" multiple accept=".xlsx,.xls" hidden />
+        <button class="btn btn-teal" id="exportExcelBtn">Exportar Excel</button>
+        <button class="btn btn-ghost" id="exportPdfBtn">Exportar PDF</button>
+        <button class="btn btn-outline" id="resetBtn">Restablecer</button>
+      </div>
+    </header>
+
+    <section class="status-strip" id="statusStrip">
+      <div><strong>Fecha de corte:</strong> <span id="fechaCorte">28/02/2026</span></div>
+      <div><strong>Fuente activa:</strong> <span id="sourceMode">Demo validado con fuentes anexas</span></div>
+      <div><strong>Archivos cargados:</strong> <span id="loadedFiles">9 fuentes base</span></div>
+      <div class="health-pill warning" id="overallHealth">Advertencia de conciliación</div>
+    </section>
+
+    <main class="layout-grid">
+      <aside class="side-panel">
+        <div class="panel-title">Filtros globales</div>
+        <label>Cliente / NIT / Pagaré<input id="searchInput" type="search" placeholder="Buscar cliente, NIT o pagaré" /></label>
+        <label>Línea de crédito<select id="lineFilter"><option value="">Todas</option></select></label>
+        <label>Calificación<select id="ratingFilter"><option value="">Todas</option></select></label>
+        <label>Sector<select id="sectorFilter"><option value="">Todos</option></select></label>
+        <label>Rango de mora<select id="moraFilter"><option value="">Todos</option><option value="0">Sin mora</option><option value="1-30">1 a 30 días</option><option value="31-90">31 a 90 días</option><option value="91-720">91 a 720 días</option><option value="720+">Mayor a 720 días</option></select></label>
+        <label>Rango de monto<select id="amountFilter"><option value="">Todos</option><option value="0-100m">Hasta $100M</option><option value="100m-1000m">$100M a $1.000M</option><option value="1000m+">Mayor a $1.000M</option></select></label>
+        <button class="btn btn-teal full" id="clearFiltersBtn">Limpiar filtros</button>
+
+        <div class="upload-card">
+          <h3>Carga y validación</h3>
+          <p>Arrastra o selecciona los libros Excel de cartera. El motor detecta el tipo de archivo por nombre y estructura.</p>
+          <div id="dropZone" class="drop-zone">Soltar archivos aquí</div>
+        </div>
+
+        <div class="legend-card">
+          <h3>Semáforos</h3>
+          <p><span class="dot ok"></span> Validado</p>
+          <p><span class="dot warn"></span> Advertencia</p>
+          <p><span class="dot danger"></span> Crítico</p>
+        </div>
+      </aside>
+
+      <section class="content-panel">
+        <nav class="tabs" id="tabs">
+          <button class="tab active" data-tab="dashboard">Dashboard Ejecutivo</button>
+          <button class="tab" data-tab="validacion">Carga y Validación</button>
+          <button class="tab" data-tab="saldos">Saldos</button>
+          <button class="tab" data-tab="recaudos">Pagos y Recaudos</button>
+          <button class="tab" data-tab="desembolsos">Desembolsos</button>
+          <button class="tab" data-tab="riesgo">Riesgo y Provisión</button>
+          <button class="tab" data-tab="edad">Edad de Cartera</button>
+          <button class="tab" data-tab="concentracion">Concentración</button>
+          <button class="tab" data-tab="formato514">Formato 514</button>
+          <button class="tab" data-tab="cliente360">Detalle por Cliente</button>
+        </nav>
+
+        <section class="tab-page active" id="tab-dashboard">
+          <div class="section-heading">
+            <div><span class="eyebrow">Resumen gerencial</span><h2>Dashboard ejecutivo</h2></div>
+            <button class="mini-btn" id="fullscreenBtn">Pantalla completa</button>
+          </div>
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="alert-grid" id="alertGrid"></div>
+          <div class="chart-grid">
+            <article class="chart-card large"><h3>Distribución de cartera por línea</h3><canvas id="lineChart"></canvas></article>
+            <article class="chart-card"><h3>Cartera al día vs vencida</h3><canvas id="statusChart"></canvas></article>
+            <article class="chart-card"><h3>Calificación por saldo</h3><canvas id="ratingChart"></canvas></article>
+            <article class="chart-card large"><h3>Concentración top 10 deudores</h3><canvas id="topDebtorsChart"></canvas></article>
+            <article class="chart-card large"><h3>Edad de cartera por rangos</h3><canvas id="agingChart"></canvas></article>
+            <article class="chart-card"><h3>Indicadores de calidad por sector</h3><canvas id="sectorChart"></canvas></article>
+          </div>
+        </section>
+
+        <section class="tab-page" id="tab-validacion">
+          <div class="section-heading"><div><span class="eyebrow">Motor de control</span><h2>Conciliación entre fuentes y calidad de datos</h2></div></div>
+          <div class="validation-grid" id="validationGrid"></div>
+          <div class="table-toolbar"><input id="validationSearch" placeholder="Buscar validación" /><button class="mini-btn" data-export-table="validationTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="validationTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-saldos">
+          <div class="section-heading"><div><span class="eyebrow">Cartera vigente</span><h2>Saldos de cartera</h2></div></div>
+          <div class="table-toolbar"><input id="saldosSearch" placeholder="Buscar saldo" /><button class="mini-btn" data-export-table="saldosTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="saldosTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-recaudos">
+          <div class="section-heading"><div><span class="eyebrow">Recaudo mensual</span><h2>Pagos y recaudos</h2></div></div>
+          <div class="chart-card"><h3>Composición del recaudo</h3><canvas id="recaudosChart"></canvas></div>
+          <div class="table-toolbar"><input id="pagosSearch" placeholder="Buscar pago" /><button class="mini-btn" data-export-table="pagosTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="pagosTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-desembolsos">
+          <div class="section-heading"><div><span class="eyebrow">Flujo comercial</span><h2>Desembolsos</h2></div></div>
+          <div class="chart-card"><h3>Desembolsos por línea</h3><canvas id="desembolsosChart"></canvas></div>
+          <div class="table-toolbar"><input id="desembolsosSearch" placeholder="Buscar desembolso" /><button class="mini-btn" data-export-table="desembolsosTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="desembolsosTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-riesgo">
+          <div class="section-heading"><div><span class="eyebrow">Riesgo crediticio</span><h2>Calificación, provisión y alertas</h2></div></div>
+          <div class="chart-grid two">
+            <article class="chart-card"><h3>Provisión general y saldo</h3><canvas id="provisionChart"></canvas></article>
+            <article class="chart-card"><h3>Saldo por calificación</h3><canvas id="riskRatingChart"></canvas></article>
+          </div>
+          <div class="table-toolbar"><input id="calificacionSearch" placeholder="Buscar calificación" /><button class="mini-btn" data-export-table="calificacionTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="calificacionTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-edad">
+          <div class="section-heading"><div><span class="eyebrow">Matriz de vencimientos</span><h2>Edad de cartera y mora</h2></div></div>
+          <div class="table-toolbar"><input id="edadSearch" placeholder="Buscar cartera por edad" /><button class="mini-btn" data-export-table="edadTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="edadTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-concentracion">
+          <div class="section-heading"><div><span class="eyebrow">Exposición individual</span><h2>Concentración de cartera</h2></div></div>
+          <div class="table-toolbar"><input id="concentracionSearch" placeholder="Buscar deudor" /><button class="mini-btn" data-export-table="concentracionTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="concentracionTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-formato514">
+          <div class="section-heading"><div><span class="eyebrow">Reporte regulatorio</span><h2>Formato 514 - SFC</h2></div></div>
+          <div class="table-toolbar"><input id="formatoSearch" placeholder="Buscar subcuenta" /><button class="mini-btn" data-export-table="formatoTable">Exportar tabla</button></div>
+          <div class="table-wrap"><table id="formatoTable"></table></div>
+        </section>
+
+        <section class="tab-page" id="tab-cliente360">
+          <div class="section-heading"><div><span class="eyebrow">Gestión comercial</span><h2>Vista 360° del cliente</h2></div></div>
+          <div id="clientCards" class="client-grid"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <button class="help-floating" id="helpBtn" aria-label="Ayuda">i</button>
+  <dialog id="helpDialog" class="modal">
+    <button class="modal-close" id="closeHelp">×</button>
+    <h2>Manual rápido</h2>
+    <p>El aplicativo inicia con datos demo validados contra las fuentes anexas. También puede cargar los libros Excel institucionales para recalcular el dashboard en tiempo real.</p>
+    <ol>
+      <li>Cargue uno o varios archivos Excel mediante el botón superior o arrastrando al panel lateral.</li>
+      <li>Revise el módulo de conciliación para identificar diferencias entre ACRESC, Resultados y Formato 514.</li>
+      <li>Use filtros globales para enfocar cliente, línea, calificación, sector o mora.</li>
+      <li>Exporte el dashboard a PDF o las tablas a Excel.</li>
+    </ol>
+  </dialog>
+
+  <dialog id="clientDialog" class="modal wide">
+    <button class="modal-close" id="closeClient">×</button>
+    <div id="clientDetail"></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
