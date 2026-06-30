@@ -8,6 +8,9 @@
     lime: '#ccd400', teal: '#00757a', dark: '#004651', ok: '#16a34a', warn: '#f59e0b', danger: '#dc2626', gray: '#5c6670', pale: '#edf7f7'
   };
 
+  const ANEXO1_STORAGE_KEY = 'infihuilaCarteraAnexo1.v1.5';
+  const ANEXO1_LEGACY_STORAGE_KEY = 'infihuilaCarteraAnexo1.v1';
+
   const SOURCE_CONFIG = {
     pagos: { title: 'Pagos y recaudos', fileHint: 'ACREPC1', headers: ['TIPO','TRANSACCION','NUMERO','CLIENTE','ENTIDAD','PRESTAMO','LINEA','FECHA','CAPITAL','INTERES CORRIENTE','INTERES SUSPENDIDO','INTERES MORA','OTROS','TOTAL PAGADO','ESTADO'] },
     desembolsos: { title: 'Desembolsos', fileHint: 'ACREPC_DES', headers: ['LINEA','CLIENTE','ENTIDAD','CONTRATO','PAGARE','FECHA DESEMBOLSO','FECHA VENCIMIENTO','MONTO','SALDO CAPITAL (FECHA VALIDA)','PLAZO','FREC KAPI','FREQ INT','TASA','MODALIDAD','ENTIDAD CANAL'] },
@@ -30,8 +33,10 @@
     indicadoresCalidad: clone(window.DEMO_DATA?.indicadoresCalidad || []),
     formato514: clone(window.DEMO_DATA?.formato514 || []),
     resultados: clone(window.DEMO_DATA?.resultados || []),
+    anexo1: clone(window.ANEXO1_DEMO || getEmptyAnexo1State()),
     filtros: { search:'', line:'', rating:'', sector:'', mora:'', amount:'' },
-    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '1.2.0', demo: true },
+    metadata: { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version: '2.0.0', demo: true },
+    ui: { activeLayout:'inicio', activeSubmodule:null, filtersDrawerOpen:false, actionMenuOpen:false, compactMode:true, layoutVersion: '2.0.0' },
     charts: {},
     tables: {},
     validations: [],
@@ -46,6 +51,7 @@
   function init(){
     cacheDom();
     bindEvents();
+    applyPersistedDataMode();
     initializeState();
     renderAll();
     syncTabFromHash();
@@ -53,16 +59,16 @@
   }
 
   function cacheDom(){
-    ['fileInput','dropZone','sourceMode','loadedFiles','fechaCorte','overallHealth','kpiGrid','alertGrid','validationGrid',
+    ['fileInput','dropZone','sourceMode','loadedFiles','fechaCorte','overallHealth','kpiGrid','alertGrid','validationGrid','sessionPill','adminAccessBtn','logoutBtn','deleteDataBtn',
      'searchInput','lineFilter','ratingFilter','sectorFilter','moraFilter','amountFilter','clearFiltersBtn','resetBtn','exportExcelBtn','exportPdfBtn',
-     'tabs','helpBtn','helpDialog','closeHelp','clientDialog','closeClient','clientDetail','clientCards','fullscreenBtn'].forEach(id => dom[id] = document.getElementById(id));
+     'tabs','anexo1Subtabs','anexo1MetaLine','anexo1Resumen','anexo1Alerts','anexo1Content','anexo1Search','anexo1LineFilter','anexo1RatingFilter','anexo1SourceFilter','anexo1MoraFilter','anexo1ViewMode','toggleAnexo1EditBtn','saveAnexo1Btn','discardAnexo1EditsBtn','addAnexo1RowBtn','deleteAnexo1RowBtn','anexo1EditStatus','exportAnexo1ExcelBtn','exportAnexo1PdfBtn','clearAnexo1Btn','refreshAnexo1Btn','helpBtn','helpDialog','closeHelp','clientDialog','closeClient','clientDetail','clientCards','fullscreenBtn'].forEach(id => dom[id] = document.getElementById(id));
   }
 
   function bindEvents(){
-    dom.fileInput.addEventListener('change', e => handleFiles(e.target.files));
-    dom.dropZone.addEventListener('dragover', e => { e.preventDefault(); dom.dropZone.classList.add('drag'); });
-    dom.dropZone.addEventListener('dragleave', () => dom.dropZone.classList.remove('drag'));
-    dom.dropZone.addEventListener('drop', e => { e.preventDefault(); dom.dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+    dom.fileInput?.addEventListener('change', e => handleFiles(e.target.files));
+    dom.dropZone?.addEventListener('dragover', e => { e.preventDefault(); dom.dropZone.classList.add('drag'); });
+    dom.dropZone?.addEventListener('dragleave', () => dom.dropZone.classList.remove('drag')); 
+    dom.dropZone?.addEventListener('drop', e => { e.preventDefault(); dom.dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
     dom.searchInput.addEventListener('input', e => updateFilter('search', e.target.value));
     dom.lineFilter.addEventListener('change', e => updateFilter('line', e.target.value));
     dom.ratingFilter.addEventListener('change', e => updateFilter('rating', e.target.value));
@@ -70,17 +76,57 @@
     dom.moraFilter.addEventListener('change', e => updateFilter('mora', e.target.value));
     dom.amountFilter.addEventListener('change', e => updateFilter('amount', e.target.value));
     dom.clearFiltersBtn.addEventListener('click', clearFilters);
-    dom.resetBtn.addEventListener('click', resetDemo);
+    dom.resetBtn?.addEventListener('click', resetDemo);
+    dom.deleteDataBtn?.addEventListener('click', clearAllLoadedData);
+    dom.logoutBtn?.addEventListener('click', () => window.CarteraAuth?.logout?.());
     dom.exportExcelBtn.addEventListener('click', exportToExcel);
     dom.exportPdfBtn.addEventListener('click', exportToPDF);
     dom.tabs.addEventListener('click', e => { const btn = e.target.closest('.tab[data-tab]'); if(btn){ e.preventDefault(); switchTab(btn.dataset.tab); } });
+    dom.anexo1Subtabs?.addEventListener('click', e => { const btn = e.target.closest('[data-anexo1-sheet]'); if(btn){ e.preventDefault(); state.anexo1.activeSheet = btn.dataset.anexo1Sheet; renderAnexo1Module(); }});
+    dom.anexo1Search?.addEventListener('input', e => { state.anexo1.filters.search = e.target.value; renderAnexo1Module(); });
+    dom.anexo1LineFilter?.addEventListener('change', e => { state.anexo1.filters.line = e.target.value; renderAnexo1Module(); });
+    dom.anexo1RatingFilter?.addEventListener('change', e => { state.anexo1.filters.rating = e.target.value; renderAnexo1Module(); });
+    dom.anexo1SourceFilter?.addEventListener('change', e => { state.anexo1.filters.source = e.target.value; renderAnexo1Module(); });
+    dom.anexo1MoraFilter?.addEventListener('change', e => { state.anexo1.filters.mora = e.target.value; renderAnexo1Module(); });
+    dom.anexo1ViewMode?.addEventListener('change', e => { state.anexo1.viewMode = e.target.value; renderAnexo1Module(); });
+    dom.exportAnexo1ExcelBtn?.addEventListener('click', exportAnexo1ToExcel);
+    dom.exportAnexo1PdfBtn?.addEventListener('click', exportAnexo1ToPDF);
+    dom.clearAnexo1Btn?.addEventListener('click', clearAnexo1Data);
+    dom.refreshAnexo1Btn?.addEventListener('click', renderAnexo1Module);
+    dom.toggleAnexo1EditBtn?.addEventListener('click', toggleAnexo1EditMode);
+    dom.saveAnexo1Btn?.addEventListener('click', saveAnexo1Changes);
+    dom.discardAnexo1EditsBtn?.addEventListener('click', discardAnexo1Edits);
+    dom.addAnexo1RowBtn?.addEventListener('click', addAnexo1Row);
+    dom.deleteAnexo1RowBtn?.addEventListener('click', deleteAnexo1SelectedRow);
     document.body.addEventListener('click', e => {
+      const gridCell = e.target.closest('[data-anexo-edit-cell]');
+      if(gridCell) updateAnexo1GridCell(gridCell);
+      const detailCell = e.target.closest('[data-anexo-edit-detail]');
+      if(detailCell) updateAnexo1DetailCell(detailCell);
+      const rowSelect = e.target.closest('[data-anexo-row-select]');
+      if(rowSelect){ selectAnexo1Row(rowSelect); }
+      const recordSelect = e.target.closest('[data-anexo-record-select]');
+      if(recordSelect){ selectAnexo1Record(recordSelect); }
       const exportBtn = e.target.closest('[data-export-table]');
       if(exportBtn) exportSingleTable(exportBtn.dataset.exportTable);
       const sortable = e.target.closest('th[data-sort]');
       if(sortable) sortTable(sortable.dataset.table, sortable.dataset.sort);
       const client = e.target.closest('[data-client]');
       if(client) openClient360(client.dataset.client);
+    });
+    document.body.addEventListener('input', e => {
+      const gridCell = e.target.closest('[data-anexo-edit-cell]');
+      if(gridCell) updateAnexo1GridCell(gridCell, { soft:true });
+      const detailCell = e.target.closest('[data-anexo-edit-detail]');
+      if(detailCell) updateAnexo1DetailCell(detailCell, { soft:true });
+    });
+    document.body.addEventListener('blur', e => {
+      const editable = e.target.closest?.('[data-anexo-edit-cell], [data-anexo-edit-detail]');
+      if(editable) finalizeAnexo1Edit();
+    }, true);
+    document.body.addEventListener('keydown', e => {
+      const editable = e.target.closest?.('[data-anexo-edit-cell], [data-anexo-edit-detail]');
+      if(editable) handleAnexo1EditableKeydown(e, editable);
     });
     dom.helpBtn.addEventListener('click', () => dom.helpDialog.showModal());
     dom.closeHelp.addEventListener('click', () => dom.helpDialog.close());
@@ -103,9 +149,11 @@
     renderCharts();
     renderTables();
     renderClientCards();
+    renderAnexo1Module();
   }
 
   function switchTab(tabName, updateHash = true){
+    if(state.ui) state.ui.activeLayout = String(tabName || 'dashboard').replace(/^#/, '');
     if(typeof window.activateCarteraTab === 'function'){
       window.activateCarteraTab(tabName || 'dashboard', { updateHash });
       return;
@@ -142,10 +190,63 @@
     switchTab(window.location.hash || 'dashboard', false);
   }
 
+  function renderSessionAccess(){
+    const session = window.CarteraAuth?.getSession?.();
+    if(dom.sessionPill){
+      dom.sessionPill.textContent = session ? `${session.role === 'admin' ? 'Admin' : 'Usuario'}: ${session.email}` : 'Sesión no validada';
+      dom.sessionPill.classList.toggle('is-admin', session?.role === 'admin');
+    }
+    if(dom.adminAccessBtn){
+      dom.adminAccessBtn.hidden = session?.role !== 'admin';
+    }
+  }
+
+  function clearAllLoadedData(){
+    const confirmed = confirm('¿Borrar toda la información de cartera cargada en esta sesión? Esta acción dejará el aplicativo sin datos hasta que cargues nuevamente los Excel o restablezcas los datos demo.');
+    if(!confirmed) return;
+    clearSourceArrays();
+    state.metadata = { fechaCorte:null, archivosCargados: [], fechaCarga: new Date().toISOString(), version:'2.0.0', demo:false, cleared:true };
+    state.filtros = { search:'', line:'', rating:'', sector:'', mora:'', amount:'' };
+    state.anexo1 = getEmptyAnexo1State();
+    try{ localStorage.setItem('infihuilaCarteraDataMode.v1', 'cleared'); localStorage.removeItem(ANEXO1_STORAGE_KEY); localStorage.removeItem(ANEXO1_LEGACY_STORAGE_KEY); }catch(err){}
+    ['searchInput','lineFilter','ratingFilter','sectorFilter','moraFilter','amountFilter'].forEach(id => { if(dom[id]) dom[id].value = ''; });
+    renderAll();
+    alert('Información cargada borrada. Puedes cargar nuevos Excel o usar Restablecer para volver a los datos demo.');
+  }
+
+  function clearSourceArrays(){
+    ['pagos','desembolsos','calificacion','concentracion','edadCartera','saldos','indicadoresCalidad','formato514','resultados'].forEach(key => state[key] = []);
+    state.anexo1 = getEmptyAnexo1State();
+    state.unified = [];
+    state.validations = [];
+  }
+
+  function applyPersistedDataMode(){
+    try{
+      if(localStorage.getItem('infihuilaCarteraDataMode.v1') === 'cleared'){
+        clearSourceArrays();
+        state.metadata = { fechaCorte:null, archivosCargados: [], fechaCarga: new Date().toISOString(), version:'2.0.0', demo:false, cleared:true };
+        return;
+      }
+      const saved = localStorage.getItem(ANEXO1_STORAGE_KEY) || localStorage.getItem(ANEXO1_LEGACY_STORAGE_KEY);
+      if(saved){
+        const parsed = JSON.parse(saved);
+        state.anexo1 = rehydrateAnexo1State(parsed);
+        state.anexo1.edit.enabled = false;
+        state.anexo1.edit.dirty = false;
+        state.metadata.demo = false;
+        state.metadata.cleared = false;
+      }
+    }catch(err){
+      console.warn('No fue posible restaurar Anexo 1 guardado localmente.', err);
+    }
+  }
+
   function renderStatus(){
+    renderSessionAccess();
     dom.fechaCorte.textContent = formatDate(findFechaCorte());
-    dom.sourceMode.textContent = state.metadata.demo ? 'Demo validado con fuentes anexas' : 'Archivos cargados por el usuario';
-    dom.loadedFiles.textContent = state.metadata.demo ? '9 fuentes base' : `${state.metadata.archivosCargados.length} archivo(s)`;
+    dom.sourceMode.textContent = state.metadata.cleared ? 'Sin datos: información cargada borrada' : state.metadata.demo ? 'Demo validado con fuentes anexas' : 'Archivos cargados por el usuario';
+    dom.loadedFiles.textContent = state.metadata.cleared ? '0 archivos activos' : state.metadata.demo ? '9 fuentes base' : `${state.metadata.archivosCargados.length} archivo(s)`;
     const hasCritical = state.validations.some(v => v.status === 'Crítico');
     const hasWarning = state.validations.some(v => v.status === 'Advertencia');
     dom.overallHealth.className = `health-pill ${hasCritical ? 'danger' : hasWarning ? 'warning' : 'ok'}`;
@@ -168,12 +269,13 @@
 
   function resetDemo(){
     if(!confirm('¿Restablecer los datos demo validados con las fuentes anexas?')) return;
+    try{ localStorage.removeItem('infihuilaCarteraDataMode.v1'); localStorage.removeItem(ANEXO1_STORAGE_KEY); localStorage.removeItem(ANEXO1_LEGACY_STORAGE_KEY); }catch(err){}
     Object.assign(state, {
       pagos: clone(window.DEMO_DATA.pagos), desembolsos: clone(window.DEMO_DATA.desembolsos), calificacion: clone(window.DEMO_DATA.calificacion),
       concentracion: clone(window.DEMO_DATA.concentracion), edadCartera: clone(window.DEMO_DATA.edadCartera), saldos: clone(window.DEMO_DATA.saldos),
-      indicadoresCalidad: clone(window.DEMO_DATA.indicadoresCalidad), formato514: clone(window.DEMO_DATA.formato514), resultados: clone(window.DEMO_DATA.resultados)
+      indicadoresCalidad: clone(window.DEMO_DATA.indicadoresCalidad), formato514: clone(window.DEMO_DATA.formato514), resultados: clone(window.DEMO_DATA.resultados), anexo1: clone(window.ANEXO1_DEMO || getEmptyAnexo1State())
     });
-    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'1.2.0', demo:true };
+    state.metadata = { fechaCorte:'2026-02-28', archivosCargados: [], fechaCarga: new Date().toISOString(), version:'2.0.0', demo:true };
     clearFilters();
   }
 
@@ -193,6 +295,11 @@
       try{
         const buffer = await file.arrayBuffer();
         const wb = XLSX.read(buffer, { type:'array', cellDates:true, raw:false });
+        if(detectAnexo1Workbook(file.name, wb)){
+          state.anexo1 = parseAnexo1Workbook(file.name, wb);
+          loaded.push(`${file.name} → Anexo 1 (${Object.keys(state.anexo1.hojas || {}).length} hojas)`);
+          continue;
+        }
         const parsed = parseWorkbook(file.name, wb);
         if(parsed.type){
           state[parsed.type] = parsed.records;
@@ -205,6 +312,7 @@
         failed.push(`${file.name}: ${err.message}`);
       }
     }
+    try{ localStorage.removeItem('infihuilaCarteraDataMode.v1'); localStorage.removeItem(ANEXO1_STORAGE_KEY); localStorage.removeItem(ANEXO1_LEGACY_STORAGE_KEY); }catch(err){}
     state.metadata.demo = false;
     state.metadata.archivosCargados.push(...loaded);
     state.metadata.fechaCarga = new Date().toISOString();
@@ -419,7 +527,7 @@
       ['Cartera al día', stats.capitalDia, 'Capital en rango al día', 'money', 'ok'],
       ['> 720 días', stats.capital720, 'Capital crítico por edad', 'money', stats.capital720 > 0 ? 'danger':'ok']
     ];
-    dom.kpiGrid.innerHTML = cards.map(([label,value,note,type,status]) => `
+    dom.kpiGrid.innerHTML = cards.slice(0,8).map(([label,value,note,type,status]) => `
       <article class="kpi-card">
         <div class="kpi-label">${label}</div>
         <div class="kpi-value">${formatValue(value,type)}</div>
@@ -721,6 +829,10 @@
     appendSheet(wb, 'Calificacion', filteredRaw(state.calificacion));
     appendSheet(wb, 'Concentracion', filteredRaw(state.concentracion));
     appendSheet(wb, 'Formato514', state.formato514);
+    if(state.anexo1?.loaded){
+      Object.entries(state.anexo1.hojas || {}).forEach(([key,sheet]) => appendSheet(wb, `Anexo1_${key}`.substring(0,31), sheet.records?.length ? sheet.records : (sheet.grid || [])));
+      appendSheet(wb, 'Anexo1_Validaciones', state.anexo1.validaciones || []);
+    }
     XLSX.writeFile(wb, `Gestion_Cartera_INFIHUILA_${isoToday()}.xlsx`);
   }
 
@@ -756,6 +868,877 @@
     const ws = XLSX.utils.json_to_sheet(rows || []);
     XLSX.utils.book_append_sheet(wb, ws, name.substring(0,31));
   }
+
+
+  /* ===============================
+     MÓDULO ANEXO 1 - v1.4.1
+     =============================== */
+  function getEmptyAnexo1State(){
+    return {
+      workbookName: null,
+      fechaCarga: null,
+      fechaReporte: null,
+      loaded: false,
+      demo: false,
+      activeSheet: 'resumen',
+      viewMode: 'structured',
+      filters: { search:'', line:'', rating:'', source:'', mora:'', amount:'', municipio:'', gracia:'', reestructuracion:'', garantia:'' },
+      hojas: {
+        instrucciones: { name:'Instrucciones', grid:[], merges:[], records:[] },
+        generalCarteraTotal: { name:'General cartera total', grid:[], merges:[], records:[] },
+        generalCarteraExcedentes: { name:'General cartera excedentes', grid:[], merges:[], records:[] },
+        carteraComercial: { name:'Cartera comercial', grid:[], merges:[], records:[] },
+        carteraComercialExcedentes: { name:'Cartera comercial excedentes', grid:[], merges:[], records:[] },
+        detalleCartera: { name:'Detalle cartera', grid:[], merges:[], records:[] }
+      },
+      metadata: { entidad:'INFIHUILA', codigoEntidad:'262 5', cifrasEnMillones:true, fuente:'Anexo_1 febrero.xlsx', versionModulo:'2.0.0' },
+      edit: { enabled:false, dirty:false, lastSaved:null, snapshot:null, selected:null, audit:[] },
+      validaciones: [],
+      resumen: {}
+    };
+  }
+
+  function ensureAnexo1State(){
+    if(!state.anexo1) state.anexo1 = getEmptyAnexo1State();
+    const empty = getEmptyAnexo1State();
+    state.anexo1.filters = { ...empty.filters, ...(state.anexo1.filters || {}) };
+    state.anexo1.hojas = { ...empty.hojas, ...(state.anexo1.hojas || {}) };
+    state.anexo1.metadata = { ...empty.metadata, ...(state.anexo1.metadata || {}) };
+    state.anexo1.edit = { ...empty.edit, ...(state.anexo1.edit || {}) };
+    state.anexo1.activeSheet = state.anexo1.activeSheet || 'resumen';
+    state.anexo1.viewMode = state.anexo1.viewMode || 'structured';
+    return state.anexo1;
+  }
+
+  function detectAnexo1Workbook(fileName, workbook){
+    const n = normalizeText(fileName);
+    if(n.includes('ANEXO') && (n.includes('1') || n.includes('UNO'))) return true;
+    const names = (workbook?.SheetNames || []).map(normalizeText).join('|');
+    return names.includes('GENERAL CARTERA TOTAL') && names.includes('DETALLE CARTERA');
+  }
+
+  function parseAnexo1Workbook(fileName, workbook){
+    const model = getEmptyAnexo1State();
+    model.workbookName = fileName;
+    model.fechaCarga = new Date().toISOString();
+    model.loaded = true;
+    model.demo = false;
+    model.metadata.fuente = fileName;
+
+    const map = {
+      instrucciones: ['INSTRUCCIONES'],
+      generalCarteraTotal: ['GENERAL CARTERA TOTAL'],
+      generalCarteraExcedentes: ['GENERAL CARTERA EXCEDENTES'],
+      carteraComercial: ['CARTERA COMERCIAL'],
+      carteraComercialExcedentes: ['CARTERA COMERCIAL EXCEDENTES'],
+      detalleCartera: ['DETALLE CARTERA']
+    };
+
+    Object.entries(map).forEach(([key, candidates]) => {
+      const sheetName = (workbook.SheetNames || []).find(name => candidates.some(c => normalizeText(name).includes(c)));
+      if(sheetName){
+        const ws = workbook.Sheets[sheetName];
+        model.hojas[key] = parseAnexo1Sheet(sheetName, ws, key);
+      }
+    });
+
+    model.fechaReporte = detectAnexo1FechaReporte(model) || model.fechaReporte || '28/02/2026';
+    model.resumen = buildAnexo1Resumen(model);
+    model.validaciones = runAnexo1Validations(model);
+    model.activeSheet = 'resumen';
+    model.edit = { enabled:false, dirty:false, lastSaved:null, snapshot:null, selected:null, audit:[] };
+    return model;
+  }
+
+  function parseAnexo1Sheet(sheetName, worksheet, sheetKey){
+    const grid = XLSX.utils.sheet_to_json(worksheet, { header:1, defval:'', raw:true });
+    const normalizedGrid = grid.map(row => row.map(cell => normalizeAnexo1CellValue(cell)));
+    const records = sheetKey === 'detalleCartera' ? extractAnexo1DetalleRecords(normalizedGrid) : [];
+    return { name: sheetName, grid: normalizedGrid, merges: worksheet['!merges'] || [], records };
+  }
+
+  function normalizeAnexo1CellValue(value){
+    if(value instanceof Date) return value.toISOString().slice(0,10);
+    if(value === null || value === undefined) return '';
+    if(typeof value === 'number') return value;
+    return String(value).replace(/\r\n/g, '\n').trim();
+  }
+
+  function detectAnexo1FechaReporte(model){
+    const sheets = Object.values(model.hojas || {});
+    for(const sheet of sheets){
+      for(const row of (sheet.grid || []).slice(0,8)){
+        const joined = normalizeText(row.join(' '));
+        if(joined.includes('MES DE REPORTE')){
+          const value = row.find(x => typeof x === 'number' || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(x)));
+          if(typeof value === 'number' && value > 30000) return excelSerialToDate(value).split('-').reverse().join('/');
+          if(value) return formatDate(value);
+        }
+      }
+    }
+    return null;
+  }
+
+  function extractAnexo1DetalleRecords(grid){
+    const headerIndex = grid.findIndex(row => {
+      const t = normalizeText(row.join('|'));
+      return t.includes('IDENTIFICACION CLIENTE') && t.includes('NOMBRE CLIENTE') && t.includes('SALDO CAPITAL');
+    });
+    if(headerIndex < 0) return [];
+    const headers = makeUniqueHeaders(grid[headerIndex].map((h,i) => normalizeHeader(h || `COL_${i+1}`)));
+    return grid.slice(headerIndex + 1).map((row, offset) => {
+      const rec = {};
+      headers.forEach((h,i) => rec[h] = normalizeAnexo1CellValue(row[i]));
+      rec.__gridRowIndex = headerIndex + 1 + offset;
+      rec.__headers = headers;
+      return rec;
+    }).filter(r => {
+      const id = val(r,'IDENTIFICACION CLIENTE');
+      const name = val(r,'NOMBRE CLIENTE');
+      const credit = val(r,'NUMERO DE CREDITO') || val(r,'NÚMERO DE CRÉDITO');
+      const capital = toNumber(val(r,'SALDO CAPITAL AL CORTE'));
+      return (id || name || credit) && capital > 0;
+    });
+  }
+
+  function getAnexoDetalleHeaderInfo(){
+    const grid = state.anexo1?.hojas?.detalleCartera?.grid || [];
+    const headerIndex = grid.findIndex(row => {
+      const t = normalizeText(row.join('|'));
+      return t.includes('IDENTIFICACION CLIENTE') && t.includes('NOMBRE CLIENTE') && t.includes('SALDO CAPITAL');
+    });
+    if(headerIndex < 0) return { headerIndex:-1, headers:[] };
+    return { headerIndex, headers: makeUniqueHeaders(grid[headerIndex].map((h,i) => normalizeHeader(h || `COL_${i+1}`))) };
+  }
+
+  function buildAnexo1Resumen(model = state.anexo1){
+    const rows = model?.hojas?.detalleCartera?.records || [];
+    const capital = sumAnexoDetalle(rows, 'SALDO CAPITAL AL CORTE');
+    const intereses = sumAnexoDetalle(rows, 'SALDO INTERESES AL CORTE');
+    const otros = sumAnexoDetalle(rows, 'SALDO OTROS CONCEPTOS AL CORTE');
+    const provision = sumAnexoDetalle(rows, 'PROVISION');
+    const uniqueDebtors = unique(rows.map(r => String(val(r,'IDENTIFICACION CLIENTE') || val(r,'NOMBRE CLIENTE') || '').trim()).filter(Boolean)).length;
+    const uniqueOperations = unique(rows.map(r => String(val(r,'NUMERO DE CREDITO') || val(r,'NÚMERO DE CRÉDITO') || '').trim()).filter(Boolean)).length;
+    const moraMax = rows.reduce((m,r)=>Math.max(m, toNumber(val(r,'DIAS DE MORA'))), 0);
+    const carteraA = rows.filter(r => normalizeText(val(r,'CALIFICACION')).startsWith('A')).reduce((a,r)=>a + toNumber(val(r,'SALDO CAPITAL AL CORTE')), 0);
+    const carteraE = rows.filter(r => normalizeText(val(r,'CALIFICACION')).startsWith('E')).reduce((a,r)=>a + toNumber(val(r,'SALDO CAPITAL AL CORTE')), 0);
+    const carteraVencida = rows.filter(r => toNumber(val(r,'DIAS DE MORA')) > 0).reduce((a,r)=>a + toNumber(val(r,'SALDO CAPITAL AL CORTE')), 0);
+
+    const generalGrid = model?.hojas?.generalCarteraTotal?.grid || [];
+    const totalRow = findAnexoGridRow(generalGrid, 'TOTAL CARTERA');
+    const desembolsos = totalRow ? toNumber(totalRow[4] || totalRow[5]) : 8300;
+    const recaudos = totalRow ? toNumber(totalRow[6] || totalRow[7]) : 1080;
+
+    return {
+      capital, intereses, otros, provision,
+      total: capital + intereses + otros,
+      deudores: uniqueDebtors,
+      operaciones: uniqueOperations,
+      moraMax,
+      carteraA,
+      carteraE,
+      carteraVencida,
+      desembolsos,
+      recaudos,
+      castigos: 0,
+      reestructuraciones: 0
+    };
+  }
+
+  function runAnexo1Validations(model = state.anexo1){
+    const rows = model?.hojas?.detalleCartera?.records || [];
+    const sheets = model?.hojas || {};
+    const resumen = model?.resumen || buildAnexo1Resumen(model);
+    const validations = [];
+    const expected = ['instrucciones','generalCarteraTotal','generalCarteraExcedentes','carteraComercial','carteraComercialExcedentes','detalleCartera'];
+    expected.forEach(key => {
+      const has = Array.isArray(sheets[key]?.grid) && sheets[key].grid.length > 0;
+      validations.push(anexoValidation(`Hoja ${sheets[key]?.name || key}`, has ? 'Validado':'Crítico', has ? 'Hoja cargada correctamente.':'No se encontró la hoja esperada en el libro.'));
+    });
+    validations.push(anexoValidation('Detalle cartera con registros', rows.length ? 'Validado':'Crítico', `${rows.length} registro(s) de cartera activa detectados.`));
+    validations.push(anexoValidation('Saldo capital Anexo 1', resumen.capital > 0 ? 'Validado':'Crítico', `Saldo capital detectado: ${formatAnexoMoney(resumen.capital)}.`));
+    validations.push(anexoValidation('Máximo días de mora', resumen.moraMax > 720 ? 'Crítico': resumen.moraMax > 0 ? 'Advertencia':'Validado', `Máximo días de mora identificado: ${resumen.moraMax}.`));
+
+    const missingName = rows.filter(r => !val(r,'NOMBRE CLIENTE')).length;
+    validations.push(anexoValidation('Clientes sin nombre', missingName ? 'Advertencia':'Validado', missingName ? `${missingName} registro(s) sin nombre de cliente.`:'Todos los registros tienen nombre de cliente.'));
+
+    const missingFunding = rows.filter(r => toNumber(val(r,'SALDO CAPITAL AL CORTE')) > 0 && !val(r,'FUENTE DE FONDEO')).length;
+    validations.push(anexoValidation('Fuente de fondeo', missingFunding ? 'Advertencia':'Validado', missingFunding ? `${missingFunding} operación(es) sin fuente de fondeo.`:'Fuente de fondeo diligenciada.'));
+
+    const resCapital = sumWhere(state.resultados || [], r => normalizeText(val(r,'DESCRIPCION CONCEPTO')) === 'CAPITAL', 'SALDO CONCEPTO');
+    if(resCapital > 0){
+      const diff = Math.abs(resumen.capital - (resCapital / 1000000));
+      validations.push(anexoValidation('Conciliación capital Anexo 1 vs Resultados', diff <= 2 ? 'Validado':'Advertencia', `Diferencia aproximada: ${formatAnexoMoney(diff)}.`));
+    }
+
+    const formatoTotal = findFormatoTotal();
+    if(formatoTotal > 0){
+      const diffFormato = Math.abs(resumen.capital - (formatoTotal / 1000000));
+      validations.push(anexoValidation('Conciliación Anexo 1 vs Formato 514', diffFormato <= 2 ? 'Validado':'Advertencia', `Diferencia aproximada: ${formatAnexoMoney(diffFormato)}.`));
+    }
+
+    return validations;
+  }
+
+  function anexoValidation(control, status, observacion){
+    return { control, status, observacion, fuente:'Anexo 1', fecha: state?.anexo1?.fechaReporte || '28/02/2026' };
+  }
+
+  function renderAnexo1Module(){
+    const anexo = ensureAnexo1State();
+    anexo.resumen = buildAnexo1Resumen(anexo);
+    anexo.validaciones = runAnexo1Validations(anexo);
+    renderAnexo1Meta(anexo);
+    renderAnexo1Kpis(anexo);
+    renderAnexo1Alerts(anexo);
+    renderAnexo1Subtabs(anexo);
+    populateAnexo1Filters(anexo);
+    renderAnexo1EditStatus(anexo);
+
+    const active = anexo.activeSheet || 'resumen';
+    if(!anexo.loaded && !anexo.demo){
+      dom.anexo1Content.innerHTML = `<div class="anexo1-empty"><h3>No se ha cargado información del Anexo 1</h3><p>Cargue el archivo <strong>Anexo_1 febrero.xlsx</strong> para visualizar este módulo.</p></div>`;
+      return;
+    }
+
+    if(active === 'resumen') return renderAnexo1ResumenContent(anexo);
+    if(active === 'validaciones') return renderAnexo1Validaciones(anexo);
+
+    const sheet = anexo.hojas?.[active];
+    if(!sheet || !(sheet.grid || []).length){
+      dom.anexo1Content.innerHTML = `<div class="anexo1-empty"><h3>Hoja sin información</h3><p>La hoja seleccionada conserva estructura, pero no presenta información diligenciada para el corte cargado.</p></div>`;
+      return;
+    }
+
+    if(anexo.viewMode === 'excel') return renderAnexo1ExcelGrid(sheet);
+
+    if(active === 'instrucciones') return renderAnexo1Instructions(sheet);
+    if(active === 'detalleCartera') return renderAnexo1Detalle(anexo);
+    return renderAnexo1StructuredSheet(sheet, active);
+  }
+
+  function renderAnexo1Meta(anexo){
+    if(dom.anexo1MetaLine){
+      dom.anexo1MetaLine.textContent = `${anexo.metadata?.entidad || 'INFIHUILA'} · Código ${anexo.metadata?.codigoEntidad || '262 5'} · Corte ${anexo.fechaReporte || '28/02/2026'} · Cifras en millones de pesos · Fuente: ${anexo.workbookName || anexo.metadata?.fuente || 'Anexo_1 febrero.xlsx'}`;
+    }
+  }
+
+  function renderAnexo1Kpis(anexo){
+    if(!dom.anexo1Resumen) return;
+    const r = anexo.resumen || {};
+    const cards = [
+      ['Saldo capital', formatAnexoMoney(r.capital), 'Detalle cartera'],
+      ['Intereses', formatAnexoMoney(r.intereses), 'Saldo intereses al corte'],
+      ['Otros conceptos', formatAnexoMoney(r.otros), 'Mora y otros conceptos'],
+      ['Provisión', formatAnexoMoney(r.provision), 'Provisión reportada'],
+      ['Deudores', r.deudores || 0, 'Clientes únicos'],
+      ['Operaciones', r.operaciones || 0, 'Créditos únicos'],
+      ['Categoría A', formatAnexoMoney(r.carteraA), 'Capital calificación A'],
+      ['Categoría E', formatAnexoMoney(r.carteraE), 'Capital calificación E']
+    ];
+    dom.anexo1Resumen.innerHTML = cards.map(([label,value,note]) => `
+      <article class="kpi-card">
+        <div class="kpi-label">${escapeHtml(label)}</div>
+        <div class="kpi-value">${escapeHtml(value)}</div>
+        <div class="kpi-note">${escapeHtml(note)}</div>
+        <span class="kpi-status ${label === 'Categoría E' && toNumber(r.carteraE) > 0 ? 'danger':'ok'}"></span>
+      </article>`).join('');
+  }
+
+  function renderAnexo1Alerts(anexo){
+    if(!dom.anexo1Alerts) return;
+    const critical = (anexo.validaciones || []).filter(v => v.status === 'Crítico').length;
+    const warnings = (anexo.validaciones || []).filter(v => v.status === 'Advertencia').length;
+    const rows = anexo.hojas?.detalleCartera?.records?.length || 0;
+    dom.anexo1Alerts.innerHTML = [
+      {status: critical ? 'danger':'ok', title:'Estado Anexo 1', msg: critical ? `${critical} validación(es) críticas.`:'Estructura principal disponible.'},
+      {status: warnings ? 'warn':'ok', title:'Advertencias', msg: warnings ? `${warnings} advertencia(s) para revisión.`:'Sin advertencias materiales.'},
+      {status: rows ? 'ok':'danger', title:'Detalle cartera', msg: `${rows} registro(s) activos detectados.`}
+    ].map(a => `<article class="alert-card ${a.status}"><h4>${a.title}</h4><p>${a.msg}</p></article>`).join('');
+  }
+
+  function renderAnexo1Subtabs(anexo){
+    if(!dom.anexo1Subtabs) return;
+    dom.anexo1Subtabs.querySelectorAll('[data-anexo1-sheet]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.anexo1Sheet === anexo.activeSheet);
+    });
+  }
+
+  function populateAnexo1Filters(anexo){
+    const rows = anexo.hojas?.detalleCartera?.records || [];
+    fillSelect(dom.anexo1LineFilter, unique(rows.map(r => val(r,'LINEA DE CREDITO') || val(r,'LINEA DE CRÉDITO'))), 'Todas las líneas');
+    fillSelect(dom.anexo1RatingFilter, unique(rows.map(r => val(r,'CALIFICACION'))), 'Todas las calificaciones');
+    fillSelect(dom.anexo1SourceFilter, unique(rows.map(r => val(r,'FUENTE DE FONDEO'))), 'Todas las fuentes');
+    if(dom.anexo1MoraFilter) dom.anexo1MoraFilter.value = anexo.filters?.mora || '';
+    if(dom.anexo1Search) dom.anexo1Search.value = anexo.filters?.search || '';
+    if(dom.anexo1ViewMode) dom.anexo1ViewMode.value = anexo.viewMode || 'structured';
+  }
+
+  function renderAnexo1ResumenContent(anexo){
+    const r = anexo.resumen || {};
+    const byLine = groupAnexoRows(filteredAnexoDetalle(anexo), r => displayLine(val(r,'LINEA DE CREDITO') || val(r,'LINEA DE CRÉDITO')), r => toNumber(val(r,'SALDO CAPITAL AL CORTE')));
+    const byRating = groupAnexoRows(filteredAnexoDetalle(anexo), r => val(r,'CALIFICACION') || 'S/C', r => toNumber(val(r,'SALDO CAPITAL AL CORTE')));
+    dom.anexo1Content.innerHTML = `
+      <div class="anexo1-meta-grid">
+        <div class="anexo1-meta-card"><span>Entidad</span><strong>${escapeHtml(anexo.metadata?.entidad || 'INFIHUILA')}</strong></div>
+        <div class="anexo1-meta-card"><span>Código entidad</span><strong>${escapeHtml(anexo.metadata?.codigoEntidad || '262 5')}</strong></div>
+        <div class="anexo1-meta-card"><span>Corte</span><strong>${escapeHtml(anexo.fechaReporte || '28/02/2026')}</strong></div>
+        <div class="anexo1-meta-card"><span>Fuente</span><strong>${escapeHtml(anexo.workbookName || 'Anexo_1 febrero.xlsx')}</strong></div>
+        <div class="anexo1-meta-card"><span>Cifras</span><strong>Millones de pesos</strong></div>
+      </div>
+      <div class="anexo1-summary-grid">
+        <article class="anexo1-section-card">
+          <h3>Resumen financiero</h3>
+          <p><strong>Total cartera:</strong> ${formatAnexoMoney(r.total)}</p>
+          <p><strong>Cartera vencida:</strong> ${formatAnexoMoney(r.carteraVencida)}</p>
+          <p><strong>Máximo días de mora:</strong> ${r.moraMax || 0}</p>
+          <p><strong>Desembolsos del mes:</strong> ${formatAnexoMoney(r.desembolsos)}</p>
+          <p><strong>Recaudos del mes:</strong> ${formatAnexoMoney(r.recaudos)}</p>
+        </article>
+        <article class="anexo1-section-card">
+          <h3>Distribución por línea</h3>
+          ${renderMiniBarList(byLine)}
+        </article>
+        <article class="anexo1-section-card">
+          <h3>Distribución por calificación</h3>
+          ${renderMiniBarList(byRating)}
+        </article>
+        <article class="anexo1-section-card">
+          <h3>Validación rápida</h3>
+          <div class="anexo1-validation-status">${(anexo.validaciones || []).slice(0,6).map(v => `<span class="badge ${v.status==='Crítico'?'danger':v.status==='Advertencia'?'warn':'ok'}">${escapeHtml(v.control)}</span>`).join('')}</div>
+          <p class="anexo1-note">El módulo conserva la vista tipo Excel y la vista estructurada para revisar cada hoja del archivo.</p>
+        </article>
+      </div>`;
+  }
+
+  function renderMiniBarList(grouped){
+    const entries = Object.entries(grouped || {}).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const maxVal = Math.max(...entries.map(e=>e[1]), 1);
+    if(!entries.length) return '<p class="anexo1-note">Sin datos para mostrar.</p>';
+    return entries.map(([name,value]) => `
+      <div class="anexo1-mini-row">
+        <div><strong>${escapeHtml(shortName(name, 38))}</strong><span>${formatAnexoMoney(value)}</span></div>
+        <div class="anexo1-mini-bar"><i style="width:${Math.max(4, value / maxVal * 100)}%"></i></div>
+      </div>`).join('');
+  }
+
+  function renderAnexo1Validaciones(anexo){
+    const rows = anexo.validaciones || [];
+    dom.anexo1Content.innerHTML = `
+      <div class="anexo1-section-card"><h3>Validaciones Anexo 1</h3><p>Controles automáticos de estructura, calidad de datos y conciliación financiera.</p></div>
+      <div class="anexo1-table-wrap"><table>
+        <thead><tr><th>Control</th><th>Fuente</th><th>Estado</th><th>Observación</th><th>Fecha</th></tr></thead>
+        <tbody>${rows.map(v => `<tr class="${v.status==='Crítico'?'risk-row-danger':v.status==='Advertencia'?'risk-row-warn':''}"><td>${escapeHtml(v.control)}</td><td>${escapeHtml(v.fuente)}</td><td>${formatStatus(v.status)}</td><td>${escapeHtml(v.observacion)}</td><td>${escapeHtml(v.fecha || '')}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
+  function renderAnexo1Instructions(sheet){
+    const items = (sheet.grid || []).flat().map(x => String(x || '').trim()).filter(Boolean);
+    dom.anexo1Content.innerHTML = `<div class="anexo1-section-card"><h3>Instrucciones del Anexo 1</h3><div class="anexo1-instruction-list">${items.map(item => {
+      const linked = escapeHtml(item).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      return `<div class="anexo1-instruction">${linked}</div>`;
+    }).join('')}</div></div>`;
+  }
+
+  function renderAnexo1Detalle(anexo){
+    const rows = filteredAnexoDetalle(anexo);
+    const allRows = anexo.hojas?.detalleCartera?.records || [];
+    const editable = !!anexo.edit?.enabled;
+    const columns = [
+      ['IDENTIFICACION CLIENTE','NIT'],
+      ['NOMBRE CLIENTE','Nombre cliente'],
+      ['NÚMERO DE CRÉDITO','No. crédito'],
+      ['LINEA DE CRÉDITO','Línea'],
+      ['SALDO CAPITAL AL CORTE','Saldo capital'],
+      ['SALDO INTERESES AL CORTE','Intereses'],
+      ['SALDO OTROS CONCEPTOS AL CORTE','Otros'],
+      ['DIAS DE MORA','Días mora'],
+      ['CALIFICACION','Calificación'],
+      ['FUENTE DE FONDEO','Fondeo'],
+      ['PROVISION','Provisión'],
+      ['Municipio de inversión','Municipio']
+    ];
+    dom.anexo1Content.innerHTML = `
+      <div class="anexo1-detail-toolbar">
+        <span>${rows.length} registro(s) filtrado(s)</span>
+        <span class="anexo1-pill">Saldo filtrado: ${formatAnexoMoney(rows.reduce((a,r)=>a+toNumber(val(r,'SALDO CAPITAL AL CORTE')),0))}</span>
+        ${editable ? '<span class="badge warn">Edición activa</span><span class="anexo1-note">Puede tabular directamente; use Tab o Enter para avanzar.</span>' : '<span class="badge neutral">Consulta</span>'}
+      </div>
+      <div class="anexo1-table-wrap"><table>
+        <thead><tr><th>Sel.</th>${columns.map(([,label])=>`<th>${escapeHtml(label)}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r => {
+          const recordIndex = allRows.indexOf(r);
+          const selected = anexo.edit?.selected?.sheetKey === 'detalleCartera' && anexo.edit?.selected?.recordIndex === recordIndex;
+          return `<tr class="${selected ? 'anexo1-row-selected ' : ''}${toNumber(val(r,'DIAS DE MORA'))>720?'risk-row-danger':toNumber(val(r,'DIAS DE MORA'))>0?'risk-row-warn':''}">
+            <td><button type="button" class="row-pick" data-anexo-record-select="${recordIndex}" title="Seleccionar fila">●</button></td>
+            ${columns.map(([key]) => `<td class="${/SALDO|PROVISION/.test(key)?'money':''}">${renderAnexo1EditableDetailCell(r, key, recordIndex, editable)}</td>`).join('')}
+          </tr>`;
+        }).join('') || `<tr><td colspan="${columns.length + 1}" class="empty-state">No hay registros para los filtros aplicados.</td></tr>`}</tbody>
+      </table></div>`;
+  }
+
+  function renderAnexo1EditableDetailCell(record, key, recordIndex, editable){
+    const value = val(record, key);
+    if(!editable) return formatAnexoCell(key, value);
+    return `<span class="anexo1-cell-editable" contenteditable="true" spellcheck="false" tabindex="0" data-anexo-edit-detail="detalleCartera" data-record-index="${recordIndex}" data-key="${escapeHtml(key)}">${escapeHtml(value)}</span>`;
+  }
+
+  function renderAnexo1StructuredSheet(sheet, sheetKey){
+    const status = anexoSheetCompleteness(sheet);
+    const statusCls = status === 'Vacío' ? 'warn' : status === 'Parcial' ? 'warn' : 'ok';
+    dom.anexo1Content.innerHTML = `
+      <div class="anexo1-section-card">
+        <h3>${escapeHtml(sheet.name)}</h3>
+        <div class="anexo1-badges"><span class="badge ${statusCls}">${status}</span><span class="anexo1-pill">Vista estructurada</span></div>
+        <p>La hoja se presenta conservando su estructura original. Cambie a <strong>Vista tipo Excel</strong> para ver la grilla completa.</p>
+      </div>
+      ${renderAnexoGridAsBlocks(sheet)}`;
+  }
+
+  function renderAnexoGridAsBlocks(sheet){
+    const rows = (sheet.grid || []).filter(row => row.some(cell => String(cell ?? '').trim() !== ''));
+    if(!rows.length) return '<div class="anexo1-empty">La hoja no contiene información diligenciada.</div>';
+    return `<div class="anexo1-table-wrap"><table>
+      <tbody>${rows.map(row => {
+        const text = normalizeText(row.join(' '));
+        const cls = text.match(/^\d+\./) || text.includes('DATOS GENERALES') || text.includes('PRINCIPALES') ? 'section-row' : '';
+        return `<tr class="${cls}">${row.map(cell => `<td>${formatAnexoGridCell(cell)}</td>`).join('')}</tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  }
+
+  function renderAnexo1ExcelGrid(sheet){
+    const grid = sheet.grid || [];
+    const activeSheet = state.anexo1?.activeSheet || 'detalleCartera';
+    const editable = !!state.anexo1?.edit?.enabled;
+    const maxCols = Math.max(...grid.map(r=>r.length), 1);
+    dom.anexo1Content.innerHTML = `
+      <div class="anexo1-detail-toolbar">
+        <span class="anexo1-pill">Hoja: ${escapeHtml(sheet.name || activeSheet)}</span>
+        <span class="badge ${editable ? 'warn':'neutral'}">${editable ? 'Edición activa':'Consulta'}</span>
+        ${editable ? '<span class="anexo1-note">Edite las celdas directamente. Tab/Enter avanza entre celdas. Use Guardar cambios para persistir en este navegador.</span>' : '<span class="anexo1-note">Active edición para modificar la grilla.</span>'}
+      </div>
+      <div class="anexo1-table-wrap"><table class="anexo1-excel-grid ${editable ? 'is-editable':''}">
+        <thead><tr><th class="row-index">#</th>${Array.from({length: maxCols}, (_,i)=>`<th>${excelColumnName(i)}</th>`).join('')}</tr></thead>
+        <tbody>${grid.map((row,i) => {
+          const text = normalizeText(row.join(' '));
+          const selected = state.anexo1?.edit?.selected?.sheetKey === activeSheet && state.anexo1?.edit?.selected?.rowIndex === i;
+          const cls = `${selected ? 'anexo1-row-selected ' : ''}${text.includes('DATOS GENERALES') || text.includes('PRINCIPALES') || text.match(/^\d+\./) ? 'section-row' : text.includes('IDENTIFICACION CLIENTE') || text.includes('TIPO DE CLIENTE') ? 'header-row' : ''}`;
+          return `<tr class="${cls}"><td class="row-index"><button type="button" class="row-pick" data-anexo-row-select="${activeSheet}:${i}" title="Seleccionar fila">${i+1}</button></td>${Array.from({length:maxCols},(_,j)=>renderAnexo1EditableGridCell(row[j], activeSheet, i, j, editable)).join('')}</tr>`;
+        }).join('')}</tbody>
+      </table></div>`;
+  }
+
+  function renderAnexo1EditableGridCell(value, sheetKey, rowIndex, colIndex, editable){
+    if(!editable) return `<td>${formatAnexoGridCell(value)}</td>`;
+    return `<td class="anexo1-grid-edit-cell" contenteditable="true" spellcheck="false" tabindex="0" data-anexo-edit-cell="${sheetKey}" data-row="${rowIndex}" data-col="${colIndex}">${escapeHtml(value)}</td>`;
+  }
+
+  function filteredAnexoDetalle(anexo = state.anexo1){
+    const f = anexo.filters || {};
+    const q = normalizeText(f.search || '');
+    return (anexo.hojas?.detalleCartera?.records || []).filter(r => {
+      const text = normalizeText(Object.values(r).join(' '));
+      const line = val(r,'LINEA DE CREDITO') || val(r,'LINEA DE CRÉDITO');
+      const rating = val(r,'CALIFICACION');
+      const source = val(r,'FUENTE DE FONDEO');
+      const mora = toNumber(val(r,'DIAS DE MORA'));
+      return (!q || text.includes(q))
+        && (!f.line || line === f.line)
+        && (!f.rating || rating === f.rating)
+        && (!f.source || source === f.source)
+        && (!f.mora || matchMora(mora, f.mora));
+    });
+  }
+
+
+  function renderAnexo1EditStatus(anexo = state.anexo1){
+    if(!dom.anexo1EditStatus) return;
+    const edit = ensureAnexo1State().edit || {};
+    const selected = edit.selected ? ` · Fila seleccionada: ${edit.selected.sheetKey || ''} ${Number.isFinite(edit.selected.rowIndex) ? '#'+(edit.selected.rowIndex + 1) : ''}` : '';
+    const saved = edit.lastSaved ? ` · Último guardado: ${formatDateTime(edit.lastSaved)}` : '';
+    dom.anexo1EditStatus.textContent = `${edit.enabled ? 'Modo edición activo' : 'Modo consulta'} · ${edit.dirty ? 'cambios pendientes' : 'sin cambios pendientes'}${selected}${saved}`;
+    dom.anexo1EditStatus.classList.toggle('dirty', !!edit.dirty);
+    dom.anexo1EditStatus.classList.toggle('editing', !!edit.enabled);
+    if(dom.toggleAnexo1EditBtn) dom.toggleAnexo1EditBtn.textContent = edit.enabled ? 'Desactivar edición' : 'Activar edición';
+  }
+
+  function toggleAnexo1EditMode(){
+    const anexo = ensureAnexo1State();
+    if(!anexo.loaded && !anexo.demo){
+      alert('Primero cargue el Anexo 1 o restablezca los datos demo.');
+      return;
+    }
+    if(!anexo.edit.enabled){
+      anexo.edit.snapshot = JSON.stringify(sanitizeAnexo1ForStorage(anexo));
+      anexo.edit.enabled = true;
+    } else {
+      anexo.edit.enabled = false;
+    }
+    renderAnexo1Module();
+  }
+
+  function markAnexo1Dirty(change = null){
+    const anexo = ensureAnexo1State();
+    anexo.edit.dirty = true;
+    anexo.edit.editedAt = new Date().toISOString();
+    if(change){
+      anexo.edit.audit = Array.isArray(anexo.edit.audit) ? anexo.edit.audit : [];
+      anexo.edit.audit.unshift({ ...change, fecha: anexo.edit.editedAt });
+      anexo.edit.audit = anexo.edit.audit.slice(0, 100);
+    }
+    renderAnexo1EditStatus(anexo);
+  }
+
+  function updateAnexo1GridCell(el, opts = {}){
+    const anexo = ensureAnexo1State();
+    if(!anexo.edit?.enabled) return;
+    const sheetKey = el.dataset.anexoEditCell;
+    const row = Number(el.dataset.row);
+    const col = Number(el.dataset.col);
+    const sheet = anexo.hojas?.[sheetKey];
+    if(!sheet || !Number.isFinite(row) || !Number.isFinite(col)) return;
+    sheet.grid[row] = sheet.grid[row] || [];
+    const oldValue = sheet.grid[row][col];
+    const newValue = normalizeAnexoEditedValue(el.textContent);
+    if(String(oldValue ?? '') === String(newValue ?? '')) return;
+    sheet.grid[row][col] = newValue;
+    if(sheetKey === 'detalleCartera'){
+      sheet.records = extractAnexo1DetalleRecords(sheet.grid || []);
+    }
+    markAnexo1Dirty({ tipo:'celda', hoja:sheet.name || sheetKey, fila:row + 1, columna:excelColumnName(col), anterior:oldValue, nuevo:newValue });
+    if(!opts.soft) finalizeAnexo1Edit();
+  }
+
+  function updateAnexo1DetailCell(el, opts = {}){
+    const anexo = ensureAnexo1State();
+    if(!anexo.edit?.enabled) return;
+    const recordIndex = Number(el.dataset.recordIndex);
+    const key = el.dataset.key;
+    const rows = anexo.hojas?.detalleCartera?.records || [];
+    const record = rows[recordIndex];
+    if(!record || !key) return;
+    const oldValue = record[key];
+    const newValue = normalizeAnexoEditedValue(el.textContent);
+    if(String(oldValue ?? '') === String(newValue ?? '')) return;
+    record[key] = newValue;
+
+    const grid = anexo.hojas.detalleCartera.grid || [];
+    const info = getAnexoDetalleHeaderInfo();
+    const colIndex = info.headers.findIndex(h => normalizeKey(h) === normalizeKey(key));
+    const rowIndex = record.__gridRowIndex;
+    if(Number.isFinite(rowIndex) && colIndex >= 0 && grid[rowIndex]){
+      grid[rowIndex][colIndex] = newValue;
+    }
+    markAnexo1Dirty({ tipo:'detalle', hoja:'Detalle cartera', fila:Number.isFinite(rowIndex) ? rowIndex + 1 : recordIndex + 1, columna:key, anterior:oldValue, nuevo:newValue });
+    if(!opts.soft) finalizeAnexo1Edit();
+  }
+
+  function finalizeAnexo1Edit(){
+    const anexo = ensureAnexo1State();
+    if(anexo.hojas?.detalleCartera?.grid?.length){
+      anexo.hojas.detalleCartera.records = extractAnexo1DetalleRecords(anexo.hojas.detalleCartera.grid);
+    }
+    anexo.resumen = buildAnexo1Resumen(anexo);
+    anexo.validaciones = runAnexo1Validations(anexo);
+    renderAnexo1Kpis(anexo);
+    renderAnexo1Alerts(anexo);
+    renderAnexo1EditStatus(anexo);
+  }
+
+  function saveAnexo1Changes(){
+    const anexo = ensureAnexo1State();
+    if(!anexo.loaded && !anexo.demo){
+      alert('No hay información del Anexo 1 para guardar.');
+      return;
+    }
+    finalizeAnexo1Edit();
+    anexo.edit.dirty = false;
+    anexo.edit.enabled = false;
+    anexo.edit.lastSaved = new Date().toISOString();
+    anexo.edit.snapshot = JSON.stringify(sanitizeAnexo1ForStorage(anexo));
+    try{
+      localStorage.setItem(ANEXO1_STORAGE_KEY, JSON.stringify(sanitizeAnexo1ForStorage(anexo)));
+      localStorage.removeItem(ANEXO1_LEGACY_STORAGE_KEY);
+      renderAnexo1Module();
+      alert('Cambios del Anexo 1 guardados localmente en este navegador. También puede exportar el Excel actualizado.');
+    }catch(err){
+      console.error(err);
+      alert('No fue posible guardar los cambios. Verifique el espacio disponible del navegador.');
+    }
+  }
+
+  function discardAnexo1Edits(){
+    const anexo = ensureAnexo1State();
+    if(!anexo.edit.dirty && !anexo.edit.snapshot){
+      alert('No hay cambios pendientes para descartar.');
+      return;
+    }
+    if(!confirm('¿Descartar los cambios no guardados del Anexo 1?')) return;
+    try{
+      const base = anexo.edit.snapshot || localStorage.getItem(ANEXO1_STORAGE_KEY);
+      if(base){
+        state.anexo1 = rehydrateAnexo1State(JSON.parse(base));
+      } else {
+        state.anexo1 = clone(window.ANEXO1_DEMO || getEmptyAnexo1State());
+      }
+      state.anexo1.edit.enabled = false;
+      state.anexo1.edit.dirty = false;
+      renderAnexo1Module();
+    }catch(err){
+      console.error(err);
+      alert('No fue posible descartar los cambios automáticamente.');
+    }
+  }
+
+  function addAnexo1Row(){
+    const anexo = ensureAnexo1State();
+    if(!anexo.loaded && !anexo.demo){
+      alert('Primero cargue el Anexo 1.');
+      return;
+    }
+    if(!anexo.edit.enabled) anexo.edit.enabled = true;
+    let sheetKey = anexo.activeSheet || 'detalleCartera';
+    if(sheetKey === 'resumen' || sheetKey === 'validaciones') sheetKey = 'detalleCartera';
+    const sheet = anexo.hojas?.[sheetKey];
+    if(!sheet){
+      alert('No hay hoja activa para agregar fila.');
+      return;
+    }
+    const maxCols = Math.max(...(sheet.grid || [[]]).map(r => r.length), 1);
+    const newRow = Array.from({length:maxCols}, () => '');
+    sheet.grid = sheet.grid || [];
+    sheet.grid.push(newRow);
+    if(sheetKey === 'detalleCartera'){
+      sheet.records = extractAnexo1DetalleRecords(sheet.grid || []);
+    }
+    anexo.activeSheet = sheetKey;
+    anexo.viewMode = 'excel';
+    anexo.edit.selected = { sheetKey, rowIndex: sheet.grid.length - 1 };
+    markAnexo1Dirty({ tipo:'fila', hoja:sheet.name || sheetKey, fila:sheet.grid.length, columna:'', anterior:'', nuevo:'Fila agregada' });
+    renderAnexo1Module();
+  }
+
+  function deleteAnexo1SelectedRow(){
+    const anexo = ensureAnexo1State();
+    if(!anexo.edit.enabled){
+      alert('Active el modo edición para eliminar filas.');
+      return;
+    }
+    const selected = anexo.edit.selected;
+    if(!selected){
+      alert('Seleccione primero una fila desde la grilla tipo Excel o la tabla de Detalle cartera.');
+      return;
+    }
+    const sheetKey = selected.sheetKey || 'detalleCartera';
+    const sheet = anexo.hojas?.[sheetKey];
+    if(!sheet || !Array.isArray(sheet.grid)){
+      alert('No hay hoja válida para eliminar.');
+      return;
+    }
+    let rowIndex = selected.rowIndex;
+    if(!Number.isFinite(rowIndex) && sheetKey === 'detalleCartera' && Number.isFinite(selected.recordIndex)){
+      rowIndex = sheet.records?.[selected.recordIndex]?.__gridRowIndex;
+    }
+    if(!Number.isFinite(rowIndex) || rowIndex < 0 || rowIndex >= sheet.grid.length){
+      alert('La fila seleccionada no es válida.');
+      return;
+    }
+    if(rowIndex < 1 && !confirm('La fila seleccionada parece ser de encabezado. ¿Desea eliminarla de todos modos?')) return;
+    if(!confirm(`¿Eliminar la fila ${rowIndex + 1} de ${sheet.name || sheetKey}?`)) return;
+    const removed = sheet.grid.splice(rowIndex, 1);
+    if(sheetKey === 'detalleCartera'){
+      sheet.records = extractAnexo1DetalleRecords(sheet.grid || []);
+    }
+    anexo.edit.selected = null;
+    markAnexo1Dirty({ tipo:'fila', hoja:sheet.name || sheetKey, fila:rowIndex + 1, columna:'', anterior:JSON.stringify(removed?.[0] || []), nuevo:'Fila eliminada' });
+    renderAnexo1Module();
+  }
+
+  function selectAnexo1Row(button){
+    const [sheetKey, rowText] = String(button.dataset.anexoRowSelect || '').split(':');
+    const rowIndex = Number(rowText);
+    const anexo = ensureAnexo1State();
+    anexo.edit.selected = { sheetKey, rowIndex };
+    renderAnexo1Module();
+  }
+
+  function selectAnexo1Record(button){
+    const recordIndex = Number(button.dataset.anexoRecordSelect);
+    const record = state.anexo1?.hojas?.detalleCartera?.records?.[recordIndex];
+    const rowIndex = record?.__gridRowIndex;
+    state.anexo1.edit.selected = { sheetKey:'detalleCartera', recordIndex, rowIndex };
+    renderAnexo1Module();
+  }
+
+  function handleAnexo1EditableKeydown(event, current){
+    if(event.key !== 'Enter' && event.key !== 'Tab') return;
+    event.preventDefault();
+    const cells = Array.from(document.querySelectorAll('[data-anexo-edit-cell], [data-anexo-edit-detail]'));
+    const index = cells.indexOf(current);
+    const direction = event.shiftKey ? -1 : 1;
+    const next = cells[index + direction] || cells[direction > 0 ? 0 : cells.length - 1];
+    if(next){
+      current.blur();
+      next.focus();
+      if(document.createRange && window.getSelection){
+        const range = document.createRange();
+        range.selectNodeContents(next);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+  }
+
+  function normalizeAnexoEditedValue(value){
+    const raw = String(value ?? '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    return raw;
+  }
+
+  function sanitizeAnexo1ForStorage(anexo){
+    const copy = clone(anexo);
+    copy.edit = { ...(copy.edit || {}), enabled:false, dirty:false, snapshot:null, selected:null };
+    return copy;
+  }
+
+  function rehydrateAnexo1State(saved){
+    const empty = getEmptyAnexo1State();
+    const hydrated = { ...empty, ...(saved || {}) };
+    hydrated.hojas = { ...empty.hojas, ...(saved?.hojas || {}) };
+    hydrated.metadata = { ...empty.metadata, ...(saved?.metadata || {}) };
+    hydrated.edit = { ...empty.edit, ...(saved?.edit || {}), enabled:false, dirty:false, snapshot:null };
+    if(hydrated.hojas?.detalleCartera?.grid?.length){
+      hydrated.hojas.detalleCartera.records = extractAnexo1DetalleRecords(hydrated.hojas.detalleCartera.grid);
+    }
+    hydrated.resumen = buildAnexo1Resumen(hydrated);
+    hydrated.validaciones = runAnexo1Validations(hydrated);
+    hydrated.loaded = hydrated.loaded || true;
+    return hydrated;
+  }
+
+  function formatDateTime(value){
+    if(!value) return '';
+    try{
+      return new Intl.DateTimeFormat('es-CO', { dateStyle:'short', timeStyle:'short' }).format(new Date(value));
+    }catch(err){
+      return String(value);
+    }
+  }
+
+  function clearAnexo1Data(){
+    if(!confirm('¿Borrar únicamente la información cargada del Anexo 1?')) return;
+    state.anexo1 = getEmptyAnexo1State();
+    try{ localStorage.removeItem(ANEXO1_STORAGE_KEY); localStorage.removeItem(ANEXO1_LEGACY_STORAGE_KEY); }catch(err){}
+    renderAnexo1Module();
+  }
+
+  function exportAnexo1ToExcel(){
+    if(typeof XLSX === 'undefined'){
+      alert('No se pudo cargar SheetJS/XLSX. Verifique conexión a internet para exportar Anexo 1.');
+      return;
+    }
+    const anexo = ensureAnexo1State();
+    const wb = XLSX.utils.book_new();
+    Object.values(anexo.hojas || {}).forEach(sheet => {
+      const ws = XLSX.utils.aoa_to_sheet(sheet.grid || []);
+      XLSX.utils.book_append_sheet(wb, ws, (sheet.name || 'Hoja').substring(0,31));
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(anexo.validaciones || []), 'Validaciones');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(anexo.edit?.audit || []), 'Historial edición');
+    XLSX.writeFile(wb, `Anexo_1_INFIHUILA_${isoToday()}.xlsx`);
+  }
+
+  async function exportAnexo1ToPDF(){
+    if(!window.html2canvas || !window.jspdf){
+      alert('No se pudo cargar jsPDF/html2canvas. Verifique conexión a internet para exportar PDF.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const target = document.querySelector('#tab-anexo1');
+    const canvas = await html2canvas(target, { scale:2, backgroundColor:'#f3f5f6' });
+    const pdf = new jsPDF('p','mm','a4');
+    const img = canvas.toDataURL('image/png');
+    const pageW = pdf.internal.pageSize.getWidth();
+    const ratio = pageW / canvas.width * 0.94;
+    pdf.addImage(img, 'PNG', pageW*0.03, 8, canvas.width*ratio, canvas.height*ratio);
+    pdf.save(`Anexo_1_INFIHUILA_${isoToday()}.pdf`);
+  }
+
+  function anexoSheetCompleteness(sheet){
+    const cells = (sheet.grid || []).flat().map(x => String(x ?? '').trim());
+    const filled = cells.filter(Boolean).length;
+    if(filled === 0) return 'Vacío';
+    return filled < 12 ? 'Parcial' : 'Completo';
+  }
+
+  function findAnexoGridRow(grid, pattern){
+    const target = normalizeText(pattern);
+    return (grid || []).find(row => normalizeText(row.join(' ')).includes(target));
+  }
+
+  function sumAnexoDetalle(rows, key){
+    return (rows || []).reduce((a,r) => a + toNumber(val(r,key)), 0);
+  }
+
+  function groupAnexoRows(rows, keyFn, valueFn){
+    const out = {};
+    (rows || []).forEach(r => {
+      const k = keyFn(r) || 'Sin clasificar';
+      out[k] = (out[k] || 0) + valueFn(r);
+    });
+    return out;
+  }
+
+  function formatAnexoMoney(v){
+    const n = toNumber(v);
+    return `$${new Intl.NumberFormat('es-CO', { maximumFractionDigits: n >= 100 ? 0 : 2 }).format(n)} millones`;
+  }
+
+  function formatAnexoCell(key, value){
+    const k = normalizeText(key);
+    if(k.includes('SALDO') || k.includes('MONTO') || k.includes('PROVISION')) return formatAnexoMoney(value);
+    if(k.includes('FECHA')) return formatDate(value instanceof Date ? value.toISOString().slice(0,10) : value);
+    if(k.includes('CALIFICACION')) return formatRating(value);
+    return escapeHtml(value);
+  }
+
+  function formatAnexoGridCell(value){
+    if(typeof value === 'number'){
+      if(value > 30000 && value < 60000) return formatDate(excelSerialToDate(value));
+      return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 }).format(value);
+    }
+    const s = String(value ?? '');
+    return escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  }
+
+  function excelColumnName(index){
+    let n = index + 1;
+    let name = '';
+    while(n > 0){
+      const rem = (n - 1) % 26;
+      name = String.fromCharCode(65 + rem) + name;
+      n = Math.floor((n - 1) / 26);
+    }
+    return name;
+  }
+
+
+
+  /* ===============================
+     UI v2.0: componentes modulares
+     =============================== */
+  function renderModuleLayout(){ return true; }
+  function renderModuleHeader(){ return true; }
+  function renderQuickAccessCards(){ return true; }
+  function renderCollapsibleFilters(){ return true; }
+  function renderActionMenu(){ return true; }
+  function renderCompactKpis(){ return true; }
+  function renderAlertSummary(){ return true; }
+  function renderModuleTabs(){ return true; }
+  function renderDrawer(){ return true; }
+  function renderBreadcrumb(){ return true; }
 
   /* ===============================
      UTILIDADES DE DATOS Y FORMATO

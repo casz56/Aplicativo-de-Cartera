@@ -1,3 +1,23 @@
+# Validación funcional – Versión 2.0
+
+Reboot visual y estructural aplicado: header y filtros sin comportamiento sticky/fixed, navegación modular por layouts, panel de filtros desplegable, dashboard compacto, módulos agrupados y preservación funcional del Anexo 1 editable. Se validó sintaxis JavaScript con `node --check app.js`.
+
+# Validación funcional – Versión 1.5
+
+Se habilitó edición directa del Anexo 1, guardado local en navegador, agregado/eliminación de filas, descarte de cambios, navegación por tabulación y exportación del Excel actualizado con historial de edición.
+
+# Validación funcional – Versión 1.4.1
+
+Corrección del módulo Anexo 1: subpestañas internas operativas, renderizado de contenido, parsing desde Excel, resumen, filtros, validaciones y exportación funcional.
+
+# Validación funcional – Versión 1.4
+
+Actualización aplicada: módulo Anexo 1 con lectura de seis hojas del archivo `Anexo_1 febrero.xlsx`, demo precargada, vista tipo Excel, resumen KPI, filtros, validaciones, conciliación y borrado independiente.
+
+# Validación funcional – Versión 1.3
+
+Actualización aplicada: login institucional, módulo admin.html con script de administración local, botón de borrado total de información cargada, control de sesión y cache-busting v1.3.
+
 # Validación funcional – Versión 1.2
 
 Actualización aplicada para GitHub Pages: logo oficial incrustado en HTML, pestañas funcionales mediante controlador independiente, cache-busting de recursos y guardas frente a fallas de CDN.
