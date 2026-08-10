@@ -1,0 +1,373 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function institutionalAuth() {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@infihuila\\.gov\\.co$');
+    }
+
+    function profilePath() {
+      return /databases/$(database)/documents/Usuarios/$(request.auth.uid);
+    }
+
+    function profileExists() {
+      return signedIn() && exists(profilePath());
+    }
+
+    function profile() {
+      return get(profilePath()).data;
+    }
+
+    function activeUser() {
+      return institutionalAuth()
+        && profileExists()
+        && profile().isActive == true
+        && profile().email == request.auth.token.email;
+    }
+
+    function roleIs(role) {
+      return activeUser() && profile().role == role;
+    }
+
+    function hasAnyRole(roles) {
+      return activeUser() && profile().role in roles;
+    }
+
+    function admin() {
+      return roleIs('admin');
+    }
+
+    function portfolioReader() {
+      return hasAnyRole([
+        'admin',
+        'asesor_gerencia',
+        'jefe_cartera',
+        'analista_cartera',
+        'auditor',
+        'consulta'
+      ]);
+    }
+
+    function portfolioManager() {
+      return hasAnyRole(['admin', 'jefe_cartera', 'analista_cartera']);
+    }
+
+    function publisher() {
+      return hasAnyRole(['admin', 'jefe_cartera']);
+    }
+
+    function auditReader() {
+      return hasAnyRole(['admin', 'asesor_gerencia', 'jefe_cartera', 'auditor']);
+    }
+
+    function validRole(role) {
+      return role in [
+        'admin',
+        'asesor_gerencia',
+        'jefe_cartera',
+        'analista_cartera',
+        'auditor',
+        'consulta'
+      ];
+    }
+
+    function validInstitutionalEmail(email) {
+      return email is string && email.matches('^[^@]+@infihuila\\.gov\\.co$');
+    }
+
+    function cycleExists(cycleId) {
+      return exists(/databases/$(database)/documents/CarteraCycles/$(cycleId));
+    }
+
+    function cycle(cycleId) {
+      return get(/databases/$(database)/documents/CarteraCycles/$(cycleId)).data;
+    }
+
+    function draftCycle(cycleId) {
+      return cycleExists(cycleId) && cycle(cycleId).status == 'draft';
+    }
+
+    function publishedCycle(cycleId) {
+      return cycleExists(cycleId) && cycle(cycleId).status == 'published';
+    }
+
+    function validActorCreate(data) {
+      return data.createdBy == request.auth.uid
+        && data.createdAt == request.time;
+    }
+
+    function validActorUpdate(data) {
+      return data.updatedBy == request.auth.uid
+        && data.updatedAt == request.time;
+    }
+
+    // -----------------------------------------------------------------------
+    // USUARIOS
+    // Bootstrap del primer administrador: se crea manualmente en Firebase
+    // Console. Luego un admin puede mantener perfiles/roles desde el app.
+    // Las credenciales de Authentication NO se administran desde Firestore.
+    // -----------------------------------------------------------------------
+    match /Usuarios/{uid} {
+      allow get: if activeUser() && (request.auth.uid == uid || admin());
+      allow list: if admin()
+        && request.query.limit != null
+        && request.query.limit <= 200;
+
+      allow create: if admin()
+        && request.resource.data.uid == uid
+        && validInstitutionalEmail(request.resource.data.email)
+        && validRole(request.resource.data.role)
+        && request.resource.data.isActive is bool
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if admin()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && validRole(request.resource.data.role)
+        && request.resource.data.isActive is bool
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // CONFIGURACIÓN
+    // -----------------------------------------------------------------------
+    match /Config/{docId} {
+      allow read: if portfolioReader();
+      allow create, update: if admin();
+      allow delete: if false;
+    }
+
+    match /Vigencias/{year} {
+      allow read: if portfolioReader();
+      allow create, update: if publisher()
+        && request.resource.data.year == year
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time
+        && (
+          request.resource.data.currentCycleId == null
+          || publishedCycle(request.resource.data.currentCycleId)
+        );
+      allow delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // CORTES DE CARTERA
+    // Solo se trabaja directamente desde navegador mientras el corte es draft.
+    // Un corte published queda inmutable.
+    // -----------------------------------------------------------------------
+    match /CarteraCycles/{cycleId} {
+      allow read: if portfolioReader();
+
+      allow create: if portfolioManager()
+        && request.resource.data.status == 'draft'
+        && validActorCreate(request.resource.data);
+
+      allow update: if activeUser()
+        && resource.data.status == 'draft'
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.year == resource.data.year
+        && request.resource.data.cutoffDate == resource.data.cutoffDate
+        && validActorUpdate(request.resource.data)
+        && (
+          (portfolioManager() && request.resource.data.status == 'draft')
+          ||
+          (
+            publisher()
+            && request.resource.data.status == 'published'
+            && exists(/databases/$(database)/documents/CarteraAggregates/$(cycleId))
+            && exists(/databases/$(database)/documents/CarteraValidations/$(cycleId))
+            && get(/databases/$(database)/documents/CarteraValidations/$(cycleId)).data.readyToPublish == true
+          )
+        );
+
+      allow delete: if admin() && resource.data.status == 'draft';
+    }
+
+    // -----------------------------------------------------------------------
+    // IMPORTACIONES
+    // El Excel se procesa localmente. Firestore recibe metadatos, hash SHA-256
+    // y datos normalizados en chunks para ahorrar escrituras del plan Spark.
+    // -----------------------------------------------------------------------
+    match /ImportJobs/{jobId} {
+      allow read: if portfolioReader();
+      allow create: if portfolioManager()
+        && draftCycle(request.resource.data.cycleId)
+        && request.resource.data.uploaderUid == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if portfolioManager()
+        && draftCycle(resource.data.cycleId)
+        && request.resource.data.cycleId == resource.data.cycleId
+        && request.resource.data.uploaderUid == resource.data.uploaderUid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /CarteraChunks/{chunkId} {
+      allow get: if portfolioReader();
+      allow list: if portfolioReader()
+        && request.query.limit != null
+        && request.query.limit <= 200;
+
+      allow create: if portfolioManager()
+        && draftCycle(request.resource.data.cycleId)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.rows is list
+        && request.resource.data.rowCount is int
+        && request.resource.data.rowCount == request.resource.data.rows.size()
+        && request.resource.data.rowCount > 0
+        && request.resource.data.rowCount <= 500;
+
+      // Correcciones se hacen creando un nuevo ImportJob. El chunk anterior
+      // puede eliminarse solo mientras el corte siga en borrador.
+      allow update: if false;
+      allow delete: if portfolioManager() && draftCycle(resource.data.cycleId);
+    }
+
+    match /CarteraAggregates/{cycleId} {
+      allow read: if portfolioReader();
+      allow create, update: if portfolioManager()
+        && draftCycle(cycleId)
+        && request.resource.data.cycleId == cycleId
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if portfolioManager() && draftCycle(cycleId);
+    }
+
+    match /CarteraValidations/{cycleId} {
+      allow read: if portfolioReader();
+      allow create, update: if portfolioManager()
+        && draftCycle(cycleId)
+        && request.resource.data.cycleId == cycleId
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.readyToPublish is bool;
+      allow delete: if portfolioManager() && draftCycle(cycleId);
+    }
+
+
+    // -----------------------------------------------------------------------
+    // EDITOR OPERATIVO v3.4.0
+    // Profesional de Cartera (analista_cartera), Jefe de Cartera y Admin.
+    // Solo sobre cortes en borrador. Los borrados son lógicos.
+    // -----------------------------------------------------------------------
+    match /CarteraRowEdits/{editId} {
+      allow get: if portfolioReader();
+      allow list: if portfolioReader()
+        && request.query.limit != null
+        && request.query.limit <= 1000;
+
+      allow create: if portfolioManager()
+        && draftCycle(request.resource.data.cycleId)
+        && request.resource.data.sourceType is string
+        && request.resource.data.jobId is string
+        && request.resource.data.rowId is string
+        && request.resource.data.data is map
+        && request.resource.data.deleted is bool
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if portfolioManager()
+        && draftCycle(resource.data.cycleId)
+        && request.resource.data.cycleId == resource.data.cycleId
+        && request.resource.data.sourceType == resource.data.sourceType
+        && request.resource.data.jobId == resource.data.jobId
+        && request.resource.data.rowId == resource.data.rowId
+        && request.resource.data.data is map
+        && request.resource.data.deleted is bool
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    match /CarteraManualRows/{rowId} {
+      allow get: if portfolioReader();
+      allow list: if portfolioReader()
+        && request.query.limit != null
+        && request.query.limit <= 1000;
+
+      allow create: if portfolioManager()
+        && draftCycle(request.resource.data.cycleId)
+        && request.resource.data.sourceType is string
+        && request.resource.data.sourceKey is string
+        && request.resource.data.rowId == rowId
+        && request.resource.data.data is map
+        && request.resource.data.deleted is bool
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if portfolioManager()
+        && draftCycle(resource.data.cycleId)
+        && request.resource.data.cycleId == resource.data.cycleId
+        && request.resource.data.sourceType == resource.data.sourceType
+        && request.resource.data.sourceKey == resource.data.sourceKey
+        && request.resource.data.rowId == resource.data.rowId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.data is map
+        && request.resource.data.deleted is bool
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // AJUSTES TRAZABLES DEL ANEXO 1
+    // Append-only. No se altera el dato importado.
+    // -----------------------------------------------------------------------
+    match /Anexo1Overrides/{overrideId} {
+      allow read: if portfolioReader();
+      allow create: if portfolioManager()
+        && draftCycle(request.resource.data.cycleId)
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() >= 10;
+      allow update, delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // AUDITORÍA CLIENT-SIDE ENDURECIDA POR REGLAS
+    // Append-only. El actor y la hora no pueden ser suplantados.
+    // -----------------------------------------------------------------------
+    match /AuditLogs/{logId} {
+      allow read: if auditReader();
+      allow create: if activeUser()
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.actorEmail == request.auth.token.email
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /UserPreferences/{uid} {
+      allow read: if activeUser() && request.auth.uid == uid;
+      allow create, update: if activeUser()
+        && request.auth.uid == uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if activeUser() && request.auth.uid == uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="cartera-build" content="3.3.5-single-file">
+  <meta name="cartera-build" content="3.4.0-editor-operativo">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#004651">
   <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
@@ -290,6 +290,44 @@ body.sidebar-collapsed .logout-btn{display:none}
 
 }
 
+
+/* v3.4.0 · Editor operativo */
+.editor-shell{display:flex;flex-direction:column;gap:12px}
+.editor-toolbar{display:grid;grid-template-columns:minmax(160px,.75fr) minmax(180px,.9fr) minmax(240px,1.4fr) auto;gap:10px;align-items:end}
+.editor-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.editor-actions-left,.editor-actions-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.editor-status{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.editor-table-shell{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;max-height:min(58vh,640px);background:#fff}
+.editor-table{border-collapse:separate;border-spacing:0;min-width:100%;width:max-content;font-size:11px}
+.editor-table th{position:sticky;top:0;z-index:4;background:#f4f8f8;color:#426066;font-size:10px;text-transform:uppercase;letter-spacing:.035em;font-weight:900;padding:9px 10px;border-bottom:1px solid var(--border-strong);white-space:nowrap}
+.editor-table th:first-child,.editor-table td:first-child{position:sticky;left:0;z-index:3;background:#fff}
+.editor-table th:first-child{z-index:5;background:#f4f8f8}
+.editor-table td{padding:5px 6px;border-bottom:1px solid #edf2f2;border-right:1px solid #f0f4f4;vertical-align:middle;background:#fff}
+.editor-table tr:hover td{background:#fbfdfd}.editor-table tr:hover td:first-child{background:#fbfdfd}
+.editor-table tr.row-dirty td{background:#fffdf2}
+.editor-table tr.row-deleted td{background:#fff5f4;opacity:.75}
+.editor-table tr.row-deleted .cell-editor{text-decoration:line-through;color:#8b7775}
+.cell-editor{width:170px;min-width:130px;height:33px;border:1px solid transparent;border-radius:7px;padding:0 8px;background:transparent;color:var(--text);outline:none;transition:all var(--ease)}
+.cell-editor:hover{border-color:#d8e4e5;background:#fff}
+.cell-editor:focus{border-color:var(--infi-primary);background:#fff;box-shadow:0 0 0 3px rgba(0,108,114,.075)}
+.cell-editor[data-numeric="1"]{text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.row-actions{display:flex;gap:5px;align-items:center;white-space:nowrap}
+.editor-row-index{display:flex;align-items:center;gap:7px;min-width:78px}
+.editor-origin{width:7px;height:7px;border-radius:50%;background:#9aabad;display:inline-block}
+.editor-origin.manual{background:var(--infi-accent)}.editor-origin.edited{background:var(--warning)}
+.editor-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:2px}
+.editor-pagination{display:flex;align-items:center;gap:8px}
+.editor-column-add{display:flex;gap:6px;align-items:end}.editor-column-add .input{width:170px}
+.data-operational-card{border-color:#d5e5e6;background:linear-gradient(180deg,#fff,#fbfdfd)}
+.data-operational-card .card-body{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.data-operational-card .feature-points{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.data-operational-card .feature-points .badge{font-size:9.5px}
+.file-format-note{font-size:10px;color:var(--text-2);line-height:1.5;margin-top:8px}
+.soft-delete-note{display:flex;gap:8px;align-items:flex-start;background:var(--warning-soft);border:1px solid #eee2bd;border-radius:9px;padding:9px 11px;color:#6f5b22;font-size:10.5px;line-height:1.4}
+.editor-empty{padding:32px;text-align:center;color:var(--text-2)}
+@media(max-width:1100px){.editor-toolbar{grid-template-columns:1fr 1fr}.data-operational-card .card-body{grid-template-columns:1fr}}
+@media(max-width:720px){.editor-toolbar{grid-template-columns:1fr}.editor-column-add{width:100%}.editor-column-add .input{width:100%}.editor-footer{align-items:stretch}.editor-pagination{justify-content:space-between;width:100%}}
+
 </style>
 </head>
 <body class="app-body">
@@ -413,32 +451,32 @@ body.sidebar-collapsed .logout-btn{display:none}
         </section>
 
         <section class="view" id="view-portfolio" data-title="Cartera" data-crumb="Gestión de cartera / Cartera">
-          <header class="view-head"><div><h1>Cartera</h1><p>Detalle de obligaciones del corte publicado con búsqueda y filtros.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" id="exportPortfolioButton" type="button"><i data-lucide="sheet" size="15"></i>Excel</button></div></header>
+          <header class="view-head"><div><h1>Cartera</h1><p>Detalle de obligaciones del corte publicado con búsqueda y filtros.</p></div><div class="view-tools"><button class="btn btn-primary btn-sm" type="button" data-edit-source="ACRESC_P1" data-manager-only><i data-lucide="table-properties" size="15"></i>Editar datos</button><button class="btn btn-outline btn-sm" id="exportPortfolioButton" type="button"><i data-lucide="sheet" size="15"></i>Excel</button></div></header>
           <div id="portfolioContent"></div>
         </section>
 
         <section class="view" id="view-clients" data-title="Clientes" data-crumb="Gestión de cartera / Clientes">
-          <header class="view-head"><div><h1>Clientes</h1><p>Concentración consolidada por cliente y exposición total.</p></div></header>
+          <header class="view-head"><div><h1>Clientes</h1><p>Concentración consolidada por cliente y exposición total.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" type="button" data-edit-source="ACRESC_P1" data-manager-only><i data-lucide="pencil-line" size="15"></i>Editar cartera</button></div></header>
           <div id="clientsContent"></div>
         </section>
 
         <section class="view" id="view-collections" data-title="Recaudos" data-crumb="Gestión de cartera / Recaudos">
-          <header class="view-head"><div><h1>Recaudos</h1><p>Movimientos identificados en la fuente de recaudo del corte seleccionado.</p></div></header>
+          <header class="view-head"><div><h1>Recaudos</h1><p>Movimientos identificados en la fuente de recaudo del corte seleccionado.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" type="button" data-edit-source="ACREPC1" data-manager-only><i data-lucide="pencil-line" size="15"></i>Editar recaudos</button></div></header>
           <div id="collectionsContent"></div>
         </section>
 
         <section class="view" id="view-risk" data-title="Riesgo" data-crumb="Control / Riesgo">
-          <header class="view-head"><div><h1>Riesgo de cartera</h1><p>Edades de mora, concentración y exposiciones prioritarias.</p></div></header>
+          <header class="view-head"><div><h1>Riesgo de cartera</h1><p>Edades de mora, concentración y exposiciones prioritarias.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" type="button" data-edit-source="ACRESC_P1" data-manager-only><i data-lucide="pencil-line" size="15"></i>Editar base</button></div></header>
           <div id="riskContent"></div>
         </section>
 
         <section class="view" id="view-maturities" data-title="Vencimientos" data-crumb="Control / Vencimientos">
-          <header class="view-head"><div><h1>Vencimientos</h1><p>Obligaciones ordenadas por fecha o días de mora cuando la fuente lo permite.</p></div></header>
+          <header class="view-head"><div><h1>Vencimientos</h1><p>Obligaciones ordenadas por fecha o días de mora cuando la fuente lo permite.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" type="button" data-edit-source="ACRESC_P1" data-manager-only><i data-lucide="pencil-line" size="15"></i>Editar base</button></div></header>
           <div id="maturitiesContent"></div>
         </section>
 
         <section class="view" id="view-data" data-title="Cortes e importaciones" data-crumb="Gestión de datos / Cortes e importaciones" data-manager-only>
-          <header class="view-head"><div><h1>Cortes e importaciones</h1><p>Trazabilidad de cortes, fuentes, hashes SHA-256 y estado de publicación.</p></div><div class="view-tools"><button class="btn btn-primary btn-sm" type="button" data-action="new-cycle"><i data-lucide="calendar-plus" size="15"></i>Nuevo corte</button><button class="btn btn-outline btn-sm" type="button" data-action="import-source"><i data-lucide="file-up" size="15"></i>Cargar fuente</button></div></header>
+          <header class="view-head"><div><h1>Cortes e importaciones</h1><p>Trazabilidad, edición tabular, cargas masivas y estado de publicación.</p></div><div class="view-tools"><button class="btn btn-primary btn-sm" type="button" data-action="open-editor"><i data-lucide="table-properties" size="15"></i>Editor operativo</button><button class="btn btn-outline btn-sm" type="button" data-action="new-cycle"><i data-lucide="calendar-plus" size="15"></i>Nuevo corte</button><button class="btn btn-outline btn-sm" type="button" data-action="import-source"><i data-lucide="file-up" size="15"></i>Carga masiva</button></div></header>
           <div id="dataContent"></div>
         </section>
 
@@ -471,7 +509,7 @@ body.sidebar-collapsed .logout-btn{display:none}
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle" style="width:min(900px,100%)">
       <header class="modal-header"><div><h2 id="importModalTitle">Cargar fuente de cartera</h2><p>El Excel se procesa localmente; Firestore recibe datos normalizados, hash y trazabilidad.</p></div><button class="icon-btn" type="button" data-close-modal="importModal"><i data-lucide="x" size="18"></i></button></header>
       <div class="modal-body">
-        <div class="form-grid"><div class="field"><label for="importCycle">Corte en borrador</label><select class="select" id="importCycle"></select></div><div class="field"><label for="importSource">Tipo de fuente</label><select class="select" id="importSource"></select></div><div class="field" style="grid-column:1/-1"><label for="importFile">Archivo Excel / CSV</label><input class="input" id="importFile" type="file" accept=".xlsx,.xls,.xlsb,.csv"></div></div>
+        <div class="form-grid"><div class="field"><label for="importCycle">Corte en borrador</label><select class="select" id="importCycle"></select></div><div class="field"><label for="importSource">Tipo de fuente</label><select class="select" id="importSource"></select></div><div class="field"><label for="importSheet">Hoja / pestaña</label><select class="select" id="importSheet"><option value="">Automática · primera hoja</option></select></div><div class="field"><label for="importFile">Archivo tabulado</label><input class="input" id="importFile" type="file" accept=".xlsx,.xlsm,.xlsb,.xls,.csv,.tsv,.txt,.ods,.fods,.xml,.slk,.sylk,.dif,.prn,.dbf,.numbers,text/csv,text/tab-separated-values"></div></div><div class="file-format-note">Formatos principales: XLSX, XLSM, XLSB, XLS, CSV, TSV/TXT, ODS/FODS, XML SpreadsheetML, SLK/SYLK, DIF, PRN y DBF. Otros archivos tabulados compatibles se intentan detectar automáticamente.</div>
         <div class="view-tools" style="margin-top:14px"><button class="btn btn-outline" id="analyzeImportButton" type="button">Analizar archivo</button><button class="btn btn-primary" id="saveImportButton" type="button" disabled>Guardar importación</button></div>
         <div id="importAnalysis" style="margin-top:16px"></div><div class="data-log" id="importLog" style="margin-top:12px">Seleccione corte, fuente y archivo.</div>
       </div>
@@ -490,7 +528,42 @@ body.sidebar-collapsed .logout-btn{display:none}
   <div class="modal-backdrop" id="userModal" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
       <header class="modal-header"><div><h2 id="userModalTitle">Editar perfil institucional</h2><p>La cuenta de Authentication no se modifica desde este formulario.</p></div><button class="icon-btn" type="button" data-close-modal="userModal"><i data-lucide="x" size="18"></i></button></header>
-      <form id="userForm"><div class="modal-body"><input type="hidden" id="editUserUid"><div class="form-grid"><div class="field" style="grid-column:1/-1"><label>Usuario</label><input class="input" id="editUserName" readonly></div><div class="field"><label for="editUserRole">Rol</label><select class="select" id="editUserRole"><option value="admin">Administrador</option><option value="asesor_gerencia">Asesor de Gerencia</option><option value="jefe_cartera">Jefe de Cartera</option><option value="analista_cartera">Analista de Cartera</option><option value="auditor">Auditor</option><option value="consulta">Consulta</option></select></div><div class="field"><label for="editUserActive">Estado</label><select class="select" id="editUserActive"><option value="true">Activo</option><option value="false">Inactivo</option></select></div></div><p class="auth-message" id="userFormMessage"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="userModal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></footer></form>
+      <form id="userForm"><div class="modal-body"><input type="hidden" id="editUserUid"><div class="form-grid"><div class="field" style="grid-column:1/-1"><label>Usuario</label><input class="input" id="editUserName" readonly></div><div class="field"><label for="editUserRole">Rol</label><select class="select" id="editUserRole"><option value="admin">Administrador</option><option value="asesor_gerencia">Asesor de Gerencia</option><option value="jefe_cartera">Jefe de Cartera</option><option value="analista_cartera">Profesional de Cartera</option><option value="auditor">Auditor</option><option value="consulta">Consulta</option></select></div><div class="field"><label for="editUserActive">Estado</label><select class="select" id="editUserActive"><option value="true">Activo</option><option value="false">Inactivo</option></select></div></div><p class="auth-message" id="userFormMessage"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="userModal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></footer></form>
+    </section>
+  </div>
+
+
+  <div class="modal-backdrop" id="dataEditorModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="dataEditorTitle" style="width:min(1480px,calc(100vw - 28px));max-height:94vh">
+      <header class="modal-header"><div><h2 id="dataEditorTitle">Editor operativo de cartera</h2><p>Edición tabular con trazabilidad. Los cortes publicados permanecen inmutables.</p></div><button class="icon-btn" type="button" data-close-modal="dataEditorModal"><i data-lucide="x" size="18"></i></button></header>
+      <div class="modal-body" style="overflow:auto"><div class="editor-shell">
+        <div class="editor-toolbar">
+          <div class="field"><label for="editorCycle">Corte de trabajo</label><select class="select" id="editorCycle"></select></div>
+          <div class="field"><label for="editorSource">Fuente / tabla</label><select class="select" id="editorSource"></select></div>
+          <div class="field"><label for="editorSearch">Buscar dentro de la tabla</label><input class="input" id="editorSearch" placeholder="Buscar en cualquier columna..."></div>
+          <div class="field"><label for="editorPageSize">Filas por página</label><select class="select" id="editorPageSize"><option>25</option><option selected>50</option><option>100</option></select></div>
+        </div>
+        <div class="editor-actions">
+          <div class="editor-actions-left">
+            <button class="btn btn-primary btn-sm" id="editorAddRow" type="button"><i data-lucide="plus" size="15"></i>Nueva fila</button>
+            <button class="btn btn-outline btn-sm" id="editorBulkImport" type="button"><i data-lucide="file-up" size="15"></i>Carga masiva</button>
+            <div class="editor-column-add"><div class="field"><label for="editorNewColumn">Nueva columna</label><input class="input" id="editorNewColumn" placeholder="Ej. observacion"></div><button class="btn btn-outline btn-sm" id="editorAddColumn" type="button"><i data-lucide="columns-3" size="15"></i>Agregar</button></div>
+          </div>
+          <div class="editor-actions-right editor-status">
+            <label class="badge"><input id="editorShowDeleted" type="checkbox" style="accent-color:var(--infi-primary)"> Mostrar eliminadas</label>
+            <span class="badge badge-info" id="editorRowCount">0 filas</span>
+            <span class="badge badge-warning" id="editorDirtyCount">0 cambios</span>
+          </div>
+        </div>
+        <div class="soft-delete-note"><i data-lucide="shield-check" size="16"></i><span><strong>Eliminación trazable:</strong> una fila eliminada deja de operar en el aplicativo, pero se conserva el registro técnico para auditoría. Los datos de un corte publicado no se pueden modificar.</span></div>
+        <div id="editorGridHost" class="editor-table-shell"><div class="editor-empty">Seleccione un corte y una fuente para comenzar.</div></div>
+        <div class="editor-footer">
+          <div class="editor-pagination"><button class="btn btn-outline btn-sm" id="editorPrev" type="button">Anterior</button><span class="badge" id="editorPageLabel">1 / 1</span><button class="btn btn-outline btn-sm" id="editorNext" type="button">Siguiente</button></div>
+          <div class="editor-actions-right"><button class="btn btn-outline btn-sm" id="editorDiscard" type="button">Descartar cambios</button><button class="btn btn-primary" id="editorSave" type="button"><i data-lucide="save" size="16"></i>Guardar cambios</button></div>
+        </div>
+        <div class="data-log" id="editorLog">Los cambios se guardan por filas para reducir escrituras en Firebase Spark.</div>
+      </div></div>
+      <footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="dataEditorModal">Cerrar</button></footer>
     </section>
   </div>
 
@@ -550,7 +623,7 @@ function roleLabel(role) {
     admin:"Administrador",
     asesor_gerencia:"Asesor de Gerencia",
     jefe_cartera:"Jefe de Cartera",
-    analista_cartera:"Analista de Cartera",
+    analista_cartera:"Profesional de Cartera",
     auditor:"Auditor",
     consulta:"Consulta"
   })[role] || role || "Sin rol";
@@ -856,7 +929,8 @@ async function getImportJobs(cycleId, sourceType = null) {
 }
 
 async function getLatestImportJob(cycleId, sourceType) {
-  return (await getImportJobs(cycleId, sourceType))[0] || null;
+  const jobs = await getImportJobs(cycleId, sourceType);
+  return jobs.find((job) => job.status === "completed") || jobs[0] || null;
 }
 
 async function getJobChunks(jobId) {
@@ -866,11 +940,110 @@ async function getJobChunks(jobId) {
   return snap.docs.map((d) => ({ id:d.id, ...d.data() })).sort((a,b) => (a.sequence || 0) - (b.sequence || 0));
 }
 
-async function getSourceRows(cycleId, sourceType) {
+function sourceKey(cycleId, sourceType) { return `${cycleId}__${sourceType}`; }
+function docSafe(value) { return String(value ?? "").replace(/[\/\\?#\[\]]/g, "_").slice(0, 1200); }
+function publicRowData(row) {
+  const out = {};
+  for (const [key,value] of Object.entries(row || {})) if (!key.startsWith("_")) out[key] = value;
+  return out;
+}
+async function getRowEdits(jobId) {
+  if (!jobId) return [];
+  const snap = await getDocs(query(collection(db, "CarteraRowEdits"), where("jobId", "==", jobId), limit(1000)));
+  return snap.docs.map((d) => ({ id:d.id, ...d.data() }));
+}
+async function getManualRows(cycleId, sourceType) {
+  const snap = await getDocs(query(collection(db, "CarteraManualRows"), where("sourceKey", "==", sourceKey(cycleId,sourceType)), limit(1000)));
+  return snap.docs.map((d) => ({ id:d.id, ...d.data() }));
+}
+async function getSourceWorkspace(cycleId, sourceType, { includeDeleted=false } = {}) {
   const job = await getLatestImportJob(cycleId, sourceType);
-  if (!job) return { job:null, rows:[] };
-  const chunks = await getJobChunks(job.id);
-  return { job, rows:chunks.flatMap((c) => Array.isArray(c.rows) ? c.rows : []) };
+  let imported = [];
+  if (job) {
+    const chunks = await getJobChunks(job.id);
+    imported = chunks.flatMap((chunk) => {
+      const sequence = Number(chunk.sequence || 0);
+      return (Array.isArray(chunk.rows) ? chunk.rows : []).map((row,index) => ({
+        ...row,
+        _rowId:String(row?._rowId || `${job.id}_${sequence}_${index+1}`),
+        _origin:"imported", _jobId:job.id
+      }));
+    });
+    const edits = await getRowEdits(job.id);
+    const editMap = new Map(edits.map((edit) => [String(edit.rowId), edit]));
+    imported = imported.map((row) => {
+      const edit = editMap.get(String(row._rowId));
+      if (!edit) return { ...row, _deleted:false, _edited:false };
+      return { ...row, ...(edit.data && typeof edit.data === "object" ? edit.data : {}),
+        _deleted:edit.deleted === true, _edited:true, _editId:edit.id };
+    });
+  }
+  const manualDocs = await getManualRows(cycleId, sourceType);
+  const manual = manualDocs.map((item) => ({
+    ...(item.data && typeof item.data === "object" ? item.data : {}),
+    _rowId:String(item.rowId || item.id), _origin:"manual", _jobId:null,
+    _deleted:item.deleted === true, _edited:true, _manualDocId:item.id
+  }));
+  const rows = [...imported, ...manual];
+  return { job, rows: includeDeleted ? rows : rows.filter((row) => !row._deleted) };
+}
+async function getSourceRows(cycleId, sourceType) {
+  const result = await getSourceWorkspace(cycleId, sourceType, { includeDeleted:false });
+  return { job:result.job, rows:result.rows.map((row) => publicRowData(row)) };
+}
+async function markSourcePresent(cycleId, sourceType) {
+  await updateDoc(doc(db, "CarteraCycles", cycleId), {
+    importedSources:arrayUnion(sourceType), manualSources:arrayUnion(sourceType),
+    updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp()
+  });
+  invalidateCache("cycles");
+}
+async function saveOperationalRows({ cycleId, sourceType, rows }) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sesión no disponible.");
+  const cycle = await getCycle(cycleId);
+  if (!cycle || cycle.status !== "draft") throw new Error("Solo se pueden modificar cortes en borrador.");
+  const dirty = rows.filter((row) => row._dirty === true);
+  if (!dirty.length) return { saved:0 };
+
+  const ops = [];
+  for (const row of dirty) {
+    const data = publicRowData(row);
+    if (row._origin === "manual") {
+      const ref = doc(db, "CarteraManualRows", docSafe(row._manualDocId || row._rowId));
+      const payload = {
+        cycleId, sourceType, sourceKey:sourceKey(cycleId,sourceType), rowId:String(row._rowId),
+        data, deleted:row._deleted === true, updatedBy:user.uid, updatedAt:serverTimestamp()
+      };
+      if (row._new === true) { payload.createdBy=user.uid; payload.createdAt=serverTimestamp(); }
+      ops.push((batch) => batch.set(ref, payload, { merge:true }));
+    } else {
+      if (!row._jobId) continue;
+      const ref = doc(db, "CarteraRowEdits", docSafe(`${row._jobId}__${row._rowId}`));
+      ops.push((batch) => batch.set(ref, {
+        cycleId, sourceType, jobId:String(row._jobId), rowId:String(row._rowId),
+        data, deleted:row._deleted === true, updatedBy:user.uid, updatedAt:serverTimestamp()
+      }, { merge:true }));
+    }
+  }
+
+  await writeChunks(ops);
+  if (dirty.some((row) => row._deleted !== true)) await markSourcePresent(cycleId, sourceType);
+  await audit("OPERATIONAL_ROWS_SAVED", "CarteraData", sourceKey(cycleId,sourceType), {
+    cycleId, sourceType, rowsChanged:dirty.length,
+    deleted:dirty.filter((r)=>r._deleted===true).length,
+    manual:dirty.filter((r)=>r._origin==="manual").length
+  });
+
+  if (sourceType === "ACRESC_P1") {
+    const effective = await getSourceRows(cycleId, sourceType);
+    const current = await getAggregate(cycleId, true) || {};
+    const sourceMeta = { ...(current.sourceMeta || {}) };
+    sourceMeta[sourceType] = { ...(sourceMeta[sourceType] || {}), rows:effective.rows.length, manuallyAdjusted:true };
+    await mergeAggregate(cycleId, { sourceMeta, financialSummary:financialSummaryFromRows(effective.rows) });
+  }
+  await recalculateValidation(cycleId);
+  return { saved:dirty.length };
 }
 
 async function getUsers() {
@@ -1180,14 +1353,28 @@ async function sha256(buffer) {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2,"0")).join("");
 }
 
-async function analyzeExcel(file, cycleId, sourceType) {
-  if (!file) throw new Error("Seleccione un archivo Excel o CSV.");
+async function readWorkbook(file) {
+  if (!file) throw new Error("Seleccione un archivo tabulado.");
+  const buffer = await file.arrayBuffer();
+  let workbook;
+  try { workbook = XLSX.read(buffer, { type:"array", cellDates:true, raw:true, dense:false, WTF:false }); }
+  catch (error) { throw new Error(`No fue posible interpretar "${file.name}" como hoja de cálculo o archivo tabulado compatible.`); }
+  if (!workbook.SheetNames?.length) throw new Error("El archivo no contiene hojas o tablas legibles.");
+  return { buffer, workbook };
+}
+async function workbookSheetNames(file) {
+  const { workbook } = await readWorkbook(file);
+  return workbook.SheetNames || [];
+}
+async function analyzeExcel(file, cycleId, sourceType, requestedSheet="") {
   const cycle = await getCycle(cycleId); if (!cycle) throw new Error("No existe el corte seleccionado.");
   if (cycle.status !== "draft") throw new Error("Solo se puede importar información a cortes en borrador.");
-  const buffer = await file.arrayBuffer(); const hash = await sha256(buffer);
-  const workbook = XLSX.read(buffer, { type:"array", cellDates:true, raw:true });
-  const sheetName = workbook.SheetNames[0]; if (!sheetName) throw new Error("El archivo no contiene hojas.");
-  const parsed = parseSheet(workbook.Sheets[sheetName]); if (!parsed.rows.length) throw new Error("No se encontraron filas de datos.");
+  const { buffer, workbook } = await readWorkbook(file);
+  const hash = await sha256(buffer);
+  const sheetName = requestedSheet && workbook.Sheets[requestedSheet] ? requestedSheet : workbook.SheetNames[0];
+  const parsed = parseSheet(workbook.Sheets[sheetName]);
+  if (!parsed.rows.length) throw new Error("No se encontraron filas de datos.");
+  parsed.rows = parsed.rows.map((row,index) => ({ ...row, _rowId:String(row._rowId || `${hash.slice(0,16)}_${index+1}`) }));
   const chunks = splitRows(parsed.rows);
   return { file, hash, buffer, sheetName, sourceType, cycleId, ...parsed, chunks };
 }
@@ -1238,6 +1425,55 @@ async function recalculateValidation(cycleId) {
   return payload;
 }
 
+
+// ===== operational-editor.js =====
+const SOURCE_TEMPLATES = Object.freeze({
+  ACRESC_P1:["cliente","identificacion","obligacion","linea","saldo","saldo_vencido","dias_mora","calificacion","provision","fecha_vencimiento","municipio"],
+  ACREPC1:["fecha_pago","cliente","identificacion","obligacion","valor_recaudo","observacion"]
+});
+function editorColumns(rows, job, sourceType) {
+  const fromJob=Array.isArray(job?.headerMap)?job.headerMap.map((h)=>h.key).filter(Boolean):[];
+  const fromRows=[];
+  for(const row of rows.slice(0,100))for(const key of Object.keys(row))if(!key.startsWith("_")&&!fromRows.includes(key))fromRows.push(key);
+  return [...new Set([...fromJob,...fromRows,...(SOURCE_TEMPLATES[sourceType]||[])])].filter(Boolean).length
+    ? [...new Set([...fromJob,...fromRows,...(SOURCE_TEMPLATES[sourceType]||[])])].filter(Boolean)
+    : ["campo_1"];
+}
+function numericEditorField(key,value){return typeof value==="number"||/(saldo|valor|capital|provision|recaudo|pago|mora|dias|tasa|interes|cuota|monto|total)/i.test(String(key));}
+function parseEditorValue(raw,previous){const text=String(raw??"").trim();if(text==="")return null;if(typeof previous==="number")return safeNumber(text);if(typeof previous==="boolean")return /^(true|1|si|sí)$/i.test(text);return text;}
+function editorDirtyCount(){return state.editor?.rows?.filter((r)=>r._dirty).length||0;}
+function filteredEditorRows(){if(!state.editor)return[];const showDeleted=qs("#editorShowDeleted")?.checked===true;const search=String(state.editor.search||"").toLowerCase().trim();return state.editor.rows.filter((row)=>{if(!showDeleted&&row._deleted)return false;if(!search)return true;return state.editor.columns.some((key)=>String(row[key]??"").toLowerCase().includes(search));});}
+function renderEditorGrid(){
+  const host=qs("#editorGridHost");if(!host||!state.editor)return;
+  const rows=filteredEditorRows(),size=Number(state.editor.pageSize||50),pages=Math.max(1,Math.ceil(rows.length/size));
+  state.editor.page=Math.max(1,Math.min(Number(state.editor.page||1),pages));
+  const start=(state.editor.page-1)*size,pageRows=rows.slice(start,start+size),columns=state.editor.columns;
+  qs("#editorRowCount").textContent=`${formatNumber(rows.length)} filas`;qs("#editorDirtyCount").textContent=`${formatNumber(editorDirtyCount())} cambios`;qs("#editorPageLabel").textContent=`${state.editor.page} / ${pages}`;qs("#editorPrev").disabled=state.editor.page<=1;qs("#editorNext").disabled=state.editor.page>=pages;
+  if(!pageRows.length){host.innerHTML=`<div class="editor-empty"><strong>Sin filas visibles.</strong><br>Puede crear una fila nueva o realizar una carga masiva.</div>`;return;}
+  host.innerHTML=`<table class="editor-table"><thead><tr><th>Fila</th>${columns.map((key)=>`<th>${escapeHtml(key)}</th>`).join("")}<th>Acciones</th></tr></thead><tbody>${pageRows.map((row,i)=>{const realIndex=state.editor.rows.indexOf(row),cls=`${row._dirty?"row-dirty":""} ${row._deleted?"row-deleted":""}`.trim(),origin=row._origin==="manual"?"manual":(row._edited?"edited":"");return `<tr class="${cls}" data-editor-index="${realIndex}"><td><div class="editor-row-index"><span class="editor-origin ${origin}"></span><strong>${start+i+1}</strong></div></td>${columns.map((key)=>{const value=row[key]??"",numeric=numericEditorField(key,value)?"1":"0";return `<td><input class="cell-editor" data-editor-cell="${escapeHtml(key)}" data-numeric="${numeric}" value="${escapeHtml(value)}" ${row._deleted?"disabled":""}></td>`;}).join("")}<td><div class="row-actions"><button class="btn ${row._deleted?"btn-outline":"btn-danger"} btn-sm" type="button" data-editor-delete="${realIndex}">${row._deleted?"Restaurar":"Eliminar"}</button></div></td></tr>`;}).join("")}</tbody></table>`;
+}
+async function loadEditorWorkspace(){
+  const cycleId=qs("#editorCycle").value,sourceType=qs("#editorSource").value;if(!cycleId||!sourceType)return;
+  setSyncState("loading","Cargando editor");qs("#editorLog").textContent="Consultando fuente, ajustes y filas manuales…";
+  const workspace=await getSourceWorkspace(cycleId,sourceType,{includeDeleted:true});
+  state.editor={cycleId,sourceType,job:workspace.job,rows:workspace.rows.map((row)=>({...row,_dirty:false,_new:false})),columns:editorColumns(workspace.rows,workspace.job,sourceType),search:"",page:1,pageSize:Number(qs("#editorPageSize").value||50)};
+  qs("#editorSearch").value="";qs("#editorShowDeleted").checked=false;
+  qs("#editorLog").textContent=workspace.job?`Fuente base: ${workspace.job.fileName||workspace.job.id}\nFilas disponibles: ${workspace.rows.length}\nEdite las celdas necesarias y guarde cuando termine.`:`La fuente ${sourceType} aún no tiene archivo base. Puede diligenciar filas manualmente o realizar una carga masiva.`;
+  renderEditorGrid();setSyncState("online");refreshIcons();
+}
+async function openDataEditor(preferredSource=""){
+  if(!hasRole(state.profile,MANAGER_ROLES)){showToast("Sin permisos","Su rol no tiene habilitada la edición de cartera.","error");return;}
+  const drafts=(await getCycles(true)).filter((c)=>c.status==="draft");
+  if(!drafts.length){showToast("Cree un corte de trabajo","La edición directa se realiza únicamente sobre cortes en borrador.","warning",6000);openCycleModal();return;}
+  qs("#editorCycle").innerHTML=drafts.map((c)=>`<option value="${escapeHtml(c.id)}">${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");
+  qs("#editorSource").innerHTML=(state.config?.sourceTypes||[]).map((source)=>`<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("");
+  if(preferredSource&&(state.config?.sourceTypes||[]).includes(preferredSource))qs("#editorSource").value=preferredSource;
+  openModal("dataEditorModal");await loadEditorWorkspace();
+}
+function addEditorRow(){if(!state.editor)return;const row={_rowId:uid("manual"),_origin:"manual",_manualDocId:uid("manualrow"),_deleted:false,_edited:true,_dirty:true,_new:true};for(const key of state.editor.columns)row[key]=null;state.editor.rows.unshift(row);state.editor.page=1;renderEditorGrid();}
+function addEditorColumn(){if(!state.editor)return;const raw=qs("#editorNewColumn").value.trim();if(!raw)return;const key=normalizeKey(raw);if(state.editor.columns.includes(key)){showToast("Columna existente",`La columna ${key} ya existe.`,"warning");return;}state.editor.columns.push(key);for(const row of state.editor.rows)if(!(key in row))row[key]=null;qs("#editorNewColumn").value="";renderEditorGrid();}
+async function saveEditorWorkspace(){if(!state.editor)return;const dirty=editorDirtyCount();if(!dirty){showToast("Sin cambios","No existen modificaciones pendientes.","info");return;}try{qs("#editorSave").disabled=true;setSyncState("loading","Guardando cambios");qs("#editorLog").textContent=`Guardando ${dirty} fila(s) modificada(s) con trazabilidad…`;const result=await saveOperationalRows({cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,rows:state.editor.rows});showToast("Cambios guardados",`${result.saved} fila(s) actualizadas en Firestore.`,"success");await loadEditorWorkspace();if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){console.error("Operational editor",error);qs("#editorLog").textContent=`ERROR\n${error.code||""}\n${error.message}`;showToast("No fue posible guardar",error.message,"error",7000);}finally{qs("#editorSave").disabled=false;setSyncState("online");}}
+
 // ===== admin.js =====
 window.__CARTERA_ASSET_BOOT__ = true;
 // v3.3.2 boot marker: confirms the ES-module graph loaded under HTTP/HTTPS.
@@ -1247,7 +1483,7 @@ document.getElementById("bootFailure")?.remove();
 const state = {
   user:null, profile:null, config:null, years:[], selectedYear:null, yearDoc:null, cycle:null,
   aggregate:null, validation:null, portfolio:null, summary:null, aging:null, lines:null,
-  payments:null, cycles:[], importJobs:[], users:null, analyzedImport:null,
+  payments:null, cycles:[], importJobs:[], users:null, analyzedImport:null, editor:null,
   portfolioPage:1, portfolioPageSize:25, portfolioSearch:"", portfolioLine:"", portfolioMora:"all"
 };
 
@@ -1462,7 +1698,8 @@ async function renderData(){
   const root=qs("#dataContent"); state.cycles=await getCycles(true); const activeDraft=state.cycles.find((c)=>c.status==="draft");
   const sourceTypes=state.config?.sourceTypes||[]; const imported=activeDraft?.importedSources||[];
   state.importJobs=activeDraft?await getImportJobs(activeDraft.id):[];
-  root.innerHTML=`${activeDraft?`<article class="card" style="margin-bottom:16px"><div class="card-header"><div><h2 class="card-title">Corte en trabajo · ${formatDate(activeDraft.cutoffDate)}</h2><p class="card-subtitle">${escapeHtml(activeDraft.label||activeDraft.id)}</p></div><span class="badge badge-warning">Borrador</span></div><div class="card-body"><div class="source-grid">${sourceTypes.map((s)=>`<div class="source-chip ${imported.includes(s)?"done":""}"><strong>${escapeHtml(s)}</strong><span>${imported.includes(s)?"Cargada":"Pendiente"}</span></div>`).join("")}</div><div class="view-tools" style="margin-top:16px"><button class="btn btn-outline btn-sm" data-validate-cycle="${escapeHtml(activeDraft.id)}">Validar corte</button>${hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-primary btn-sm" data-publish-cycle="${escapeHtml(activeDraft.id)}">Publicar corte</button>`:""}</div></div></article>`:empty("Sin cortes en borrador","Puede crear un nuevo corte para iniciar la carga de fuentes.",`<button class="btn btn-primary btn-sm" data-action="new-cycle">Nuevo corte</button>`)}
+  const operationalCard=`<article class="card data-operational-card" style="margin-bottom:14px"><div class="card-body"><div><h2 class="card-title">Editor operativo</h2><p class="card-subtitle">Diligencie, tabule, corrija o elimine registros directamente en el corte de trabajo. Los cambios quedan auditados.</p><div class="feature-points"><span class="badge badge-info">Edición por filas</span><span class="badge badge-info">Borrado trazable</span><span class="badge badge-info">Carga masiva</span><span class="badge badge-info">XLSX · XLS · CSV · ODS · TXT</span></div></div><button class="btn btn-primary" type="button" data-action="open-editor"><i data-lucide="table-properties" size="17"></i>Abrir editor</button></div></article>`;
+  root.innerHTML=operationalCard+`${activeDraft?`<article class="card" style="margin-bottom:16px"><div class="card-header"><div><h2 class="card-title">Corte en trabajo · ${formatDate(activeDraft.cutoffDate)}</h2><p class="card-subtitle">${escapeHtml(activeDraft.label||activeDraft.id)}</p></div><span class="badge badge-warning">Borrador</span></div><div class="card-body"><div class="source-grid">${sourceTypes.map((s)=>`<div class="source-chip ${imported.includes(s)?"done":""}"><strong>${escapeHtml(s)}</strong><span>${imported.includes(s)?"Cargada":"Pendiente"}</span></div>`).join("")}</div><div class="view-tools" style="margin-top:16px"><button class="btn btn-outline btn-sm" data-validate-cycle="${escapeHtml(activeDraft.id)}">Validar corte</button>${hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-primary btn-sm" data-publish-cycle="${escapeHtml(activeDraft.id)}">Publicar corte</button>`:""}</div></div></article>`:empty("Sin cortes en borrador","Puede crear un nuevo corte para iniciar la carga de fuentes.",`<button class="btn btn-primary btn-sm" data-action="new-cycle">Nuevo corte</button>`)}
   <div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Historial de cortes</h2><p class="card-subtitle">Borradores y cortes publicados.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Corte</th><th>Estado</th><th>Fuentes</th><th>Creado</th></tr></thead><tbody>${state.cycles.length?state.cycles.map((c)=>`<tr><td><strong>${formatDate(c.cutoffDate)}</strong><br><span class="muted">${escapeHtml(c.label||c.id)}</span></td><td><span class="badge ${c.status==="published"?"badge-success":"badge-warning"}">${c.status==="published"?"Publicado":"Borrador"}</span></td><td>${(c.importedSources||[]).length} / ${sourceTypes.length}</td><td>${formatDateTime(c.createdAt)}</td></tr>`).join(""):`<tr><td colspan="4">Sin cortes.</td></tr>`}</tbody></table></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Importaciones del borrador</h2><p class="card-subtitle">Archivo, fuente y huella SHA-256.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Fuente</th><th>Archivo</th><th>Filas</th><th>SHA-256</th></tr></thead><tbody>${state.importJobs.length?state.importJobs.map((j)=>`<tr><td><strong>${escapeHtml(j.sourceType)}</strong></td><td>${escapeHtml(j.fileName)}</td><td>${formatNumber(j.rowCount)}</td><td class="mono" title="${escapeHtml(j.sha256)}">${escapeHtml(String(j.sha256||"").slice(0,10))}…</td></tr>`).join(""):`<tr><td colspan="4">Sin importaciones.</td></tr>`}</tbody></table></div></div></article></div>`;
   qsa("[data-validate-cycle]",root).forEach((b)=>b.addEventListener("click",()=>validateCycleAction(b.dataset.validateCycle)));
   qsa("[data-publish-cycle]",root).forEach((b)=>b.addEventListener("click",()=>publishCycleAction(b.dataset.publishCycle))); refreshIcons();
@@ -1518,7 +1755,8 @@ qs("#mobileMenuButton").addEventListener("click",openMobileSidebar);qs("#mobileO
 
 qs("#createMenuButton").addEventListener("click",()=>{qs("#createMenu").hidden=!qs("#createMenu").hidden;});
 document.addEventListener("click",(e)=>{if(!e.target.closest(".dropdown"))qs("#createMenu").hidden=true;});
-document.addEventListener("click",(e)=>{const b=e.target.closest("[data-action]");if(!b)return;const action=b.dataset.action;if(action==="new-cycle")openCycleModal();if(action==="import-source")openImportModal();});
+document.addEventListener("click",(e)=>{const b=e.target.closest("[data-action]");if(!b)return;const action=b.dataset.action;if(action==="new-cycle")openCycleModal();if(action==="import-source")openImportModal();if(action==="open-editor")openDataEditor();});
+document.addEventListener("click",(e)=>{const b=e.target.closest("[data-edit-source]");if(!b)return;openDataEditor(b.dataset.editSource||"");});
 qsa("[data-close-modal]").forEach((b)=>b.addEventListener("click",()=>closeModal(b.dataset.closeModal)));
 qsa(".modal-backdrop").forEach((m)=>m.addEventListener("click",(e)=>{if(e.target===m)closeModal(m.id);}));
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape"){qsa(".modal-backdrop:not([hidden])").forEach((m)=>closeModal(m.id));qs("#createMenu").hidden=true;}if(e.key==="/"&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();qs("#globalSearch").focus();}});
@@ -1531,10 +1769,27 @@ function openCycleModal(){qs("#cycleYear").innerHTML=state.years.map((y)=>`<opti
 qs("#cycleForm").addEventListener("submit",async(e)=>{e.preventDefault();const year=qs("#cycleYear").value,date=qs("#cycleDate").value,label=qs("#cycleLabel").value.trim();const msg=qs("#cycleFormMessage");if(!date||!date.startsWith(`${year}-`)){msg.textContent=`La fecha debe pertenecer a la vigencia ${year}.`;msg.className="auth-message error";return;}try{qs("#saveCycleButton").disabled=true;const id=await createCycle({year,cutoffDate:date,label});closeModal("cycleModal");showToast("Corte creado",`${formatDate(date)} quedó en estado borrador.`,"success");await openImportModal(id);if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){msg.textContent=error.message;msg.className="auth-message error";}finally{qs("#saveCycleButton").disabled=false;}});
 
 async function openImportModal(preselect=null){
-  try{const cycles=(await getCycles(true)).filter((c)=>c.status==="draft");if(!cycles.length){showToast("No hay cortes en borrador","Cree primero un corte de cartera.","warning");openCycleModal();return;}qs("#importCycle").innerHTML=cycles.map((c)=>`<option value="${escapeHtml(c.id)}">${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");if(preselect&&cycles.some(c=>c.id===preselect))qs("#importCycle").value=preselect;qs("#importSource").innerHTML=(state.config?.sourceTypes||[]).map((s)=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");qs("#importFile").value="";qs("#importAnalysis").innerHTML="";qs("#importLog").textContent="Seleccione fuente y archivo; luego pulse Analizar archivo.";qs("#saveImportButton").disabled=true;state.analyzedImport=null;openModal("importModal");refreshIcons();}catch(e){showToast("No fue posible preparar la importación",e.message,"error");}
+  try{const cycles=(await getCycles(true)).filter((c)=>c.status==="draft");if(!cycles.length){showToast("No hay cortes en borrador","Cree primero un corte de cartera.","warning");openCycleModal();return;}qs("#importCycle").innerHTML=cycles.map((c)=>`<option value="${escapeHtml(c.id)}">${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");if(preselect&&cycles.some(c=>c.id===preselect))qs("#importCycle").value=preselect;qs("#importSource").innerHTML=(state.config?.sourceTypes||[]).map((s)=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");qs("#importFile").value="";qs("#importSheet").innerHTML=`<option value="">Automática · primera hoja</option>`;qs("#importAnalysis").innerHTML="";qs("#importLog").textContent="Seleccione fuente y archivo; luego pulse Analizar archivo.";qs("#saveImportButton").disabled=true;state.analyzedImport=null;openModal("importModal");refreshIcons();}catch(e){showToast("No fue posible preparar la importación",e.message,"error");}
 }
-qs("#analyzeImportButton").addEventListener("click",async()=>{const file=qs("#importFile").files[0];try{setSyncState("loading","Analizando");qs("#importLog").textContent="Leyendo el archivo y calculando SHA-256…";const a=await analyzeExcel(file,qs("#importCycle").value,qs("#importSource").value);state.analyzedImport=a;qs("#importAnalysis").innerHTML=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">${kpiCard("Archivo",escapeHtml(a.file.name),"file-spreadsheet")}${kpiCard("Filas",formatNumber(a.rows.length),"rows-3")}${kpiCard("Chunks",formatNumber(a.chunks.length),"layers-3")}${kpiCard("SHA-256",`${a.hash.slice(0,8)}…${a.hash.slice(-8)}`,"fingerprint")}</div><div class="table-shell file-preview"><table><thead><tr>${a.headerMap.slice(0,10).map((h)=>`<th>${escapeHtml(h.source)}</th>`).join("")}</tr></thead><tbody>${a.rows.slice(0,6).map((r)=>`<tr>${a.headerMap.slice(0,10).map((h)=>`<td>${escapeHtml(r[h.key]??"")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;qs("#importLog").textContent=`ANÁLISIS OK\nHoja: ${a.sheetName}\nFilas: ${a.rows.length}\nChunks: ${a.chunks.length}\nSHA-256: ${a.hash}`;qs("#saveImportButton").disabled=false;refreshIcons();}catch(error){state.analyzedImport=null;qs("#saveImportButton").disabled=true;qs("#importLog").textContent=`ERROR\n${error.message}`;showToast("Error de análisis",error.message,"error");}finally{setSyncState("online");}});
+qs("#importFile").addEventListener("change",async()=>{const file=qs("#importFile").files[0];qs("#importSheet").innerHTML=`<option value="">Automática · primera hoja</option>`;if(!file)return;try{const names=await workbookSheetNames(file);qs("#importSheet").innerHTML=names.map((name,index)=>`<option value="${escapeHtml(name)}">${index===0?"Primera · ":""}${escapeHtml(name)}</option>`).join("");}catch(error){console.warn("No fue posible inspeccionar hojas",error);}});
+qs("#analyzeImportButton").addEventListener("click",async()=>{const file=qs("#importFile").files[0];try{setSyncState("loading","Analizando");qs("#importLog").textContent="Leyendo el archivo y calculando SHA-256…";const a=await analyzeExcel(file,qs("#importCycle").value,qs("#importSource").value,qs("#importSheet").value);state.analyzedImport=a;qs("#importAnalysis").innerHTML=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">${kpiCard("Archivo",escapeHtml(a.file.name),"file-spreadsheet")}${kpiCard("Filas",formatNumber(a.rows.length),"rows-3")}${kpiCard("Chunks",formatNumber(a.chunks.length),"layers-3")}${kpiCard("SHA-256",`${a.hash.slice(0,8)}…${a.hash.slice(-8)}`,"fingerprint")}</div><div class="table-shell file-preview"><table><thead><tr>${a.headerMap.slice(0,10).map((h)=>`<th>${escapeHtml(h.source)}</th>`).join("")}</tr></thead><tbody>${a.rows.slice(0,6).map((r)=>`<tr>${a.headerMap.slice(0,10).map((h)=>`<td>${escapeHtml(r[h.key]??"")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;qs("#importLog").textContent=`ANÁLISIS OK\nHoja: ${a.sheetName}\nFilas: ${a.rows.length}\nChunks: ${a.chunks.length}\nSHA-256: ${a.hash}`;qs("#saveImportButton").disabled=false;refreshIcons();}catch(error){state.analyzedImport=null;qs("#saveImportButton").disabled=true;qs("#importLog").textContent=`ERROR\n${error.message}`;showToast("Error de análisis",error.message,"error");}finally{setSyncState("online");}});
 qs("#saveImportButton").addEventListener("click",async()=>{if(!state.analyzedImport)return;try{setSyncState("loading","Guardando");qs("#saveImportButton").disabled=true;qs("#importLog").textContent="Guardando ImportJob y chunks en Firestore…";const result=await saveAnalyzedImport(state.analyzedImport);qs("#importLog").textContent=`IMPORTACIÓN COMPLETADA\nJob: ${result.jobId}\nFuentes faltantes: ${result.validation.missingSources.length?result.validation.missingSources.join(", "):"Ninguna"}`;showToast("Importación completada",`${state.analyzedImport.sourceType}: ${formatNumber(state.analyzedImport.rows.length)} filas.`,"success");state.analyzedImport=null;if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){qs("#importLog").textContent=`ERROR DE IMPORTACIÓN\n${error.code||""}\n${error.message}`;showToast("No fue posible importar",error.message,"error",7000);qs("#saveImportButton").disabled=false;}finally{setSyncState("online");}});
+
+
+qs("#editorCycle").addEventListener("change",()=>loadEditorWorkspace().catch((e)=>showToast("Editor",e.message,"error")));
+qs("#editorSource").addEventListener("change",()=>loadEditorWorkspace().catch((e)=>showToast("Editor",e.message,"error")));
+qs("#editorSearch").addEventListener("input",debounce((e)=>{if(!state.editor)return;state.editor.search=e.target.value;state.editor.page=1;renderEditorGrid();},180));
+qs("#editorPageSize").addEventListener("change",(e)=>{if(!state.editor)return;state.editor.pageSize=Number(e.target.value);state.editor.page=1;renderEditorGrid();});
+qs("#editorShowDeleted").addEventListener("change",()=>{if(!state.editor)return;state.editor.page=1;renderEditorGrid();});
+qs("#editorAddRow").addEventListener("click",addEditorRow);
+qs("#editorAddColumn").addEventListener("click",addEditorColumn);
+qs("#editorPrev").addEventListener("click",()=>{if(!state.editor)return;state.editor.page=Math.max(1,state.editor.page-1);renderEditorGrid();});
+qs("#editorNext").addEventListener("click",()=>{if(!state.editor)return;state.editor.page+=1;renderEditorGrid();});
+qs("#editorDiscard").addEventListener("click",()=>loadEditorWorkspace().catch((e)=>showToast("Editor",e.message,"error")));
+qs("#editorSave").addEventListener("click",saveEditorWorkspace);
+qs("#editorBulkImport").addEventListener("click",async()=>{if(!state.editor)return;const cycle=state.editor.cycleId,source=state.editor.sourceType;closeModal("dataEditorModal");await openImportModal(cycle);qs("#importSource").value=source;});
+qs("#editorGridHost").addEventListener("input",(e)=>{const input=e.target.closest("[data-editor-cell]");if(!input||!state.editor)return;const tr=input.closest("[data-editor-index]"),index=Number(tr?.dataset.editorIndex),row=state.editor.rows[index];if(!row)return;const key=input.dataset.editorCell;row[key]=parseEditorValue(input.value,row[key]);row._dirty=true;tr.classList.add("row-dirty");qs("#editorDirtyCount").textContent=`${formatNumber(editorDirtyCount())} cambios`;});
+qs("#editorGridHost").addEventListener("click",(e)=>{const button=e.target.closest("[data-editor-delete]");if(!button||!state.editor)return;const index=Number(button.dataset.editorDelete),row=state.editor.rows[index];if(!row)return;row._deleted=!row._deleted;row._dirty=true;renderEditorGrid();});
 
 async function runReport(type){
   if(!state.cycle){showToast("Sin corte publicado","No existe información oficial para exportar.","warning");return;}const p=await ensurePortfolio();if(!p||p.unrecognized){showToast("Sin información","No se encontró una fuente principal exportable.","warning");return;}if(type==="detail-excel")exportPortfolioExcel(filteredPortfolioRows(),state.cycle.id);if(type==="executive-excel")exportExecutiveExcel(state.summary,state.aging,state.cycle.id);if(type==="executive-pdf")printExecutiveReport({cycle:state.cycle,summary:state.summary,aging:state.aging,profile:state.profile});
