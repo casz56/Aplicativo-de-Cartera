@@ -192,7 +192,7 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if admin() && resource.data.status == 'draft';
+      allow delete: if publisher() && resource.data.status == 'draft';
     }
 
     // -----------------------------------------------------------------------
@@ -213,7 +213,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
-      allow delete: if false;
+      allow delete: if publisher() && draftCycle(resource.data.cycleId);
     }
 
     match /CarteraChunks/{chunkId} {
@@ -235,7 +235,7 @@ service cloud.firestore {
       // Correcciones se hacen creando un nuevo ImportJob. El chunk anterior
       // puede eliminarse solo mientras el corte siga en borrador.
       allow update: if false;
-      allow delete: if portfolioManager() && draftCycle(resource.data.cycleId);
+      allow delete: if publisher() && draftCycle(resource.data.cycleId);
     }
 
     match /CarteraAggregates/{cycleId} {
@@ -245,7 +245,7 @@ service cloud.firestore {
         && request.resource.data.cycleId == cycleId
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
-      allow delete: if portfolioManager() && draftCycle(cycleId);
+      allow delete: if publisher() && draftCycle(cycleId);
     }
 
     match /CarteraValidations/{cycleId} {
@@ -256,7 +256,7 @@ service cloud.firestore {
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time
         && request.resource.data.readyToPublish is bool;
-      allow delete: if portfolioManager() && draftCycle(cycleId);
+      allow delete: if publisher() && draftCycle(cycleId);
     }
 
 
@@ -292,7 +292,7 @@ service cloud.firestore {
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
 
-      allow delete: if false;
+      allow delete: if publisher() && draftCycle(resource.data.cycleId);
     }
 
     match /CarteraManualRows/{rowId} {
@@ -326,7 +326,7 @@ service cloud.firestore {
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
 
-      allow delete: if false;
+      allow delete: if publisher() && draftCycle(resource.data.cycleId);
     }
 
     // -----------------------------------------------------------------------
@@ -341,7 +341,8 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && request.resource.data.reason is string
         && request.resource.data.reason.size() >= 10;
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if publisher() && draftCycle(resource.data.cycleId);
     }
 
     // -----------------------------------------------------------------------

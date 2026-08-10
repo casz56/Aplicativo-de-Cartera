@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="cartera-build" content="3.4.0-editor-operativo">
+  <meta name="cartera-build" content="3.4.1-delete-drafts">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#004651">
   <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
@@ -291,7 +291,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 }
 
 
-/* v3.4.0 · Editor operativo */
+/* v3.4.1 · Editor operativo */
 .editor-shell{display:flex;flex-direction:column;gap:12px}
 .editor-toolbar{display:grid;grid-template-columns:minmax(160px,.75fr) minmax(180px,.9fr) minmax(240px,1.4fr) auto;gap:10px;align-items:end}
 .editor-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -327,6 +327,20 @@ body.sidebar-collapsed .logout-btn{display:none}
 .editor-empty{padding:32px;text-align:center;color:var(--text-2)}
 @media(max-width:1100px){.editor-toolbar{grid-template-columns:1fr 1fr}.data-operational-card .card-body{grid-template-columns:1fr}}
 @media(max-width:720px){.editor-toolbar{grid-template-columns:1fr}.editor-column-add{width:100%}.editor-column-add .input{width:100%}.editor-footer{align-items:stretch}.editor-pagination{justify-content:space-between;width:100%}}
+
+
+/* v3.4.1 · Eliminación segura de cortes de trabajo */
+.draft-delete-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.draft-delete-summary .metric{border:1px solid var(--border);border-radius:10px;padding:11px;background:var(--surface-soft)}
+.draft-delete-summary .metric small{display:block;color:var(--text-2);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.draft-delete-summary .metric strong{display:block;color:var(--text);font-size:13px}
+.delete-confirm-box{border:1px solid #efc8c4;background:#fff7f6;border-radius:11px;padding:12px 13px;color:#71302b;font-size:10.5px;line-height:1.5}
+.delete-confirm-box strong{color:#5c201c}
+.btn-danger-soft{background:#fff7f6;color:#a33127;border:1px solid #efc8c4}
+.btn-danger-soft:hover{background:#fff0ee;border-color:#e9b4ae}
+.history-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.protected-lock{display:inline-flex;align-items:center;gap:5px;color:var(--text-3);font-size:9.5px;white-space:nowrap}
+@media(max-width:720px){.draft-delete-summary{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -564,6 +578,38 @@ body.sidebar-collapsed .logout-btn{display:none}
         <div class="data-log" id="editorLog">Los cambios se guardan por filas para reducir escrituras en Firebase Spark.</div>
       </div></div>
       <footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="dataEditorModal">Cerrar</button></footer>
+    </section>
+  </div>
+
+
+  <div class="modal-backdrop" id="deleteCycleModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteCycleTitle" style="width:min(620px,calc(100vw - 28px))">
+      <header class="modal-header">
+        <div>
+          <h2 id="deleteCycleTitle">Eliminar corte de trabajo</h2>
+          <p>Esta acción está disponible únicamente para borradores y elimina sus datos operativos asociados.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-modal="deleteCycleModal"><i data-lucide="x" size="18"></i></button>
+      </header>
+      <div class="modal-body">
+        <div class="delete-confirm-box">
+          <strong>Acción irreversible.</strong> El corte desaparecerá del historial de trabajo junto con importaciones, chunks, ajustes, filas manuales, agregados y validaciones. El registro de auditoría de la eliminación se conserva.
+        </div>
+        <div class="draft-delete-summary">
+          <div class="metric"><small>Corte</small><strong id="deleteCycleDate">—</strong></div>
+          <div class="metric"><small>Etiqueta</small><strong id="deleteCycleLabel">—</strong></div>
+          <div class="metric"><small>Fuentes</small><strong id="deleteCycleSources">—</strong></div>
+        </div>
+        <div class="field">
+          <label for="deleteCycleConfirmation">Escriba <strong>ELIMINAR</strong> para confirmar</label>
+          <input class="input" id="deleteCycleConfirmation" autocomplete="off" placeholder="ELIMINAR">
+        </div>
+        <div class="data-log" id="deleteCycleLog">El corte publicado oficial nunca se elimina desde esta herramienta.</div>
+      </div>
+      <footer class="modal-footer">
+        <button class="btn btn-outline" type="button" data-close-modal="deleteCycleModal">Cancelar</button>
+        <button class="btn btn-danger-soft" id="confirmDeleteCycleButton" type="button" disabled><i data-lucide="trash-2" size="16"></i>Eliminar corte definitivamente</button>
+      </footer>
     </section>
   </div>
 
@@ -998,6 +1044,78 @@ async function markSourcePresent(cycleId, sourceType) {
   });
   invalidateCache("cycles");
 }
+
+async function deleteQueryInBatches(collectionName, cycleId, pageLimit = 200) {
+  let deleted = 0;
+  while (true) {
+    const snap = await getDocs(query(
+      collection(db, collectionName),
+      where("cycleId", "==", cycleId),
+      limit(pageLimit)
+    ));
+    if (snap.empty) break;
+    const ops = snap.docs.map((item) => (batch) => batch.delete(item.ref));
+    await writeChunks(ops);
+    deleted += snap.size;
+    if (snap.size < pageLimit) break;
+  }
+  return deleted;
+}
+
+async function purgeDraftCycle(cycleId) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sesión no disponible.");
+  const cycle = await getCycle(cycleId);
+  if (!cycle) throw new Error("El corte ya no existe.");
+  if (cycle.status !== "draft") throw new Error("Solo se pueden eliminar cortes en borrador.");
+  if (!hasRole(state.profile, PUBLISHER_ROLES)) throw new Error("Solo Administrador o Jefe de Cartera puede eliminar un corte completo.");
+
+  // IMPORTANTE: el corte se elimina al final. Las Security Rules de los
+  // documentos dependientes verifican que el corte todavía sea draft.
+  const counts = {
+    chunks:0, jobs:0, rowEdits:0, manualRows:0, overrides:0,
+    aggregates:0, validations:0
+  };
+
+  counts.chunks = await deleteQueryInBatches("CarteraChunks", cycleId, 200);
+  counts.rowEdits = await deleteQueryInBatches("CarteraRowEdits", cycleId, 200);
+  counts.manualRows = await deleteQueryInBatches("CarteraManualRows", cycleId, 200);
+  counts.overrides = await deleteQueryInBatches("Anexo1Overrides", cycleId, 200);
+  counts.jobs = await deleteQueryInBatches("ImportJobs", cycleId, 200);
+
+  const directOps = [];
+  const aggregateRef = doc(db, "CarteraAggregates", cycleId);
+  const validationRef = doc(db, "CarteraValidations", cycleId);
+  const [aggregateSnap, validationSnap] = await Promise.all([
+    getDoc(aggregateRef), getDoc(validationRef)
+  ]);
+  if (aggregateSnap.exists()) {
+    directOps.push((batch) => batch.delete(aggregateRef));
+    counts.aggregates = 1;
+  }
+  if (validationSnap.exists()) {
+    directOps.push((batch) => batch.delete(validationRef));
+    counts.validations = 1;
+  }
+  if (directOps.length) await writeChunks(directOps);
+
+  // Auditoría persistente antes de borrar el documento padre.
+  await audit("DRAFT_CYCLE_DELETED", "CarteraCycle", cycleId, {
+    cycleId,
+    cutoffDate:cycle.cutoffDate || null,
+    label:cycle.label || null,
+    importedSources:Array.isArray(cycle.importedSources) ? cycle.importedSources : [],
+    deletedCounts:counts
+  });
+
+  const finalBatch = writeBatch(db);
+  finalBatch.delete(doc(db, "CarteraCycles", cycleId));
+  await finalBatch.commit();
+
+  invalidateCache();
+  return counts;
+}
+
 async function saveOperationalRows({ cycleId, sourceType, rows }) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sesión no disponible.");
@@ -1426,6 +1544,72 @@ async function recalculateValidation(cycleId) {
 }
 
 
+
+// ===== delete-draft-cycle.js =====
+let pendingDeleteCycleId = null;
+
+async function openDeleteCycleModal(cycleId) {
+  if (!hasRole(state.profile, PUBLISHER_ROLES)) {
+    showToast("Sin permisos","Solo Administrador o Jefe de Cartera puede eliminar cortes completos.","error");
+    return;
+  }
+  const cycle = await getCycle(cycleId);
+  if (!cycle) {
+    showToast("Corte no encontrado","El corte ya no existe o fue eliminado.","warning");
+    return;
+  }
+  if (cycle.status !== "draft") {
+    showToast("Corte protegido","Los cortes publicados no se pueden eliminar.","warning",5500);
+    return;
+  }
+
+  pendingDeleteCycleId = cycleId;
+  qs("#deleteCycleDate").textContent = formatDate(cycle.cutoffDate);
+  qs("#deleteCycleLabel").textContent = cycle.label || cycle.id;
+  qs("#deleteCycleSources").textContent = `${(cycle.importedSources || []).length} fuente(s)`;
+  qs("#deleteCycleConfirmation").value = "";
+  qs("#confirmDeleteCycleButton").disabled = true;
+  qs("#deleteCycleLog").textContent = "Se eliminarán únicamente datos asociados a este borrador. AuditLogs se conserva.";
+  openModal("deleteCycleModal");
+  qs("#deleteCycleConfirmation").focus();
+}
+
+qs("#deleteCycleConfirmation").addEventListener("input",(e)=>{
+  qs("#confirmDeleteCycleButton").disabled = e.target.value.trim().toUpperCase() !== "ELIMINAR";
+});
+
+qs("#confirmDeleteCycleButton").addEventListener("click", async()=>{
+  if (!pendingDeleteCycleId) return;
+  const confirmation = qs("#deleteCycleConfirmation").value.trim().toUpperCase();
+  if (confirmation !== "ELIMINAR") return;
+  const button = qs("#confirmDeleteCycleButton");
+  try {
+    button.disabled = true;
+    setSyncState("loading","Eliminando corte");
+    qs("#deleteCycleLog").textContent = "Eliminando dependencias del borrador de forma segura…";
+    const cycleId = pendingDeleteCycleId;
+    const counts = await purgeDraftCycle(cycleId);
+    pendingDeleteCycleId = null;
+    closeModal("deleteCycleModal");
+    state.editor = null;
+    showToast(
+      "Corte eliminado",
+      `Se eliminó el borrador y ${counts.jobs + counts.chunks + counts.rowEdits + counts.manualRows + counts.overrides + counts.aggregates + counts.validations} registro(s) dependientes.`,
+      "success",
+      6000
+    );
+    await renderData();
+  } catch (error) {
+    console.error("Delete draft cycle", error);
+    qs("#deleteCycleLog").textContent = `ERROR\n${error.code || ""}\n${error.message}`;
+    showToast("No fue posible eliminar el corte",error.message,"error",7500);
+  } finally {
+    button.disabled = qs("#deleteCycleConfirmation").value.trim().toUpperCase() !== "ELIMINAR";
+    setSyncState("online");
+  }
+});
+
+
 // ===== operational-editor.js =====
 const SOURCE_TEMPLATES = Object.freeze({
   ACRESC_P1:["cliente","identificacion","obligacion","linea","saldo","saldo_vencido","dias_mora","calificacion","provision","fecha_vencimiento","municipio"],
@@ -1699,10 +1883,12 @@ async function renderData(){
   const sourceTypes=state.config?.sourceTypes||[]; const imported=activeDraft?.importedSources||[];
   state.importJobs=activeDraft?await getImportJobs(activeDraft.id):[];
   const operationalCard=`<article class="card data-operational-card" style="margin-bottom:14px"><div class="card-body"><div><h2 class="card-title">Editor operativo</h2><p class="card-subtitle">Diligencie, tabule, corrija o elimine registros directamente en el corte de trabajo. Los cambios quedan auditados.</p><div class="feature-points"><span class="badge badge-info">Edición por filas</span><span class="badge badge-info">Borrado trazable</span><span class="badge badge-info">Carga masiva</span><span class="badge badge-info">XLSX · XLS · CSV · ODS · TXT</span></div></div><button class="btn btn-primary" type="button" data-action="open-editor"><i data-lucide="table-properties" size="17"></i>Abrir editor</button></div></article>`;
-  root.innerHTML=operationalCard+`${activeDraft?`<article class="card" style="margin-bottom:16px"><div class="card-header"><div><h2 class="card-title">Corte en trabajo · ${formatDate(activeDraft.cutoffDate)}</h2><p class="card-subtitle">${escapeHtml(activeDraft.label||activeDraft.id)}</p></div><span class="badge badge-warning">Borrador</span></div><div class="card-body"><div class="source-grid">${sourceTypes.map((s)=>`<div class="source-chip ${imported.includes(s)?"done":""}"><strong>${escapeHtml(s)}</strong><span>${imported.includes(s)?"Cargada":"Pendiente"}</span></div>`).join("")}</div><div class="view-tools" style="margin-top:16px"><button class="btn btn-outline btn-sm" data-validate-cycle="${escapeHtml(activeDraft.id)}">Validar corte</button>${hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-primary btn-sm" data-publish-cycle="${escapeHtml(activeDraft.id)}">Publicar corte</button>`:""}</div></div></article>`:empty("Sin cortes en borrador","Puede crear un nuevo corte para iniciar la carga de fuentes.",`<button class="btn btn-primary btn-sm" data-action="new-cycle">Nuevo corte</button>`)}
-  <div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Historial de cortes</h2><p class="card-subtitle">Borradores y cortes publicados.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Corte</th><th>Estado</th><th>Fuentes</th><th>Creado</th></tr></thead><tbody>${state.cycles.length?state.cycles.map((c)=>`<tr><td><strong>${formatDate(c.cutoffDate)}</strong><br><span class="muted">${escapeHtml(c.label||c.id)}</span></td><td><span class="badge ${c.status==="published"?"badge-success":"badge-warning"}">${c.status==="published"?"Publicado":"Borrador"}</span></td><td>${(c.importedSources||[]).length} / ${sourceTypes.length}</td><td>${formatDateTime(c.createdAt)}</td></tr>`).join(""):`<tr><td colspan="4">Sin cortes.</td></tr>`}</tbody></table></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Importaciones del borrador</h2><p class="card-subtitle">Archivo, fuente y huella SHA-256.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Fuente</th><th>Archivo</th><th>Filas</th><th>SHA-256</th></tr></thead><tbody>${state.importJobs.length?state.importJobs.map((j)=>`<tr><td><strong>${escapeHtml(j.sourceType)}</strong></td><td>${escapeHtml(j.fileName)}</td><td>${formatNumber(j.rowCount)}</td><td class="mono" title="${escapeHtml(j.sha256)}">${escapeHtml(String(j.sha256||"").slice(0,10))}…</td></tr>`).join(""):`<tr><td colspan="4">Sin importaciones.</td></tr>`}</tbody></table></div></div></article></div>`;
+  root.innerHTML=operationalCard+`${activeDraft?`<article class="card" style="margin-bottom:16px"><div class="card-header"><div><h2 class="card-title">Corte en trabajo · ${formatDate(activeDraft.cutoffDate)}</h2><p class="card-subtitle">${escapeHtml(activeDraft.label||activeDraft.id)}</p></div><span class="badge badge-warning">Borrador</span></div><div class="card-body"><div class="source-grid">${sourceTypes.map((s)=>`<div class="source-chip ${imported.includes(s)?"done":""}"><strong>${escapeHtml(s)}</strong><span>${imported.includes(s)?"Cargada":"Pendiente"}</span></div>`).join("")}</div><div class="view-tools" style="margin-top:16px"><button class="btn btn-outline btn-sm" data-validate-cycle="${escapeHtml(activeDraft.id)}">Validar corte</button>${hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-primary btn-sm" data-publish-cycle="${escapeHtml(activeDraft.id)}">Publicar corte</button><button class="btn btn-danger-soft btn-sm" data-delete-cycle="${escapeHtml(activeDraft.id)}"><i data-lucide="trash-2" size="14"></i>Eliminar borrador</button>`:""}</div></div></article>`:empty("Sin cortes en borrador","Puede crear un nuevo corte para iniciar la carga de fuentes.",`<button class="btn btn-primary btn-sm" data-action="new-cycle">Nuevo corte</button>`)}
+  <div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Historial de cortes</h2><p class="card-subtitle">Borradores y cortes publicados.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Corte</th><th>Estado</th><th>Fuentes</th><th>Creado</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${state.cycles.length?state.cycles.map((c)=>`<tr><td><strong>${formatDate(c.cutoffDate)}</strong><br><span class="muted">${escapeHtml(c.label||c.id)}</span></td><td><span class="badge ${c.status==="published"?"badge-success":"badge-warning"}">${c.status==="published"?"Publicado":"Borrador"}</span></td><td>${(c.importedSources||[]).length} / ${sourceTypes.length}</td><td>${formatDateTime(c.createdAt)}</td><td><div class="history-actions">${c.status==="draft"&&hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-danger-soft btn-sm" data-delete-cycle="${escapeHtml(c.id)}"><i data-lucide="trash-2" size="13"></i>Eliminar</button>`:`<span class="protected-lock"><i data-lucide="lock-keyhole" size="12"></i>${c.status==="published"?"Protegido":"Sin acción"}</span>`}</div></td></tr>`).join(""):`<tr><td colspan="5">Sin cortes.</td></tr>`}</tbody></table></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Importaciones del borrador</h2><p class="card-subtitle">Archivo, fuente y huella SHA-256.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Fuente</th><th>Archivo</th><th>Filas</th><th>SHA-256</th></tr></thead><tbody>${state.importJobs.length?state.importJobs.map((j)=>`<tr><td><strong>${escapeHtml(j.sourceType)}</strong></td><td>${escapeHtml(j.fileName)}</td><td>${formatNumber(j.rowCount)}</td><td class="mono" title="${escapeHtml(j.sha256)}">${escapeHtml(String(j.sha256||"").slice(0,10))}…</td></tr>`).join(""):`<tr><td colspan="4">Sin importaciones.</td></tr>`}</tbody></table></div></div></article></div>`;
   qsa("[data-validate-cycle]",root).forEach((b)=>b.addEventListener("click",()=>validateCycleAction(b.dataset.validateCycle)));
-  qsa("[data-publish-cycle]",root).forEach((b)=>b.addEventListener("click",()=>publishCycleAction(b.dataset.publishCycle))); refreshIcons();
+  qsa("[data-publish-cycle]",root).forEach((b)=>b.addEventListener("click",()=>publishCycleAction(b.dataset.publishCycle)));
+  qsa("[data-delete-cycle]",root).forEach((b)=>b.addEventListener("click",()=>openDeleteCycleModal(b.dataset.deleteCycle)));
+  refreshIcons();
 }
 
 async function validateCycleAction(cycleId){
