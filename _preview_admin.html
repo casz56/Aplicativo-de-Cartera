@@ -6,48 +6,23 @@
   <meta name="theme-color" content="#004651">
   <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
   <title>Cartera INFIHUILA · Workspace</title>
-  <link rel="stylesheet" href="./assets/css/tokens.css?v=3.3.3">
-  <link rel="stylesheet" href="./assets/css/global.css?v=3.3.3">
-  <link rel="stylesheet" href="./assets/css/admin.css?v=3.3.3">
-  <link rel="stylesheet" href="./assets/css/responsive.css?v=3.3.3">
-  <link rel="stylesheet" href="./assets/css/print.css?v=3.3.3" media="print">
-  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
+  <link rel="stylesheet" href="./assets/css/tokens.css?v=3.3.2">
+  <link rel="stylesheet" href="./assets/css/global.css?v=3.3.2">
+  <link rel="stylesheet" href="./assets/css/admin.css?v=3.3.2">
+  <link rel="stylesheet" href="./assets/css/responsive.css?v=3.3.2">
+  <link rel="stylesheet" href="./assets/css/print.css?v=3.3.2" media="print">
+  
+  
 </head>
 <body class="app-body">
-  <script>
-  (function(){
-    const PAGE_KIND = 'admin';
-    window.__carteraBootReady = false;
-    window.__carteraBootTimer = setTimeout(function(){
-      if (window.__carteraBootReady) return;
-      const gate = document.getElementById(PAGE_KIND === 'login' ? 'loginLoader' : 'authGate');
-      if (gate) gate.hidden = true;
-      const box = document.createElement('div');
-      box.id = 'bootFailure';
-      box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f4f7f7;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;color:#173238';
-      const isFile = location.protocol === 'file:';
-      box.innerHTML = `<div style="width:min(720px,100%);background:white;border:1px solid #d8e3e4;border-radius:18px;padding:28px;box-shadow:0 18px 50px rgba(0,70,75,.12)">
-        <div style="font-size:13px;font-weight:800;color:#006c72;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Cartera INFIHUILA · Diagnóstico de arranque</div>
-        <h2 style="margin:0 0 10px">${isFile ? 'Abra el aplicativo con Live Server' : 'El aplicativo no terminó de iniciar'}</h2>
-        <p style="line-height:1.55;color:#5d7074;margin:0 0 18px">${isFile ? 'Esta página fue abierta como archivo local (file://). Firebase y los módulos JavaScript del aplicativo requieren un origen HTTP. En Visual Studio Code abra Frontend/index.html y seleccione Open with Live Server.' : 'Revise la consola del navegador (F12 → Console). Puede tratarse de un recurso bloqueado, falta de Internet o configuración de Firebase.'}</p>
-        <div style="background:#eef8f8;border:1px solid #c8e3e5;border-radius:10px;padding:12px 14px;font-family:Consolas,monospace;font-size:13px;word-break:break-all">URL actual: ${location.href}</div>
-        ${isFile ? '<p style="margin:16px 0 0;font-weight:700">Ruta esperada: http://127.0.0.1:5500/Frontend/index.html (el puerto puede variar).</p>' : ''}
-      </div>`;
-      document.body.appendChild(box);
-    }, 9000);
-    if (location.protocol === 'file:') {
-      setTimeout(function(){ if (!window.__carteraBootReady) window.dispatchEvent(new Event('cartera:file-protocol')); }, 50);
-    }
-  })();
-  </script>
+  
 
-  <div class="auth-gate" id="authGate">
+  <div class="auth-gate" id="authGate" hidden>
     <div class="auth-gate-card card"><img src="./assets/img/logo-infihuila-transparent.png" alt="INFIHUILA"><div class="spinner"></div><strong>Protegiendo el workspace…</strong><p>Validando identidad, perfil y permisos.</p></div>
   </div>
 
   <div class="mobile-overlay" id="mobileOverlay"></div>
-  <div class="app-shell" id="appShell" hidden>
+  <div class="app-shell" id="appShell">
     <aside class="sidebar" id="sidebar">
       <header class="sidebar-brand">
         <img class="sidebar-logo" src="./assets/img/logo-mark.png" alt="INFIHUILA">
@@ -56,7 +31,7 @@
       <nav class="sidebar-scroll" aria-label="Navegación principal">
         <section class="nav-group">
           <div class="nav-group-title">Inicio</div>
-          <button class="nav-link active" data-view="day"><span class="nav-icon"><i data-lucide="house" size="18"></i></span><span class="nav-label">Mi cartera</span></button>
+          <button class="nav-link" data-view="day"><span class="nav-icon"><i data-lucide="house" size="18"></i></span><span class="nav-label">Mi cartera</span></button>
           <button class="nav-link" data-view="summary"><span class="nav-icon"><i data-lucide="layout-dashboard" size="18"></i></span><span class="nav-label">Resumen ejecutivo</span></button>
         </section>
         <section class="nav-group">
@@ -72,7 +47,7 @@
         </section>
         <section class="nav-group" data-manager-only>
           <div class="nav-group-title">Gestión de datos</div>
-          <button class="nav-link" data-view="data"><span class="nav-icon"><i data-lucide="database-zap" size="18"></i></span><span class="nav-label">Cortes e importaciones</span></button>
+          <button class="nav-link active" data-view="data"><span class="nav-icon"><i data-lucide="database-zap" size="18"></i></span><span class="nav-label">Cortes e importaciones</span></button>
         </section>
         <section class="nav-group">
           <div class="nav-group-title">Reportes</div>
@@ -115,16 +90,16 @@
       </header>
 
       <nav class="subnav" aria-label="Vistas rápidas">
-        <button class="tab-btn active" data-view="day"><i data-lucide="house" size="16"></i>Mi cartera</button>
+        <button class="tab-btn" data-view="day"><i data-lucide="house" size="16"></i>Mi cartera</button>
         <button class="tab-btn" data-view="summary"><i data-lucide="layout-dashboard" size="16"></i>Resumen</button>
         <button class="tab-btn" data-view="portfolio"><i data-lucide="rows-3" size="16"></i>Cartera</button>
         <button class="tab-btn" data-view="risk"><i data-lucide="shield-alert" size="16"></i>Riesgo</button>
         <button class="tab-btn" data-view="collections"><i data-lucide="wallet-cards" size="16"></i>Recaudos</button>
-        <button class="tab-btn" data-view="data" data-manager-only><i data-lucide="database-zap" size="16"></i>Datos</button>
+        <button class="tab-btn active" data-view="data" data-manager-only><i data-lucide="database-zap" size="16"></i>Datos</button>
       </nav>
 
       <div class="content">
-        <section class="view active" id="view-day" data-title="Mi cartera" data-crumb="Cartera / Mi cartera">
+        <section class="view" id="view-day" data-title="Mi cartera" data-crumb="Cartera / Mi cartera">
           <header class="view-head"><div><h1>Mi cartera</h1><p>Prioridades del día, estado del corte oficial y alertas de gestión.</p></div><div class="view-tools"><span class="badge badge-info" id="currentCutBadge">Sin corte publicado</span></div></header>
           <div id="dayContent"></div>
         </section>
@@ -159,9 +134,12 @@
           <div id="maturitiesContent"></div>
         </section>
 
-        <section class="view" id="view-data" data-title="Cortes e importaciones" data-crumb="Gestión de datos / Cortes e importaciones" data-manager-only>
+        <section class="view active" id="view-data" data-title="Cortes e importaciones" data-crumb="Gestión de datos / Cortes e importaciones" data-manager-only>
           <header class="view-head"><div><h1>Cortes e importaciones</h1><p>Trazabilidad de cortes, fuentes, hashes SHA-256 y estado de publicación.</p></div><div class="view-tools"><button class="btn btn-primary btn-sm" type="button" data-action="new-cycle"><i data-lucide="calendar-plus" size="15"></i>Nuevo corte</button><button class="btn btn-outline btn-sm" type="button" data-action="import-source"><i data-lucide="file-up" size="15"></i>Cargar fuente</button></div></header>
-          <div id="dataContent"></div>
+          <div id="dataContent">
+<article class="card"><div class="empty-state"><div class="empty-icon"></div><h3>Sin cortes en borrador</h3><p>Puede crear un nuevo corte para iniciar la carga de fuentes.</p><button class="btn btn-primary btn-sm">Nuevo corte</button></div></article>
+<div class="admin-grid" style="margin-top:14px"><article class="card"><div class="card-header"><div><h2 class="card-title">Historial de cortes</h2><p class="card-subtitle">Borradores y cortes publicados.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Corte</th><th>Estado</th><th>Fuentes</th><th>Creado</th></tr></thead><tbody><tr><td colspan="4">Sin cortes.</td></tr></tbody></table></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Importaciones del borrador</h2><p class="card-subtitle">Archivo, fuente y huella SHA-256.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Fuente</th><th>Archivo</th><th>Filas</th><th>SHA-256</th></tr></thead><tbody><tr><td colspan="4">Sin importaciones.</td></tr></tbody></table></div></div></article></div>
+</div>
         </section>
 
         <section class="view" id="view-reports" data-title="Informes" data-crumb="Reportes / Informes">
@@ -217,6 +195,6 @@
   </div>
 
   <div class="toast-region" id="toastRegion"></div>
-  <script type="module" src="./assets/js/admin.js?v=3.3.3"></script>
+  
 </body>
 </html>
