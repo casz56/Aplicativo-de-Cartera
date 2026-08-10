@@ -1,0 +1,1573 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="cartera-build" content="3.3.5-single-file">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#004651">
+  <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
+  <title>Cartera INFIHUILA · Workspace</title>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
+<style id="cartera-embedded-styles">
+:root {
+  --infi-primary: #006c72;
+  --infi-primary-2: #0b7a7f;
+  --infi-primary-soft: #eaf5f5;
+  --infi-dark: #004651;
+  --infi-dark-2: #063b43;
+  --infi-accent: #c9d300;
+  --infi-accent-hover: #b9c300;
+  --infi-accent-soft: #f5f7dc;
+
+  --surface: #ffffff;
+  --surface-soft: #f4f7f7;
+  --surface-muted: #eef3f3;
+  --surface-tint: #edf6f6;
+  --surface-raised: #fbfcfc;
+
+  --text: #12343a;
+  --text-2: #60757a;
+  --text-3: #88989c;
+  --border: #dde7e8;
+  --border-strong: #cad8da;
+
+  --success: #23764d;
+  --success-soft: #edf7f1;
+  --warning: #8b6816;
+  --warning-soft: #fff8e8;
+  --danger: #aa3b34;
+  --danger-soft: #fff2f1;
+  --info: #216f7a;
+  --info-soft: #edf7f8;
+
+  --shadow-xs: 0 1px 2px rgba(0, 54, 60, .035);
+  --shadow-sm: 0 5px 16px rgba(0, 54, 60, .055);
+  --shadow-md: 0 14px 36px rgba(0, 54, 60, .085);
+  --shadow-lg: 0 28px 72px rgba(0, 54, 60, .13);
+
+  --radius-xs: 7px;
+  --radius-sm: 9px;
+  --radius-md: 12px;
+  --radius-lg: 15px;
+  --radius-xl: 22px;
+
+  --sidebar-w: 210px;
+  --sidebar-collapsed: 64px;
+  --topbar-h: 76px;
+  --subnav-h: 50px;
+
+  --font-ui: "Tw Cen MT", "Trebuchet MS", "Avenir Next", "Segoe UI", Arial, sans-serif;
+  --font-num: "Segoe UI", Arial, sans-serif;
+  --ease: 180ms cubic-bezier(.2,.7,.2,1);
+}
+
+*{box-sizing:border-box}
+html{font-size:16px;background:var(--surface-soft)}
+body{margin:0;font-family:var(--font-ui);color:var(--text);background:var(--surface-soft);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+::selection{background:rgba(0,108,114,.15);color:var(--text)}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.money,.number{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--text-2)}
+.text-danger{color:var(--danger)}.text-success{color:var(--success)}.text-warning{color:var(--warning)}
+
+.notice{padding:12px 14px;border-radius:10px;background:var(--info-soft);border:1px solid #d3e7e9;color:#46696e;line-height:1.45;font-size:12px}
+.notice.warning{background:var(--warning-soft);border-color:#ecdfb5;color:#775d18}
+.notice.error{background:var(--danger-soft);border-color:#efd4d1;color:#7c312c}
+
+.spinner{width:26px;height:26px;border:2.5px solid #dbe8e9;border-top-color:var(--infi-primary);border-radius:50%;animation:spin .78s linear infinite;margin:0 auto 11px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.btn{height:40px;border:1px solid transparent;border-radius:9px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:13px;letter-spacing:.005em;transition:background var(--ease),border-color var(--ease),box-shadow var(--ease),color var(--ease),transform var(--ease);white-space:nowrap;background:#fff;color:var(--text);box-shadow:none}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:focus-visible,.icon-btn:focus-visible,.nav-link:focus-visible,.tab-btn:focus-visible,.logout-btn:focus-visible{outline:3px solid rgba(201,211,0,.35);outline-offset:2px}
+.btn:disabled{opacity:.48;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--infi-primary);color:#fff;border-color:var(--infi-primary)}
+.btn-primary:hover{background:var(--infi-dark);border-color:var(--infi-dark);box-shadow:0 7px 18px rgba(0,70,81,.12)}
+.btn-accent{background:var(--infi-accent);border-color:var(--infi-accent);color:#1b363b}
+.btn-accent:hover{background:var(--infi-accent-hover);border-color:var(--infi-accent-hover);box-shadow:0 7px 18px rgba(158,168,0,.10)}
+.btn-outline{border-color:var(--border-strong);background:#fff;color:var(--infi-dark)}
+.btn-outline:hover{background:#f8fbfb;border-color:#b9cbcd}
+.btn-ghost{background:transparent;color:var(--infi-dark)}
+.btn-danger{background:var(--danger-soft);color:var(--danger);border-color:#eed0cd}
+.btn-sm{height:35px;padding:0 12px;font-size:11.5px}
+.btn-lg{height:47px;padding:0 20px;font-size:13.5px}
+
+.icon-btn{width:40px;height:40px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--infi-dark);display:inline-grid;place-items:center;transition:background var(--ease),border-color var(--ease),transform var(--ease)}
+.icon-btn:hover{background:var(--surface-muted);border-color:var(--border-strong);transform:translateY(-1px)}
+
+.field{display:flex;flex-direction:column;gap:7px}
+.field label,.field-label{font-size:11.5px;font-weight:800;color:#2d4b51;letter-spacing:.01em}
+.input,.select,.textarea{width:100%;border:1px solid var(--border-strong);border-radius:9px;background:#fff;color:var(--text);padding:0 13px;outline:none;transition:border var(--ease),box-shadow var(--ease),background var(--ease)}
+.input,.select{height:43px}.textarea{padding-top:11px;min-height:108px;resize:vertical}
+.input:hover,.select:hover,.textarea:hover{border-color:#b9cbcd}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--infi-primary);box-shadow:0 0 0 3px rgba(0,108,114,.085);background:#fff}
+.input::placeholder{color:#98a8ab}
+.input-shell{position:relative}.input-shell .input{padding-left:41px}.input-shell .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#84969a;pointer-events:none}
+
+.badge{display:inline-flex;align-items:center;gap:6px;min-height:23px;border-radius:999px;padding:4px 9px;font-size:10.5px;font-weight:800;line-height:1;background:var(--surface-muted);color:#4f676c;white-space:nowrap;border:1px solid transparent}
+.badge-success{background:var(--success-soft);color:var(--success);border-color:#dceee3}
+.badge-warning{background:var(--warning-soft);color:var(--warning);border-color:#f0e5c5}
+.badge-danger{background:var(--danger-soft);color:var(--danger);border-color:#f0d9d6}
+.badge-info{background:var(--info-soft);color:var(--info);border-color:#dcebed}
+.badge-accent{background:var(--infi-accent-soft);color:#666d00;border-color:#e7e9b5}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs)}
+.card-header{padding:16px 18px;border-bottom:1px solid #e7eeee;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:66px}
+.card-title{margin:0;font-size:16px;line-height:1.2;color:#183b42}.card-subtitle{margin:4px 0 0;color:var(--text-2);font-size:11.5px;line-height:1.35}.card-body{padding:18px}
+.empty-state{padding:32px 22px;text-align:center;color:var(--text-2);min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.empty-icon{width:48px;height:48px;border-radius:14px;background:var(--surface-tint);color:var(--infi-primary);display:grid;place-items:center;margin:0 auto 13px;border:1px solid #deecec}
+.empty-state h3{margin:0 0 6px;color:var(--text);font-size:16px;line-height:1.25}.empty-state p{max-width:500px;margin:0 auto 15px;font-size:12.5px;line-height:1.48}
+
+.table-shell{overflow:auto;border:1px solid var(--border);border-radius:11px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:11.5px}
+th,td{padding:10px 11px;border-bottom:1px solid #edf1f1;text-align:left;vertical-align:middle}
+th{background:#f8fafa;color:#5d7176;font-size:9.5px;text-transform:uppercase;letter-spacing:.055em;position:sticky;top:0;z-index:1;white-space:nowrap;font-weight:800}
+tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fbfdfd}td.numeric{text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,45,51,.26);backdrop-filter:blur(5px);z-index:1000;display:grid;place-items:center;padding:22px;animation:overlayIn .16s ease}
+.modal{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:17px;box-shadow:0 28px 80px rgba(0,45,51,.18);border:1px solid rgba(255,255,255,.8);animation:modalIn .18s ease}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.modal-header h2{margin:0;font-size:18px;line-height:1.25}.modal-header p{margin:5px 0 0;font-size:11.5px;color:var(--text-2);line-height:1.4}.modal-body{padding:20px}.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;background:#fbfcfc}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:translateY(5px) scale(.992)}to{opacity:1;transform:none}}
+
+.toast-region{position:fixed;right:18px;bottom:18px;z-index:1500;display:flex;flex-direction:column;gap:9px;width:min(380px,calc(100vw - 36px))}
+.toast{background:#fff;border:1px solid var(--border);border-left:3px solid var(--infi-primary);border-radius:11px;box-shadow:var(--shadow-md);padding:12px 13px;display:flex;align-items:flex-start;gap:10px;animation:toastIn .2s ease}.toast.success{border-left-color:var(--success)}.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}.toast strong{display:block;font-size:12.5px}.toast p{margin:3px 0 0;font-size:11.5px;color:var(--text-2);line-height:1.35}
+@keyframes toastIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+.skeleton{position:relative;overflow:hidden;background:#edf2f2;border-radius:8px;color:transparent!important}.skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);animation:shimmer 1.3s infinite}@keyframes shimmer{100%{transform:translateX(100%)}}
+
+.dropdown{position:relative}.dropdown-menu{position:absolute;right:0;top:calc(100% + 8px);width:218px;background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:var(--shadow-md);padding:7px;z-index:60;animation:dropdownIn .14s ease}.dropdown-item{width:100%;height:37px;border:0;background:transparent;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:9px;color:var(--text);font-weight:800;font-size:11.5px;text-align:left}.dropdown-item:hover{background:var(--surface-muted)}
+@keyframes dropdownIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+.progress{height:6px;background:#e9eeee;border-radius:999px;overflow:hidden}.progress>span{display:block;height:100%;border-radius:inherit;background:var(--infi-primary)}
+
+.app-body{min-height:100vh;overflow-x:hidden;background:var(--surface-soft)}
+.auth-gate{position:fixed;inset:0;background:linear-gradient(145deg,#f5f8f8,#edf3f3);z-index:2000;display:grid;place-items:center;padding:24px}
+.auth-gate-card{width:min(340px,90vw);text-align:center;padding:24px 26px 22px;border-radius:16px;box-shadow:var(--shadow-md)}
+.auth-gate-card img{width:150px;margin:0 auto 16px}
+.auth-gate-card strong{display:block;font-size:16px;line-height:1.25;color:var(--infi-dark);margin-top:2px}
+.auth-gate-card p{color:var(--text-2);font-size:11.5px;line-height:1.45;margin:7px 0 0}
+
+.app-shell{min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:linear-gradient(180deg,#064f58 0%,var(--infi-dark) 58%,#033d46 100%);color:#eaf7f7;z-index:80;display:flex;flex-direction:column;transition:width var(--ease),transform var(--ease);border-right:1px solid rgba(255,255,255,.045)}
+.sidebar-brand{height:76px;padding:14px 16px 14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.075)}
+.sidebar-logo{width:27px;height:40px;object-fit:contain;flex:0 0 auto}
+.sidebar-toggle{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);color:#fff;display:grid;place-items:center;transition:background var(--ease),border-color var(--ease)}
+.sidebar-toggle:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.16)}
+.sidebar-scroll{flex:1;overflow:auto;padding:12px 12px 18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}
+.sidebar-scroll::-webkit-scrollbar{width:6px}.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:999px}
+.nav-group{margin:7px 0 15px}.nav-group-title{padding:0 11px 8px;color:#7fa8ac;font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.nav-link{width:100%;height:40px;border:0;background:transparent;color:#d8e8e9;border-radius:9px;display:flex;align-items:center;gap:11px;padding:0 11px;font-size:11.5px;font-weight:800;text-align:left;transition:background var(--ease),color var(--ease),box-shadow var(--ease)}
+.nav-link:hover{background:rgba(255,255,255,.055);color:#fff}.nav-link.active{background:#fff;color:var(--infi-dark);box-shadow:0 5px 14px rgba(0,26,31,.07)}
+.nav-link .nav-icon{width:18px;display:grid;place-items:center;flex:0 0 18px}.nav-badge{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.11);display:grid;place-items:center;font-size:9.5px}.nav-link.active .nav-badge{background:var(--infi-accent-soft);color:#666d00}.nav-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user{padding:11px 12px 13px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.025)}
+.user-card{display:grid;grid-template-columns:38px minmax(0,1fr) 34px;gap:9px;align-items:center}.avatar{width:38px;height:38px;border-radius:50%;background:#f1f3c5;color:#29474c;display:grid;place-items:center;font-size:11px;font-weight:900}.user-meta{min-width:0}.user-name{font-size:11.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.user-role{font-size:9.5px;color:#a9c8ca;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.logout-btn{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.095);background:rgba(255,255,255,.05);color:#fff;display:grid;place-items:center;transition:background var(--ease)}.logout-btn:hover{background:rgba(255,255,255,.1)}
+
+.main-shell{margin-left:var(--sidebar-w);min-height:100vh;transition:margin-left var(--ease)}
+.topbar{height:var(--topbar-h);background:rgba(255,255,255,.98);border-bottom:1px solid var(--border);display:grid;grid-template-columns:minmax(250px,.82fr) minmax(340px,1.2fr) auto;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;box-shadow:0 1px 0 rgba(0,55,61,.015)}
+.top-left{display:flex;align-items:center;gap:12px;min-width:0}.crumb{font-size:10.5px;color:#849499;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.page-title{font-size:18.5px;line-height:1.2;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#193b42}
+.global-search{position:relative;min-width:0}.global-search .input{height:42px;padding-left:40px;padding-right:40px;background:#fbfcfc;border-color:#d5e0e2;font-size:12.5px}.global-search .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#8fa0a4}.search-key{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:9px;color:#98a5a8;border:1px solid var(--border);border-radius:5px;padding:2px 5px;background:#fff}
+.top-actions{display:flex;align-items:center;gap:8px;min-width:max-content}.year-control{width:126px;min-width:126px;height:40px;font-size:10.5px;font-weight:800;color:#415d63;background:#fff;padding-right:28px}.sync-pill{height:40px;border-radius:9px;padding:0 11px;background:var(--success-soft);color:var(--success);border:1px solid #dceee3;display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;white-space:nowrap}.sync-pill.offline{background:#fff5f4;color:var(--danger);border-color:#f0d8d5}.sync-pill.loading{background:var(--info-soft);color:var(--info);border-color:#dcebed}
+
+.subnav{height:var(--subnav-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px;padding:0 24px;position:sticky;top:var(--topbar-h);z-index:45;overflow-x:auto;scrollbar-width:none}.subnav::-webkit-scrollbar{display:none}.tab-btn{height:36px;border:0;border-radius:8px;background:transparent;color:#60747a;display:inline-flex;align-items:center;gap:7px;padding:0 11px;font-size:10.5px;font-weight:800;white-space:nowrap;transition:background var(--ease),color var(--ease),box-shadow var(--ease)}.tab-btn:hover{background:#f3f7f7;color:var(--infi-dark)}.tab-btn.active{background:#edf6f6;color:var(--infi-primary);box-shadow:inset 0 -2px 0 var(--infi-primary)}
+
+.content{padding:24px 24px 64px;max-width:1640px;margin:0 auto}.view{display:none}.view.active{display:block}.view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:17px}.view-head h1{font-size:25px;line-height:1.1;margin:0 0 5px;letter-spacing:-.02em;color:var(--infi-dark)}.view-head p{font-size:12px;line-height:1.45;color:var(--text-2);margin:0}.view-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:15px}.kpi-card{padding:16px 16px 14px;min-height:118px}.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:11px}.kpi-icon{width:36px;height:36px;border-radius:11px;background:#edf6f6;color:var(--infi-primary);display:grid;place-items:center;border:1px solid #dfeded}.kpi-label{font-size:10.5px;color:#65797e;font-weight:800;margin-bottom:6px}.kpi-value{font-family:var(--font-num);font-size:22px;font-weight:800;letter-spacing:-.02em;color:#173a41;white-space:nowrap}.kpi-foot{margin-top:11px;font-size:9.5px;color:#849398;display:flex;align-items:center;justify-content:space-between;gap:8px}.kpi-card.critical{border-color:#eed7d4}.kpi-card.critical .kpi-icon{background:var(--danger-soft);color:var(--danger);border-color:#f0dcda}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(310px,.72fr);gap:14px}.stack{display:flex;flex-direction:column;gap:14px}.chart-box{min-height:270px}.chart-area{padding:18px}.bar-list{display:flex;flex-direction:column;gap:12px}.bar-row{display:grid;grid-template-columns:115px 1fr 100px;gap:11px;align-items:center;font-size:10.5px}.bar-label{font-weight:800;overflow:hidden;text-overflow:ellipsis}.bar-track{height:8px;background:#edf1f1;border-radius:999px;overflow:hidden}.bar-fill{height:100%;background:var(--infi-primary);border-radius:inherit;min-width:2px}.bar-value{text-align:right;font-family:var(--font-num);font-weight:700}.donut-wrap{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center}.donut{width:146px;height:146px;border-radius:50%;position:relative;background:conic-gradient(var(--infi-primary) 0 100%)}.donut::after{content:"";position:absolute;inset:23px;background:#fff;border-radius:50%}.donut-center{position:absolute;inset:0;display:grid;place-items:center;z-index:2;text-align:center}.donut-center strong{font-size:19px;font-family:var(--font-num)}.donut-center span{display:block;font-size:8.5px;color:var(--text-2)}.legend{display:flex;flex-direction:column;gap:9px}.legend-item{display:grid;grid-template-columns:9px 1fr auto;gap:8px;align-items:center;font-size:10.5px}.legend-dot{width:8px;height:8px;border-radius:3px;background:var(--infi-primary)}
+.priority-list{display:flex;flex-direction:column}.priority-item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid #edf1f1;align-items:center}.priority-item:last-child{border-bottom:0}.priority-rank{width:34px;height:34px;border-radius:10px;background:var(--danger-soft);color:var(--danger);display:grid;place-items:center;font-weight:900;font-size:10.5px}.priority-name{font-weight:800;font-size:11.5px}.priority-meta{color:var(--text-2);font-size:9.5px;margin-top:2px}.priority-value{text-align:right;font-family:var(--font-num);font-size:11.5px;font-weight:800}
+
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:13px}.filterbar .field{min-width:165px}.filterbar .field.search-grow{flex:1;min-width:230px}.pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 3px 0;color:var(--text-2);font-size:10.5px}.pager-actions{display:flex;gap:6px}
+.source-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}.source-chip{padding:11px;border:1px solid var(--border);border-radius:10px;background:#fff;min-height:58px}.source-chip strong{font-size:10.5px;display:block}.source-chip span{font-size:9.5px;color:var(--text-2);display:block;margin-top:4px}.source-chip.done{border-color:#cfe4d7;background:#f7fbf8}.source-chip.done strong{color:var(--success)}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.data-log{background:#0a4148;color:#e9fafa;padding:13px;border-radius:10px;font-family:ui-monospace,Consolas,monospace;font-size:10.5px;white-space:pre-wrap;max-height:220px;overflow:auto}.file-preview{max-height:300px;overflow:auto}.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.role-card{border:1px solid var(--border);border-radius:11px;padding:12px}.role-card strong{display:block;font-size:11.5px}.role-card span{font-size:9.5px;color:var(--text-2)}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,40,45,.32);z-index:70;backdrop-filter:blur(2px)}
+
+body.sidebar-collapsed .sidebar{width:var(--sidebar-collapsed)}
+body.sidebar-collapsed .main-shell{margin-left:var(--sidebar-collapsed)}
+body.sidebar-collapsed .nav-label,body.sidebar-collapsed .nav-group-title,body.sidebar-collapsed .nav-badge,body.sidebar-collapsed .user-meta{display:none}
+body.sidebar-collapsed .nav-link{justify-content:center;padding:0}
+body.sidebar-collapsed .sidebar-brand{padding:14px 12px;justify-content:center;gap:4px}
+body.sidebar-collapsed .sidebar-logo{display:none}
+body.sidebar-collapsed .sidebar-toggle{display:grid}
+body.sidebar-collapsed .user-card{grid-template-columns:38px;justify-content:center}
+body.sidebar-collapsed .logout-btn{display:none}
+
+
+/* v3.3.3 · Backend synchronization */
+.backend-error-state{
+  min-height:290px;
+  max-width:720px;
+  margin-inline:auto;
+}
+.empty-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:8px;
+}
+.backend-error-state .btn{
+  min-width:160px;
+}
+#syncPill{
+  min-width:106px;
+  justify-content:center;
+}
+#syncPill.loading{
+  background:var(--surface-soft);
+  border-color:var(--border);
+  color:var(--text-secondary);
+}
+#syncPill.offline{
+  background:var(--danger-soft);
+  border-color:color-mix(in srgb, var(--danger) 24%, transparent);
+  color:var(--danger);
+}
+
+@media (max-width:1360px){
+  .topbar{grid-template-columns:minmax(220px,.78fr) minmax(300px,1fr) auto;padding:0 18px;gap:12px}
+  .content,.subnav{padding-left:20px;padding-right:20px}
+}
+@media (max-width:1120px){
+  .sync-text{display:none}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .source-grid{grid-template-columns:repeat(3,1fr)}
+  .dashboard-grid{grid-template-columns:1fr}
+  .admin-grid{grid-template-columns:1fr}
+  .topbar{grid-template-columns:minmax(215px,.8fr) minmax(250px,1fr) auto}
+  .top-actions{gap:6px}
+  .top-actions .btn{padding-left:12px;padding-right:12px}
+  .year-control{width:114px;min-width:114px}
+}
+@media (max-width:980px){
+  :root{--sidebar-w:210px}
+  .sidebar{transform:translateX(-100%)}
+  .main-shell{margin-left:0!important}
+  .sidebar.mobile-open{transform:none}
+  .mobile-overlay.open{display:block}
+  .topbar{grid-template-columns:1fr auto;height:auto;min-height:72px;padding-top:10px;padding-bottom:10px}
+  .global-search{grid-column:1/-1;grid-row:2}
+  .subnav{top:94px}
+  .top-actions .btn span.btn-label{display:none}
+  .view-head{flex-direction:column}
+  .role-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:720px){
+  .auth-body{padding:0}
+  .auth-shell{width:100%}
+  .login-card{min-height:100vh;border-radius:0;grid-template-columns:1fr;border:0;box-shadow:none}
+  .login-brand-panel{min-height:300px;padding:34px 26px 30px}
+  .login-logo{width:245px;max-width:82%}
+  .login-copy{margin-top:38px}
+  .login-copy h1{font-size:32px;line-height:1.04}
+  .login-copy p{font-size:13.5px;max-width:420px}
+  .version-pill{margin-bottom:18px;font-size:9px}
+  .login-form-panel{padding:36px 26px 44px}
+  .login-form-panel h2{font-size:27px}
+  .kpi-grid{grid-template-columns:1fr}
+  .content{padding:19px 13px 56px}
+  .subnav{padding:0 10px}
+  .topbar{padding-left:11px;padding-right:11px}
+  .source-grid,.form-grid,.role-grid{grid-template-columns:1fr}
+  .filterbar{flex-direction:column;align-items:stretch}.filterbar .field{width:100%;min-width:0}
+  .donut-wrap{grid-template-columns:1fr;justify-items:center}
+  .bar-row{grid-template-columns:86px 1fr 82px}
+  .view-head h1{font-size:23px}
+  .top-actions .sync-pill{display:none}
+  .top-actions .year-control{max-width:115px}
+  .modal-backdrop{padding:10px}.modal{border-radius:14px}.modal-header,.modal-body{padding:17px}.modal-footer{padding:13px 17px}
+}
+
+@media print {
+@media print{body{background:#fff}.sidebar,.topbar,.subnav,.view-tools,.filterbar,.toast-region,.modal-backdrop{display:none!important}.main-shell{margin:0!important}.content{padding:0!important;max-width:none}.view{display:none!important}.view.print-target{display:block!important}.card{box-shadow:none;break-inside:avoid}.table-shell{overflow:visible;border-color:#bbb}th{position:static}.kpi-grid{grid-template-columns:repeat(4,1fr)}@page{size:A4 portrait;margin:12mm}}
+
+}
+
+</style>
+</head>
+<body class="app-body">
+<script>
+  (function(){
+    const PAGE_KIND = 'admin';
+    window.__carteraBootReady = false;
+    window.__carteraBootTimer = setTimeout(function(){
+      if (window.__carteraBootReady) return;
+      const gate = document.getElementById(PAGE_KIND === 'login' ? 'loginLoader' : 'authGate');
+      if (gate) gate.hidden = true;
+      const box = document.createElement('div');
+      box.id = 'bootFailure';
+      box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f4f7f7;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;color:#173238';
+      const isFile = location.protocol === 'file:';
+      box.innerHTML = `<div style="width:min(720px,100%);background:white;border:1px solid #d8e3e4;border-radius:18px;padding:28px;box-shadow:0 18px 50px rgba(0,70,75,.12)">
+        <div style="font-size:13px;font-weight:800;color:#006c72;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Cartera INFIHUILA · Diagnóstico de arranque</div>
+        <h2 style="margin:0 0 10px">${isFile ? 'Abra el aplicativo con Live Server' : 'El aplicativo no terminó de iniciar'}</h2>
+        <p style="line-height:1.55;color:#5d7074;margin:0 0 18px">${isFile ? 'Esta página fue abierta como archivo local (file://). Firebase y los módulos JavaScript del aplicativo requieren un origen HTTP. En Visual Studio Code abra Frontend/index.html y seleccione Open with Live Server.' : 'Revise la consola del navegador (F12 → Console). Puede tratarse de un recurso bloqueado, falta de Internet o configuración de Firebase.'}</p>
+        <div style="background:#eef8f8;border:1px solid #c8e3e5;border-radius:10px;padding:12px 14px;font-family:Consolas,monospace;font-size:13px;word-break:break-all">URL actual: ${location.href}</div>
+        ${isFile ? '<p style="margin:16px 0 0;font-weight:700">Ruta esperada: http://127.0.0.1:5500/Frontend/index.html (el puerto puede variar).</p>' : ''}
+      </div>`;
+      document.body.appendChild(box);
+    }, 9000);
+    if (location.protocol === 'file:') {
+      setTimeout(function(){ if (!window.__carteraBootReady) window.dispatchEvent(new Event('cartera:file-protocol')); }, 50);
+    }
+  })();
+  </script>
+
+  <div class="auth-gate" id="authGate">
+    <div class="auth-gate-card card"><img src="data:image/png;base64,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" alt="INFIHUILA"><div class="spinner"></div><strong>Protegiendo el workspace…</strong><p>Validando identidad, perfil y permisos.</p></div>
+  </div>
+
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="app-shell" id="appShell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <header class="sidebar-brand">
+        <img class="sidebar-logo" src="data:image/png;base64,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" alt="INFIHUILA">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Contraer menú"><i data-lucide="panel-left-close" size="17"></i></button>
+      </header>
+      <nav class="sidebar-scroll" aria-label="Navegación principal">
+        <section class="nav-group">
+          <div class="nav-group-title">Inicio</div>
+          <button class="nav-link active" data-view="day"><span class="nav-icon"><i data-lucide="house" size="18"></i></span><span class="nav-label">Mi cartera</span></button>
+          <button class="nav-link" data-view="summary"><span class="nav-icon"><i data-lucide="layout-dashboard" size="18"></i></span><span class="nav-label">Resumen ejecutivo</span></button>
+        </section>
+        <section class="nav-group">
+          <div class="nav-group-title">Gestión de cartera</div>
+          <button class="nav-link" data-view="portfolio"><span class="nav-icon"><i data-lucide="rows-3" size="18"></i></span><span class="nav-label">Cartera</span><span class="nav-badge" id="portfolioCountBadge">0</span></button>
+          <button class="nav-link" data-view="clients"><span class="nav-icon"><i data-lucide="users-round" size="18"></i></span><span class="nav-label">Clientes</span></button>
+          <button class="nav-link" data-view="collections"><span class="nav-icon"><i data-lucide="wallet-cards" size="18"></i></span><span class="nav-label">Recaudos</span></button>
+        </section>
+        <section class="nav-group">
+          <div class="nav-group-title">Control</div>
+          <button class="nav-link" data-view="risk"><span class="nav-icon"><i data-lucide="shield-alert" size="18"></i></span><span class="nav-label">Riesgo</span></button>
+          <button class="nav-link" data-view="maturities"><span class="nav-icon"><i data-lucide="calendar-clock" size="18"></i></span><span class="nav-label">Vencimientos</span></button>
+        </section>
+        <section class="nav-group" data-manager-only>
+          <div class="nav-group-title">Gestión de datos</div>
+          <button class="nav-link" data-view="data"><span class="nav-icon"><i data-lucide="database-zap" size="18"></i></span><span class="nav-label">Cortes e importaciones</span></button>
+        </section>
+        <section class="nav-group">
+          <div class="nav-group-title">Reportes</div>
+          <button class="nav-link" data-view="reports"><span class="nav-icon"><i data-lucide="file-chart-column" size="18"></i></span><span class="nav-label">Informes</span></button>
+        </section>
+        <section class="nav-group" data-admin-only>
+          <div class="nav-group-title">Administración</div>
+          <button class="nav-link" data-view="users"><span class="nav-icon"><i data-lucide="user-cog" size="18"></i></span><span class="nav-label">Usuarios</span></button>
+          <button class="nav-link" data-view="config"><span class="nav-icon"><i data-lucide="settings-2" size="18"></i></span><span class="nav-label">Configuración</span></button>
+        </section>
+      </nav>
+      <footer class="sidebar-user">
+        <div class="user-card"><div class="avatar" id="profileAvatar">IN</div><div class="user-meta"><div class="user-name" id="profileName">Usuario</div><div class="user-role" id="profileRole">Cargando…</div></div><button class="logout-btn" id="logoutButton" type="button" aria-label="Cerrar sesión"><i data-lucide="log-out" size="17"></i></button></div>
+      </footer>
+    </aside>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="top-left">
+          <button class="icon-btn" id="mobileMenuButton" type="button" aria-label="Abrir menú"><i data-lucide="menu" size="19"></i></button>
+          <div style="min-width:0"><div class="crumb" id="breadcrumb">Cartera / Mi cartera</div><div class="page-title" id="pageTitle">Mi cartera</div></div>
+        </div>
+        <div class="global-search">
+          <i class="search-icon" data-lucide="search" size="18"></i>
+          <input class="input" id="globalSearch" placeholder="Buscar cliente, identificación, obligación o línea" autocomplete="off">
+          <span class="search-key">/</span>
+        </div>
+        <div class="top-actions">
+          <select class="select year-control" id="yearSelect" aria-label="Vigencia"></select>
+          <div class="sync-pill loading" id="syncPill"><i data-lucide="cloud" size="16"></i><span class="sync-text">Actualizando</span></div>
+          <div class="dropdown" data-manager-only>
+            <button class="btn btn-accent" id="createMenuButton" type="button"><i data-lucide="plus" size="17"></i><span class="btn-label">Crear</span><i data-lucide="chevron-down" size="15"></i></button>
+            <div class="dropdown-menu" id="createMenu" hidden>
+              <button class="dropdown-item" type="button" data-action="new-cycle"><i data-lucide="calendar-plus" size="16"></i>Nuevo corte</button>
+              <button class="dropdown-item" type="button" data-action="import-source"><i data-lucide="file-up" size="16"></i>Cargar fuente</button>
+            </div>
+          </div>
+          <button class="btn btn-outline" id="topReportsButton" type="button"><i data-lucide="file-chart-column" size="16"></i><span class="btn-label">Informes</span></button>
+        </div>
+      </header>
+
+      <nav class="subnav" aria-label="Vistas rápidas">
+        <button class="tab-btn active" data-view="day"><i data-lucide="house" size="16"></i>Mi cartera</button>
+        <button class="tab-btn" data-view="summary"><i data-lucide="layout-dashboard" size="16"></i>Resumen</button>
+        <button class="tab-btn" data-view="portfolio"><i data-lucide="rows-3" size="16"></i>Cartera</button>
+        <button class="tab-btn" data-view="risk"><i data-lucide="shield-alert" size="16"></i>Riesgo</button>
+        <button class="tab-btn" data-view="collections"><i data-lucide="wallet-cards" size="16"></i>Recaudos</button>
+        <button class="tab-btn" data-view="data" data-manager-only><i data-lucide="database-zap" size="16"></i>Datos</button>
+      </nav>
+
+      <div class="content">
+        <section class="view active" id="view-day" data-title="Mi cartera" data-crumb="Cartera / Mi cartera">
+          <header class="view-head"><div><h1>Mi cartera</h1><p>Prioridades del día, estado del corte oficial y alertas de gestión.</p></div><div class="view-tools"><span class="badge badge-info" id="currentCutBadge">Sin corte publicado</span></div></header>
+          <div id="dayContent"></div>
+        </section>
+
+        <section class="view" id="view-summary" data-title="Resumen ejecutivo" data-crumb="Cartera / Resumen ejecutivo">
+          <header class="view-head"><div><h1>Resumen ejecutivo</h1><p>Lectura gerencial de cartera, mora, concentración y provisión.</p></div><div class="view-tools"><span class="badge badge-info" id="summaryCutBadge">Sin corte publicado</span></div></header>
+          <div id="summaryContent"></div>
+        </section>
+
+        <section class="view" id="view-portfolio" data-title="Cartera" data-crumb="Gestión de cartera / Cartera">
+          <header class="view-head"><div><h1>Cartera</h1><p>Detalle de obligaciones del corte publicado con búsqueda y filtros.</p></div><div class="view-tools"><button class="btn btn-outline btn-sm" id="exportPortfolioButton" type="button"><i data-lucide="sheet" size="15"></i>Excel</button></div></header>
+          <div id="portfolioContent"></div>
+        </section>
+
+        <section class="view" id="view-clients" data-title="Clientes" data-crumb="Gestión de cartera / Clientes">
+          <header class="view-head"><div><h1>Clientes</h1><p>Concentración consolidada por cliente y exposición total.</p></div></header>
+          <div id="clientsContent"></div>
+        </section>
+
+        <section class="view" id="view-collections" data-title="Recaudos" data-crumb="Gestión de cartera / Recaudos">
+          <header class="view-head"><div><h1>Recaudos</h1><p>Movimientos identificados en la fuente de recaudo del corte seleccionado.</p></div></header>
+          <div id="collectionsContent"></div>
+        </section>
+
+        <section class="view" id="view-risk" data-title="Riesgo" data-crumb="Control / Riesgo">
+          <header class="view-head"><div><h1>Riesgo de cartera</h1><p>Edades de mora, concentración y exposiciones prioritarias.</p></div></header>
+          <div id="riskContent"></div>
+        </section>
+
+        <section class="view" id="view-maturities" data-title="Vencimientos" data-crumb="Control / Vencimientos">
+          <header class="view-head"><div><h1>Vencimientos</h1><p>Obligaciones ordenadas por fecha o días de mora cuando la fuente lo permite.</p></div></header>
+          <div id="maturitiesContent"></div>
+        </section>
+
+        <section class="view" id="view-data" data-title="Cortes e importaciones" data-crumb="Gestión de datos / Cortes e importaciones" data-manager-only>
+          <header class="view-head"><div><h1>Cortes e importaciones</h1><p>Trazabilidad de cortes, fuentes, hashes SHA-256 y estado de publicación.</p></div><div class="view-tools"><button class="btn btn-primary btn-sm" type="button" data-action="new-cycle"><i data-lucide="calendar-plus" size="15"></i>Nuevo corte</button><button class="btn btn-outline btn-sm" type="button" data-action="import-source"><i data-lucide="file-up" size="15"></i>Cargar fuente</button></div></header>
+          <div id="dataContent"></div>
+        </section>
+
+        <section class="view" id="view-reports" data-title="Informes" data-crumb="Reportes / Informes">
+          <header class="view-head"><div><h1>Informes</h1><p>Exportaciones ejecutivas y detalle del corte oficial.</p></div></header>
+          <div id="reportsContent"></div>
+        </section>
+
+        <section class="view" id="view-users" data-title="Usuarios" data-crumb="Administración / Usuarios" data-admin-only>
+          <header class="view-head"><div><h1>Usuarios</h1><p>Perfiles y roles autorizados en Firestore. Las credenciales se administran en Firebase Authentication.</p></div></header>
+          <div id="usersContent"></div>
+        </section>
+
+        <section class="view" id="view-config" data-title="Configuración" data-crumb="Administración / Configuración" data-admin-only>
+          <header class="view-head"><div><h1>Configuración</h1><p>Parámetros institucionales y fuentes requeridas del backend.</p></div></header>
+          <div id="configContent"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="cycleModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="cycleModalTitle">
+      <header class="modal-header"><div><h2 id="cycleModalTitle">Nuevo corte de cartera</h2><p>El corte se crea en estado borrador y solo se publica después de validar las fuentes obligatorias.</p></div><button class="icon-btn" type="button" data-close-modal="cycleModal"><i data-lucide="x" size="18"></i></button></header>
+      <form id="cycleForm"><div class="modal-body"><div class="form-grid"><div class="field"><label for="cycleYear">Vigencia</label><select class="select" id="cycleYear" required></select></div><div class="field"><label for="cycleDate">Fecha real de corte</label><input class="input" id="cycleDate" type="date" required></div><div class="field" style="grid-column:1/-1"><label for="cycleLabel">Etiqueta</label><input class="input" id="cycleLabel" placeholder="Ej. Corte julio 2026"></div></div><p class="auth-message" id="cycleFormMessage"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="cycleModal">Cancelar</button><button class="btn btn-primary" id="saveCycleButton" type="submit">Crear corte</button></footer></form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="importModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle" style="width:min(900px,100%)">
+      <header class="modal-header"><div><h2 id="importModalTitle">Cargar fuente de cartera</h2><p>El Excel se procesa localmente; Firestore recibe datos normalizados, hash y trazabilidad.</p></div><button class="icon-btn" type="button" data-close-modal="importModal"><i data-lucide="x" size="18"></i></button></header>
+      <div class="modal-body">
+        <div class="form-grid"><div class="field"><label for="importCycle">Corte en borrador</label><select class="select" id="importCycle"></select></div><div class="field"><label for="importSource">Tipo de fuente</label><select class="select" id="importSource"></select></div><div class="field" style="grid-column:1/-1"><label for="importFile">Archivo Excel / CSV</label><input class="input" id="importFile" type="file" accept=".xlsx,.xls,.xlsb,.csv"></div></div>
+        <div class="view-tools" style="margin-top:14px"><button class="btn btn-outline" id="analyzeImportButton" type="button">Analizar archivo</button><button class="btn btn-primary" id="saveImportButton" type="button" disabled>Guardar importación</button></div>
+        <div id="importAnalysis" style="margin-top:16px"></div><div class="data-log" id="importLog" style="margin-top:12px">Seleccione corte, fuente y archivo.</div>
+      </div>
+      <footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="importModal">Cerrar</button></footer>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="reportsModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="reportsModalTitle">
+      <header class="modal-header"><div><h2 id="reportsModalTitle">Generar informe</h2><p>Las exportaciones reflejan el corte oficial y los filtros activos.</p></div><button class="icon-btn" type="button" data-close-modal="reportsModal"><i data-lucide="x" size="18"></i></button></header>
+      <div class="modal-body"><div class="field"><label for="reportType">Tipo de informe</label><select class="select" id="reportType"><option value="executive">Resumen ejecutivo</option><option value="detail">Detalle de cartera</option></select></div><div class="notice" style="margin-top:14px">PDF utiliza la impresión del navegador con formato institucional. Excel se genera como archivo .xlsx.</div></div>
+      <footer class="modal-footer"><button class="btn btn-outline" id="reportExcelButton" type="button"><i data-lucide="sheet" size="15"></i>Excel</button><button class="btn btn-primary" id="reportPdfButton" type="button"><i data-lucide="file-text" size="15"></i>PDF</button></footer>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="userModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+      <header class="modal-header"><div><h2 id="userModalTitle">Editar perfil institucional</h2><p>La cuenta de Authentication no se modifica desde este formulario.</p></div><button class="icon-btn" type="button" data-close-modal="userModal"><i data-lucide="x" size="18"></i></button></header>
+      <form id="userForm"><div class="modal-body"><input type="hidden" id="editUserUid"><div class="form-grid"><div class="field" style="grid-column:1/-1"><label>Usuario</label><input class="input" id="editUserName" readonly></div><div class="field"><label for="editUserRole">Rol</label><select class="select" id="editUserRole"><option value="admin">Administrador</option><option value="asesor_gerencia">Asesor de Gerencia</option><option value="jefe_cartera">Jefe de Cartera</option><option value="analista_cartera">Analista de Cartera</option><option value="auditor">Auditor</option><option value="consulta">Consulta</option></select></div><div class="field"><label for="editUserActive">Estado</label><select class="select" id="editUserActive"><option value="true">Activo</option><option value="false">Inactivo</option></select></div></div><p class="auth-message" id="userFormMessage"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="userModal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></footer></form>
+    </section>
+  </div>
+
+  <div class="toast-region" id="toastRegion"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, browserLocalPersistence, setPersistence, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, reload, getIdToken } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, getDocFromServer, getDocsFromServer, collection, query, where, limit, setDoc, updateDoc, serverTimestamp, arrayUnion, increment, writeBatch } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+// ===== firebase-config.js =====
+// Firebase Web configuration for project "cartera-infi".
+// This object identifies the Firebase app; it is not an Admin SDK credential.
+const firebaseConfig = Object.freeze({
+  apiKey: "AIzaSyDfBubXicmFaL9i15n04d-qKDD3Ur9-6DM",
+  authDomain: "cartera-infi.firebaseapp.com",
+  projectId: "cartera-infi",
+  storageBucket: "cartera-infi.firebasestorage.app",
+  messagingSenderId: "211651402174",
+  appId: "1:211651402174:web:ac704d1c7d618299b101ef",
+  measurementId: "G-JTLE1NZW5R"
+});
+
+// ===== firebase-init.js =====
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+auth.languageCode = "es";
+
+const persistenceReady = setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.warn("No fue posible establecer persistencia local de Firebase Auth.", error);
+});
+
+// ===== utils.js =====
+const VALID_ROLES = Object.freeze([
+  "admin",
+  "asesor_gerencia",
+  "jefe_cartera",
+  "analista_cartera",
+  "auditor",
+  "consulta"
+]);
+
+const MANAGER_ROLES = Object.freeze(["admin", "jefe_cartera", "analista_cartera"]);
+const PUBLISHER_ROLES = Object.freeze(["admin", "jefe_cartera"]);
+
+function qs(selector, root = document) { return root.querySelector(selector); }
+function qsa(selector, root = document) { return [...root.querySelectorAll(selector)]; }
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
+}
+function debounce(fn, wait = 280) {
+  let timeout;
+  return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => fn(...args), wait); };
+}
+function roleLabel(role) {
+  return ({
+    admin:"Administrador",
+    asesor_gerencia:"Asesor de Gerencia",
+    jefe_cartera:"Jefe de Cartera",
+    analista_cartera:"Analista de Cartera",
+    auditor:"Auditor",
+    consulta:"Consulta"
+  })[role] || role || "Sin rol";
+}
+function initials(name = "") {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (parts.slice(0,2).map((p) => p[0]).join("") || "IN").toUpperCase();
+}
+function normalizeKey(value) {
+  let text = String(value ?? "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return text.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase() || "campo";
+}
+function uid(prefix = "id") {
+  return `${prefix}_${Date.now()}_${crypto.randomUUID().replaceAll("-", "").slice(0, 16)}`;
+}
+function hasRole(profile, roles) { return !!profile && roles.includes(profile.role); }
+function safeNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (value === null || value === undefined || value === "") return 0;
+  const raw = String(value).trim().replace(/\s/g, "");
+  if (!raw) return 0;
+  // Colombian/LatAm friendly normalization: 1.234.567,89 and 1234567.89.
+  let normalized = raw.replace(/[^0-9,.-]/g, "");
+  const comma = normalized.lastIndexOf(",");
+  const dot = normalized.lastIndexOf(".");
+  if (comma > dot) normalized = normalized.replace(/\./g, "").replace(",", ".");
+  else if (dot > comma && comma >= 0) normalized = normalized.replace(/,/g, "");
+  else if (comma >= 0 && dot < 0) normalized = normalized.replace(",", ".");
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : 0;
+}
+function showToast(title, message = "", type = "info", timeout = 3800) {
+  let region = document.getElementById("toastRegion");
+  if (!region) { region = document.createElement("div"); region.id = "toastRegion"; region.className = "toast-region"; document.body.append(region); }
+  const toast = document.createElement("div"); toast.className = `toast ${type}`;
+  toast.innerHTML = `<div><strong>${escapeHtml(title)}</strong>${message ? `<p>${escapeHtml(message)}</p>` : ""}</div>`;
+  region.append(toast); setTimeout(() => toast.remove(), timeout);
+}
+function setSyncState(state, text) {
+  const el = document.getElementById("syncPill"); if (!el) return;
+  el.classList.remove("offline", "loading");
+  if (state === "offline") el.classList.add("offline");
+  if (state === "loading") el.classList.add("loading");
+  const label = el.querySelector(".sync-text"); if (label) label.textContent = text || ({online:"Sincronizado",offline:"Sin conexión",loading:"Actualizando"})[state] || state;
+}
+function openModal(id) { const el = document.getElementById(id); if (el) { el.hidden = false; document.body.style.overflow = "hidden"; } }
+function closeModal(id) { const el = document.getElementById(id); if (el) { el.hidden = true; document.body.style.overflow = ""; } }
+function isLocalDev() { return ["localhost", "127.0.0.1"].includes(location.hostname); }
+
+// ===== auth.js =====
+async function getProfile(user) {
+  if (!user) return null;
+  const snap = await getDoc(doc(db, "Usuarios", user.uid));
+  return snap.exists() ? { id:snap.id, ...snap.data() } : null;
+}
+
+async function validateAccess(user, { requireVerified = true } = {}) {
+  if (!user) return { ok:false, reason:"unauthenticated" };
+  await reload(user);
+  await getIdToken(user, true);
+  const email = String(user.email || "").toLowerCase();
+  if (!email.endsWith("@infihuila.gov.co")) return { ok:false, reason:"domain" };
+  if (requireVerified && !user.emailVerified) return { ok:false, reason:"unverified" };
+  const profile = await getProfile(user);
+  if (!profile) return { ok:false, reason:"profile_missing" };
+  if (profile.isActive !== true) return { ok:false, reason:"inactive" };
+  if (String(profile.email || "").toLowerCase() !== email) return { ok:false, reason:"profile_email" };
+  if (!VALID_ROLES.includes(profile.role)) return { ok:false, reason:"role" };
+  return { ok:true, user, profile };
+}
+
+async function login(email, password) {
+  await persistenceReady;
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized.endsWith("@infihuila.gov.co")) throw Object.assign(new Error("Use su correo institucional @infihuila.gov.co."), { code:"app/domain" });
+  const credential = await signInWithEmailAndPassword(auth, normalized, password);
+  await reload(credential.user);
+  if (!credential.user.emailVerified) return { ok:false, reason:"unverified", user:credential.user, profile:null };
+  const access = await validateAccess(credential.user, { requireVerified:true });
+  if (!access.ok) { await signOut(auth); throw Object.assign(new Error(accessMessage(access.reason)), { code:`app/${access.reason}` }); }
+  return access;
+}
+
+async function logout() { await signOut(auth); }
+async function resendVerification(user = auth.currentUser) { if (!user) throw new Error("No existe una sesión para verificar."); await sendEmailVerification(user); }
+async function resetPassword(email) {
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized.endsWith("@infihuila.gov.co")) return;
+  await sendPasswordResetEmail(auth, normalized);
+}
+function watchAuth(callback) { return onAuthStateChanged(auth, callback); }
+
+function accessMessage(reason) {
+  return ({
+    unauthenticated:"Debe iniciar sesión.",
+    domain:"El acceso está restringido a correos @infihuila.gov.co.",
+    unverified:"Su correo institucional aún no ha sido verificado.",
+    profile_missing:"Su cuenta no tiene un perfil habilitado en Cartera.",
+    inactive:"Su cuenta se encuentra inactiva.",
+    profile_email:"El correo de Authentication no coincide con el perfil institucional.",
+    role:"Su perfil no tiene un rol válido para este aplicativo."
+  })[reason] || "No fue posible autorizar el acceso.";
+}
+
+function friendlyAuthError(error) {
+  const code = error?.code || "";
+  if (["auth/invalid-credential","auth/wrong-password","auth/user-not-found"].includes(code)) return "Correo o contraseña incorrectos.";
+  if (code === "auth/too-many-requests") return "Firebase bloqueó temporalmente nuevos intentos. Espere unos minutos antes de volver a intentar.";
+  if (code === "auth/network-request-failed") return "No fue posible conectar con Firebase. Revise su conexión a Internet.";
+  if (code === "auth/user-disabled") return "La cuenta de autenticación está deshabilitada.";
+  if (code === "auth/invalid-email") return "El correo electrónico no es válido.";
+  if (code.startsWith("app/")) return error.message;
+  return "No fue posible completar la autenticación. Intente nuevamente.";
+}
+
+// ===== auth-guard.js =====
+async function requireAuthorizedUser() {
+  await persistenceReady;
+  return new Promise((resolve, reject) => {
+    let unsubscribe = () => {};
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true; unsubscribe();
+      reject(new Error("Firebase Authentication no respondió dentro del tiempo esperado."));
+    }, 12000);
+
+    unsubscribe = watchAuth(async (user) => {
+      if (settled) return;
+      settled = true; clearTimeout(timer); unsubscribe();
+      if (!user) { location.replace("./index.html"); return; }
+      try {
+        const access = await validateAccess(user);
+        if (!access.ok) { await logout(); location.replace("./index.html"); return; }
+        resolve(access);
+      } catch (error) {
+        console.error("Auth guard", error);
+        await logout().catch(() => {});
+        reject(error);
+      }
+    });
+  });
+}
+
+// ===== firestore.js =====
+const cache = new Map();
+const CACHE_MS = 60_000;
+function cacheGet(key) { const item = cache.get(key); return item && Date.now() - item.at < CACHE_MS ? item.value : null; }
+function cacheSet(key, value) { cache.set(key, { at:Date.now(), value }); return value; }
+function invalidateCache(prefix = "") { [...cache.keys()].filter((k) => k.startsWith(prefix)).forEach((k) => cache.delete(k)); }
+
+async function getAppConfig(force = false) {
+  if (!force) { const hit = cacheGet("config"); if (hit) return hit; }
+  const snap = await getDoc(doc(db, "Config", "app"));
+  return cacheSet("config", snap.exists() ? snap.data() : null);
+}
+
+function activeFlag(value) {
+  return value === true || value === 1 || String(value).trim().toLowerCase() === "true";
+}
+
+async function serverFirstDocs(ref) {
+  try {
+    return await getDocsFromServer(ref);
+  } catch (error) {
+    console.warn("Firestore server-first fallback", error?.code || error);
+    return await getDocs(ref);
+  }
+}
+
+async function serverFirstDoc(ref) {
+  try {
+    return await getDocFromServer(ref);
+  } catch (error) {
+    console.warn("Firestore server-first document fallback", error?.code || error);
+    return await getDoc(ref);
+  }
+}
+
+async function getActiveYears(force = false) {
+  if (!force) {
+    const hit = cacheGet("years");
+    if (hit) return hit;
+  }
+
+  // 1. Consulta explícita de vigencias activas en servidor.
+  const activeQuery = query(
+    collection(db, "Vigencias"),
+    where("isActive", "==", true),
+    limit(20)
+  );
+  let snap = await serverFirstDocs(activeQuery);
+  let years = snap.docs
+    .map((d) => ({ id:d.id, ...d.data() }))
+    .filter((v) => activeFlag(v.isActive))
+    .sort((a,b) => String(b.id).localeCompare(String(a.id)));
+
+  // 2. Compatibilidad: si no devuelve resultados, leer directamente la vigencia
+  // del año actual. Esto evita falsos "sin vigencia" por caché o documentos
+  // históricos creados con pequeños cambios de tipo.
+  if (!years.length) {
+    const currentYear = String(new Date().getFullYear());
+    const direct = await serverFirstDoc(doc(db, "Vigencias", currentYear));
+    if (direct.exists()) {
+      const row = { id:direct.id, ...direct.data() };
+      if (activeFlag(row.isActive)) years = [row];
+    }
+  }
+
+  // 3. Último fallback diagnóstico: listar vigencias y normalizar el flag.
+  if (!years.length) {
+    snap = await serverFirstDocs(query(collection(db, "Vigencias"), limit(50)));
+    years = snap.docs
+      .map((d) => ({ id:d.id, ...d.data() }))
+      .filter((v) => activeFlag(v.isActive))
+      .sort((a,b) => String(b.id).localeCompare(String(a.id)));
+  }
+
+  return cacheSet("years", years);
+}
+
+async function getBackendHealth() {
+  const result = {
+    connected:false,
+    config:false,
+    profile:false,
+    activeYears:[],
+    projectId:"cartera-infi",
+    checkedAt:new Date().toISOString()
+  };
+
+  const user = auth.currentUser;
+  if (!user) return result;
+
+  const [configSnap, profileSnap] = await Promise.all([
+    serverFirstDoc(doc(db, "Config", "app")),
+    serverFirstDoc(doc(db, "Usuarios", user.uid))
+  ]);
+
+  result.config = configSnap.exists();
+  result.profile = profileSnap.exists();
+  result.activeYears = await getActiveYears(true);
+  result.connected = result.config && result.profile;
+  return result;
+}
+
+async function getCycle(cycleId) {
+  if (!cycleId) return null;
+  const snap = await getDoc(doc(db, "CarteraCycles", cycleId));
+  return snap.exists() ? { id:snap.id, ...snap.data() } : null;
+}
+
+async function getCurrentCycleForYear(year) {
+  const snap = await serverFirstDoc(doc(db, "Vigencias", String(year)));
+  if (!snap.exists()) return { year:null, cycle:null };
+  const data = { id:snap.id, ...snap.data() };
+  return { year:data, cycle:data.currentCycleId ? await getCycle(data.currentCycleId) : null };
+}
+
+async function getCycles(force = false) {
+  if (!force) { const hit = cacheGet("cycles"); if (hit) return hit; }
+  const snap = await getDocs(collection(db, "CarteraCycles"));
+  const rows = snap.docs.map((d) => ({ id:d.id, ...d.data() })).sort((a,b) => String(b.cutoffDate || b.id).localeCompare(String(a.cutoffDate || a.id)));
+  return cacheSet("cycles", rows);
+}
+
+async function createCycle({ year, cutoffDate, label }) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sesión no disponible.");
+  const cycleId = cutoffDate;
+  const ref = doc(db, "CarteraCycles", cycleId);
+  if ((await getDoc(ref)).exists()) throw new Error(`Ya existe el corte ${cycleId}.`);
+  await setDoc(ref, {
+    cycleId, year:String(year), cutoffDate, label:label || `Corte ${cutoffDate}`, status:"draft",
+    importedSources:[], importCount:0, createdBy:user.uid, createdAt:serverTimestamp(),
+    updatedBy:user.uid, updatedAt:serverTimestamp()
+  });
+  await audit("CYCLE_CREATED", "CarteraCycle", cycleId, { year:String(year), cutoffDate, label });
+  invalidateCache("cycles");
+  return cycleId;
+}
+
+async function getAggregate(cycleId, force = false) {
+  const key = `aggregate:${cycleId}`;
+  if (!force) { const hit = cacheGet(key); if (hit) return hit; }
+  const snap = await getDoc(doc(db, "CarteraAggregates", cycleId));
+  return cacheSet(key, snap.exists() ? snap.data() : null);
+}
+
+async function getValidation(cycleId, force = false) {
+  const key = `validation:${cycleId}`;
+  if (!force) { const hit = cacheGet(key); if (hit) return hit; }
+  const snap = await getDoc(doc(db, "CarteraValidations", cycleId));
+  return cacheSet(key, snap.exists() ? snap.data() : null);
+}
+
+async function getImportJobs(cycleId, sourceType = null) {
+  const q = query(collection(db, "ImportJobs"), where("cycleId", "==", cycleId), limit(200));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id:d.id, ...d.data() }))
+    .filter((row) => !sourceType || row.sourceType === sourceType)
+    .sort((a,b) => timestampMs(b.createdAt) - timestampMs(a.createdAt));
+}
+
+async function getLatestImportJob(cycleId, sourceType) {
+  return (await getImportJobs(cycleId, sourceType))[0] || null;
+}
+
+async function getJobChunks(jobId) {
+  if (!jobId) return [];
+  const q = query(collection(db, "CarteraChunks"), where("jobId", "==", jobId), limit(200));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id:d.id, ...d.data() })).sort((a,b) => (a.sequence || 0) - (b.sequence || 0));
+}
+
+async function getSourceRows(cycleId, sourceType) {
+  const job = await getLatestImportJob(cycleId, sourceType);
+  if (!job) return { job:null, rows:[] };
+  const chunks = await getJobChunks(job.id);
+  return { job, rows:chunks.flatMap((c) => Array.isArray(c.rows) ? c.rows : []) };
+}
+
+async function getUsers() {
+  const snap = await getDocs(query(collection(db, "Usuarios"), limit(200)));
+  return snap.docs.map((d) => ({ id:d.id, ...d.data() })).sort((a,b) => String(a.displayName || a.email).localeCompare(String(b.displayName || b.email), "es"));
+}
+
+async function updateUserProfile(uidValue, changes) {
+  const user = auth.currentUser;
+  await updateDoc(doc(db, "Usuarios", uidValue), { ...changes, updatedBy:user.uid, updatedAt:serverTimestamp() });
+  await audit("USER_PROFILE_UPDATED", "Usuario", uidValue, { changes:Object.keys(changes) });
+}
+
+async function audit(action, entityType, entityId, details = {}) {
+  const user = auth.currentUser;
+  if (!user) return;
+  await setDoc(doc(db, "AuditLogs", uid("audit")), {
+    actorUid:user.uid, actorEmail:user.email, action, entityType, entityId, details, createdAt:serverTimestamp()
+  });
+}
+
+async function writeChunks(operations) {
+  for (let i = 0; i < operations.length; i += 400) {
+    const batch = writeBatch(db);
+    operations.slice(i, i + 400).forEach((op) => op(batch));
+    await batch.commit();
+  }
+}
+
+async function registerImportJob(job) {
+  const ref = doc(db, "ImportJobs", job.jobId);
+  await setDoc(ref, { ...job, createdAt:serverTimestamp(), updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp() });
+  return ref;
+}
+
+async function completeImportJob(jobId) {
+  await updateDoc(doc(db, "ImportJobs", jobId), { status:"completed", updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp(), completedAt:serverTimestamp() });
+}
+
+async function updateCycleAfterImport(cycleId, sourceType) {
+  await updateDoc(doc(db, "CarteraCycles", cycleId), {
+    importedSources:arrayUnion(sourceType), importCount:increment(1), lastImportAt:serverTimestamp(),
+    updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp()
+  });
+  invalidateCache("cycles");
+}
+
+async function mergeAggregate(cycleId, data) {
+  await setDoc(doc(db, "CarteraAggregates", cycleId), {
+    cycleId, ...data, updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp()
+  }, { merge:true });
+  invalidateCache(`aggregate:${cycleId}`);
+}
+
+async function saveValidation(cycleId, data) {
+  await setDoc(doc(db, "CarteraValidations", cycleId), {
+    cycleId, ...data, updatedBy:auth.currentUser.uid, updatedAt:serverTimestamp()
+  }, { merge:true });
+  invalidateCache(`validation:${cycleId}`);
+}
+
+async function publishCycle(cycleId) {
+  const user = auth.currentUser;
+  const cycle = await getCycle(cycleId);
+  if (!cycle) throw new Error("No existe el corte seleccionado.");
+  const validation = await getValidation(cycleId, true);
+  if (!validation?.readyToPublish) throw new Error("El corte no está listo para publicar.");
+  await updateDoc(doc(db, "CarteraCycles", cycleId), {
+    status:"published", publishedAt:serverTimestamp(), publishedBy:user.uid,
+    updatedBy:user.uid, updatedAt:serverTimestamp()
+  });
+  await updateDoc(doc(db, "Vigencias", String(cycle.year)), {
+    currentCycleId:cycleId, updatedBy:user.uid, updatedAt:serverTimestamp()
+  });
+  await audit("CYCLE_PUBLISHED", "CarteraCycle", cycleId, { year:cycle.year, cutoffDate:cycle.cutoffDate });
+  invalidateCache();
+}
+
+function timestampMs(value) {
+  if (!value) return 0;
+  if (typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  return new Date(value).getTime() || 0;
+}
+
+// ===== formatters.js =====
+const money0 = new Intl.NumberFormat("es-CO", { style:"currency", currency:"COP", maximumFractionDigits:0 });
+const number0 = new Intl.NumberFormat("es-CO", { maximumFractionDigits:0 });
+const percent1 = new Intl.NumberFormat("es-CO", { style:"percent", minimumFractionDigits:1, maximumFractionDigits:1 });
+
+function formatMoney(value) { return money0.format(Number(value) || 0).replace("COP", "$" ).replace(/\s+/g, " "); }
+function formatNumber(value) { return number0.format(Number(value) || 0); }
+function formatPercentRatio(value) { return percent1.format(Number(value) || 0); }
+function formatPercent(value) { return `${new Intl.NumberFormat("es-CO", {minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(value)||0)} %`; }
+function formatDate(value) {
+  if (!value) return "—";
+  if (typeof value?.toDate === "function") value = value.toDate();
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) { const [y,m,d] = value.split("-"); return `${d}/${m}/${y}`; }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("es-CO", {day:"2-digit",month:"2-digit",year:"numeric"}).format(date);
+}
+function formatDateTime(value) {
+  if (!value) return "—";
+  if (typeof value?.toDate === "function") value = value.toDate();
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("es-CO", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
+}
+
+// ===== portfolio.js =====
+const aliases = Object.freeze({
+  client:["cliente","nombre_cliente","nombre","razon_social","deudor","nombre_deudor","tercero","nombre_tercero"],
+  id:["identificacion","numero_identificacion","nit","documento","cedula","nro_identificacion","num_identificacion"],
+  obligation:["obligacion","numero_obligacion","nro_obligacion","credito","numero_credito","pagare","numero_pagare","nro_pagare"],
+  line:["linea","linea_credito","producto","tipo_credito","modalidad"],
+  balance:["saldo","saldo_total","saldo_capital","capital","capital_pendiente","saldo_cartera","valor_saldo","saldo_obligacion"],
+  overdue:["saldo_vencido","vencido","capital_vencido","valor_vencido","cartera_vencida"],
+  daysPastDue:["dias_mora","dias_de_mora","dias_vencido","dias_vencidos","edad_mora"],
+  rating:["calificacion","calificacion_riesgo","categoria","categoria_riesgo","riesgo"],
+  provision:["provision","valor_provision","provision_total","deterioro","deterioro_cartera"],
+  dueDate:["fecha_vencimiento","vencimiento","fecha_proximo_vencimiento","proxima_fecha_pago"],
+  municipality:["municipio","ciudad","localidad"],
+  payment:["pago","valor_pago","recaudo","valor_recaudo","abono","valor_abono"],
+  paymentDate:["fecha_pago","fecha_recaudo","fecha_abono"]
+});
+
+function keysOf(rows) { return rows.length ? Object.keys(rows[0]) : []; }
+function findField(keys, list) {
+  const normalized = new Map(keys.map((k) => [normalizeKey(k), k]));
+  for (const alias of list) if (normalized.has(alias)) return normalized.get(alias);
+  for (const key of keys) { const nk = normalizeKey(key); if (list.some((alias) => nk.includes(alias))) return key; }
+  return null;
+}
+function detectFields(rows) {
+  const keys = keysOf(rows); const map = {};
+  for (const [semantic, list] of Object.entries(aliases)) map[semantic] = findField(keys, list);
+  return map;
+}
+function get(row, field) { return field ? row[field] : null; }
+function text(row, field) { const value = get(row, field); return value == null ? "" : String(value).trim(); }
+
+function normalizePortfolioRows(rows) {
+  const fields = detectFields(rows);
+  const normalized = rows.map((row, index) => ({
+    _index:index + 1,
+    raw:row,
+    client:text(row, fields.client) || "Sin nombre",
+    identification:text(row, fields.id) || "—",
+    obligation:text(row, fields.obligation) || "—",
+    line:text(row, fields.line) || "—",
+    balance:safeNumber(get(row, fields.balance)),
+    overdue:safeNumber(get(row, fields.overdue)),
+    daysPastDue:Math.max(0, Math.round(safeNumber(get(row, fields.daysPastDue)))),
+    rating:text(row, fields.rating) || "—",
+    provision:safeNumber(get(row, fields.provision)),
+    dueDate:get(row, fields.dueDate),
+    municipality:text(row, fields.municipality) || "—"
+  }));
+  return { fields, rows:normalized };
+}
+
+function portfolioSummary(normalizedRows) {
+  const total = normalizedRows.reduce((s,r) => s + r.balance, 0);
+  const overdue = normalizedRows.reduce((s,r) => s + Math.max(r.overdue, r.daysPastDue > 0 && !r.overdue ? r.balance : 0), 0);
+  const provision = normalizedRows.reduce((s,r) => s + r.provision, 0);
+  const clientMap = new Map();
+  for (const r of normalizedRows) {
+    const key = r.identification !== "—" ? r.identification : r.client.toLowerCase();
+    const item = clientMap.get(key) || { client:r.client, identification:r.identification, balance:0, overdue:0, maxDays:0, count:0 };
+    item.balance += r.balance; item.overdue += r.overdue; item.maxDays = Math.max(item.maxDays, r.daysPastDue); item.count += 1; clientMap.set(key, item);
+  }
+  const clients = [...clientMap.values()];
+  const clientsInArrears = clients.filter((c) => c.maxDays > 0 || c.overdue > 0).length;
+  return {
+    total, overdue, current:Math.max(0, total - overdue),
+    overdueRatio: total > 0 ? overdue / total : 0,
+    provision, obligations:normalizedRows.length, clients:clients.length, clientsInArrears,
+    clientRows:clients.sort((a,b) => b.balance - a.balance)
+  };
+}
+
+function agingBuckets(rows) {
+  const defs = [
+    {key:"current",label:"Al día",min:0,max:0},
+    {key:"1_30",label:"1–30 días",min:1,max:30},
+    {key:"31_60",label:"31–60 días",min:31,max:60},
+    {key:"61_90",label:"61–90 días",min:61,max:90},
+    {key:"91_180",label:"91–180 días",min:91,max:180},
+    {key:"181_360",label:"181–360 días",min:181,max:360},
+    {key:"gt360",label:">360 días",min:361,max:Infinity}
+  ];
+  return defs.map((d) => {
+    const selected = rows.filter((r) => r.daysPastDue >= d.min && r.daysPastDue <= d.max);
+    return { ...d, amount:selected.reduce((s,r) => s + r.balance, 0), count:selected.length };
+  });
+}
+
+function topExposures(rows, take = 8) {
+  return portfolioSummary(rows).clientRows.slice(0, take);
+}
+
+function groupByLine(rows) {
+  const map = new Map();
+  rows.forEach((r) => map.set(r.line || "Sin línea", (map.get(r.line || "Sin línea") || 0) + r.balance));
+  return [...map.entries()].map(([label, amount]) => ({label, amount})).sort((a,b) => b.amount - a.amount);
+}
+
+function extractPayments(rows) {
+  const fields = detectFields(rows);
+  const paymentField = fields.payment; const dateField = fields.paymentDate;
+  if (!paymentField) return { fields, rows:[], total:0 };
+  const normalized = rows.map((row,index) => ({
+    index:index+1, client:text(row, fields.client) || "Sin nombre", identification:text(row, fields.id) || "—",
+    obligation:text(row, fields.obligation) || "—", amount:safeNumber(get(row,paymentField)), date:get(row,dateField)
+  })).filter((r) => r.amount !== 0);
+  return { fields, rows:normalized, total:normalized.reduce((s,r) => s + r.amount,0) };
+}
+
+// ===== reports.js =====
+function filenameBase(cycleId, suffix) { return `Cartera_INFIHUILA_${cycleId || "sin_corte"}_${suffix}`.replace(/[^A-Za-z0-9_-]+/g,"_"); }
+
+function exportPortfolioExcel(rows, cycleId) {
+  if (!rows?.length) { showToast("Sin información", "No existen registros de cartera para exportar.", "warning"); return; }
+  const data = rows.map((r) => ({
+    Cliente:r.client, Identificación:r.identification, Obligación:r.obligation, Línea:r.line,
+    Saldo:r.balance, "Saldo vencido":r.overdue, "Días mora":r.daysPastDue, Calificación:r.rating,
+    Provisión:r.provision, Municipio:r.municipality
+  }));
+  const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet(data);
+  ws["!autofilter"] = { ref:ws["!ref"] }; ws["!freeze"] = { xSplit:0, ySplit:1 };
+  ws["!cols"] = [{wch:30},{wch:18},{wch:18},{wch:22},{wch:18},{wch:18},{wch:12},{wch:14},{wch:18},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws, "Cartera"); XLSX.writeFile(wb, `${filenameBase(cycleId,"Detalle")}.xlsx`);
+}
+
+function exportExecutiveExcel(summary, aging, cycleId) {
+  if (!summary) { showToast("Sin información", "No existe un resumen financiero disponible.", "warning"); return; }
+  const wb = XLSX.utils.book_new();
+  const kpis = [
+    ["Indicador","Valor"],["Cartera total",summary.total],["Cartera vigente",summary.current],["Cartera vencida",summary.overdue],
+    ["Índice cartera vencida",summary.overdueRatio],["Provisión",summary.provision],["Obligaciones",summary.obligations],["Clientes",summary.clients],["Clientes en mora",summary.clientsInArrears]
+  ];
+  const ws1 = XLSX.utils.aoa_to_sheet(kpis); ws1["!cols"]=[{wch:28},{wch:20}]; XLSX.utils.book_append_sheet(wb,ws1,"Resumen");
+  const ws2 = XLSX.utils.json_to_sheet((aging||[]).map((a)=>({Rango:a.label,Saldo:a.amount,Obligaciones:a.count}))); ws2["!cols"]=[{wch:20},{wch:20},{wch:15}]; XLSX.utils.book_append_sheet(wb,ws2,"Aging");
+  XLSX.writeFile(wb, `${filenameBase(cycleId,"Resumen_Ejecutivo")}.xlsx`);
+}
+
+function printExecutiveReport({ cycle, summary, aging, profile }) {
+  if (!cycle || !summary) { showToast("Sin información", "Primero debe existir un corte publicado con datos financieros reconocibles.", "warning"); return; }
+  const popup = window.open("", "_blank", "width=980,height=800");
+  if (!popup) { showToast("Ventana bloqueada", "Permita ventanas emergentes para generar el PDF.", "warning"); return; }
+  const rows = aging.map((a) => `<tr><td>${escapeHtml(a.label)}</td><td style="text-align:right">${formatMoney(a.amount)}</td><td style="text-align:right">${a.count}</td></tr>`).join("");
+  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Informe ejecutivo de cartera</title><style>
+  body{font-family:Arial,sans-serif;color:#173238;margin:32px}header{border-bottom:4px solid #006c72;padding-bottom:16px;margin-bottom:22px}h1{color:#004651;margin:0 0 6px}.meta{font-size:12px;color:#60757a}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.kpi{border:1px solid #dce6e7;border-radius:10px;padding:13px}.kpi small{display:block;color:#60757a}.kpi strong{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border-bottom:1px solid #dde6e7;padding:9px;font-size:12px}th{background:#004651;color:#fff;text-align:left}footer{margin-top:28px;border-top:1px solid #dce6e7;padding-top:10px;font-size:10px;color:#718387}@page{size:A4 portrait;margin:12mm}</style></head><body>
+  <header><h1>INFIHUILA · Informe ejecutivo de cartera</h1><div class="meta">Corte ${formatDate(cycle.cutoffDate)} · Generado ${formatDate(new Date())} · ${escapeHtml(profile?.displayName || profile?.email || "Usuario")}</div></header>
+  <div class="kpis"><div class="kpi"><small>Cartera total</small><strong>${formatMoney(summary.total)}</strong></div><div class="kpi"><small>Cartera vencida</small><strong>${formatMoney(summary.overdue)}</strong></div><div class="kpi"><small>ICV</small><strong>${formatPercentRatio(summary.overdueRatio)}</strong></div><div class="kpi"><small>Provisión</small><strong>${formatMoney(summary.provision)}</strong></div><div class="kpi"><small>Obligaciones</small><strong>${summary.obligations}</strong></div><div class="kpi"><small>Clientes en mora</small><strong>${summary.clientsInArrears}</strong></div></div>
+  <h2>Edades de cartera</h2><table><thead><tr><th>Rango</th><th>Saldo</th><th>Obligaciones</th></tr></thead><tbody>${rows}</tbody></table>
+  <footer>Documento generado desde Cartera INFIHUILA v3.3.2. Utilice la opción “Guardar como PDF” del cuadro de impresión del navegador.</footer>
+  <script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);
+  popup.document.close();
+}
+
+// ===== imports.js =====
+const encoder = new TextEncoder();
+
+function buildHeaderMap(headers) {
+  const used = new Map();
+  return headers.map((header, index) => {
+    let key = normalizeKey(header || `Campo_${index+1}`);
+    const n = (used.get(key) || 0) + 1; used.set(key, n);
+    if (n > 1) key = `${key}_${n}`;
+    return { source:String(header || `Campo ${index+1}`), key };
+  });
+}
+function cleanValue(value) {
+  if (value === undefined || value === null || value === "") return null;
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "boolean") return value;
+  return String(value).trim();
+}
+function parseSheet(sheet) {
+  const matrix = XLSX.utils.sheet_to_json(sheet, { header:1, defval:null, raw:true, blankrows:false });
+  const headerIndex = matrix.findIndex((row) => Array.isArray(row) && row.some((v) => v !== null && String(v).trim() !== ""));
+  if (headerIndex < 0) throw new Error("No se encontró una fila de encabezados.");
+  const headers = matrix[headerIndex].map((v,i) => v == null ? `Campo_${i+1}` : String(v).trim());
+  const headerMap = buildHeaderMap(headers); const rows = [];
+  for (const sourceRow of matrix.slice(headerIndex + 1)) {
+    if (!Array.isArray(sourceRow) || !sourceRow.some((v) => v !== null && String(v).trim() !== "")) continue;
+    const row = {}; headerMap.forEach((m,i) => { row[m.key] = cleanValue(sourceRow[i]); }); rows.push(row);
+  }
+  return { headerIndex, headerMap, rows };
+}
+function splitRows(rows) {
+  const chunks = []; let current = []; let bytes = 0;
+  const MAX_BYTES = 620_000; const MAX_ROWS = 250;
+  for (const row of rows) {
+    const size = encoder.encode(JSON.stringify(row)).length + 8;
+    if (current.length && (current.length >= MAX_ROWS || bytes + size > MAX_BYTES)) { chunks.push(current); current = []; bytes = 0; }
+    current.push(row); bytes += size;
+  }
+  if (current.length) chunks.push(current);
+  return chunks;
+}
+async function sha256(buffer) {
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2,"0")).join("");
+}
+
+async function analyzeExcel(file, cycleId, sourceType) {
+  if (!file) throw new Error("Seleccione un archivo Excel o CSV.");
+  const cycle = await getCycle(cycleId); if (!cycle) throw new Error("No existe el corte seleccionado.");
+  if (cycle.status !== "draft") throw new Error("Solo se puede importar información a cortes en borrador.");
+  const buffer = await file.arrayBuffer(); const hash = await sha256(buffer);
+  const workbook = XLSX.read(buffer, { type:"array", cellDates:true, raw:true });
+  const sheetName = workbook.SheetNames[0]; if (!sheetName) throw new Error("El archivo no contiene hojas.");
+  const parsed = parseSheet(workbook.Sheets[sheetName]); if (!parsed.rows.length) throw new Error("No se encontraron filas de datos.");
+  const chunks = splitRows(parsed.rows);
+  return { file, hash, buffer, sheetName, sourceType, cycleId, ...parsed, chunks };
+}
+
+function financialSummaryFromRows(rows) {
+  const normalized = normalizePortfolioRows(rows);
+  if (!normalized.fields.balance) return { detected:false, fields:normalized.fields };
+  const s = portfolioSummary(normalized.rows);
+  return { detected:true, fields:normalized.fields, total:s.total, overdue:s.overdue, current:s.current, overdueRatio:s.overdueRatio, provision:s.provision, obligations:s.obligations, clients:s.clients, clientsInArrears:s.clientsInArrears };
+}
+
+async function saveAnalyzedImport(analysis) {
+  const user = auth.currentUser; if (!user) throw new Error("Sesión no disponible.");
+  const { file, hash, sheetName, sourceType, cycleId, headerMap, rows, chunks } = analysis;
+  const jobId = uid("job");
+  await registerImportJob({
+    jobId, cycleId, sourceType, uploaderUid:user.uid, fileName:file.name, fileSize:file.size,
+    sha256:hash, sheetName, rowCount:rows.length, chunkCount:chunks.length, headerMap, status:"processing"
+  });
+  const operations = chunks.map((chunk,index) => (batch) => batch.set(doc(db, "CarteraChunks", `${jobId}_${String(index+1).padStart(4,"0")}`), {
+    cycleId, sourceType, jobId, sequence:index+1, rows:chunk, rowCount:chunk.length,
+    createdBy:user.uid, createdAt:serverTimestamp()
+  }));
+  await writeChunks(operations);
+  await completeImportJob(jobId);
+  await updateCycleAfterImport(cycleId, sourceType);
+
+  const previous = await getAggregate(cycleId, true) || {};
+  const sourceMeta = { ...(previous.sourceMeta || {}) };
+  sourceMeta[sourceType] = { jobId, fileName:file.name, sha256:hash, rows:rows.length, chunks:chunks.length, sheetName };
+  const aggregateUpdate = { sourceMeta, importJobs:Number(previous.importJobs || 0) + 1 };
+  if (sourceType === "ACRESC_P1") aggregateUpdate.financialSummary = financialSummaryFromRows(rows);
+  await mergeAggregate(cycleId, aggregateUpdate);
+  await audit("IMPORT_COMPLETED", "ImportJob", jobId, { cycleId, sourceType, fileName:file.name, rowCount:rows.length, chunkCount:chunks.length, sha256:hash });
+  const validation = await recalculateValidation(cycleId);
+  return { jobId, validation };
+}
+
+async function recalculateValidation(cycleId) {
+  const config = await getAppConfig(); const cycle = await getCycle(cycleId);
+  if (!cycle) throw new Error("No existe el corte.");
+  const required = Array.isArray(config?.sourceTypes) ? config.sourceTypes : [];
+  const imported = Array.isArray(cycle.importedSources) ? cycle.importedSources : [];
+  const missing = required.filter((source) => !imported.includes(source));
+  const ready = required.length > 0 && missing.length === 0;
+  const payload = { requiredSources:required, importedSources:imported, missingSources:missing, checks:{ requiredSourcesComplete:ready }, readyToPublish:ready };
+  await saveValidation(cycleId, payload);
+  return payload;
+}
+
+// ===== admin.js =====
+window.__CARTERA_ASSET_BOOT__ = true;
+// v3.3.2 boot marker: confirms the ES-module graph loaded under HTTP/HTTPS.
+window.__carteraBootReady = true;
+if (window.__carteraBootTimer) clearTimeout(window.__carteraBootTimer);
+document.getElementById("bootFailure")?.remove();
+const state = {
+  user:null, profile:null, config:null, years:[], selectedYear:null, yearDoc:null, cycle:null,
+  aggregate:null, validation:null, portfolio:null, summary:null, aging:null, lines:null,
+  payments:null, cycles:[], importJobs:[], users:null, analyzedImport:null,
+  portfolioPage:1, portfolioPageSize:25, portfolioSearch:"", portfolioLine:"", portfolioMora:"all"
+};
+
+let access;
+try {
+  access = await requireAuthorizedUser();
+} catch (error) {
+  console.error("No fue posible validar el acceso al workspace", error);
+  const gate = qs("#authGate");
+  if (gate) gate.innerHTML = `<div class="auth-gate-card card"><img src="data:image/png;base64,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" alt="INFIHUILA"><strong>No fue posible validar el acceso</strong><p>${String(error?.message || error)}</p><a class="btn btn-primary" href="./index.html">Volver al inicio</a></div>`;
+  throw error;
+}
+state.user = access.user; state.profile = access.profile;
+qs("#authGate").hidden = true; qs("#appShell").hidden = false;
+
+function refreshIcons(){ if(window.lucide) window.lucide.createIcons(); }
+window.addEventListener("load", refreshIcons); setTimeout(refreshIcons, 0);
+
+function setupRoleUI(){
+  const isAdmin = state.profile.role === "admin"; const isManager = hasRole(state.profile, MANAGER_ROLES);
+  qsa("[data-admin-only]").forEach((el)=>el.hidden=!isAdmin);
+  qsa("[data-manager-only]").forEach((el)=>el.hidden=!isManager);
+  qs("#profileName").textContent = state.profile.displayName || state.user.email;
+  qs("#profileRole").textContent = roleLabel(state.profile.role);
+  qs("#profileAvatar").textContent = initials(state.profile.displayName || state.user.email);
+}
+setupRoleUI();
+
+async function bootstrap({retry=false} = {}){
+  try{
+    setSyncState("loading", retry ? "Reconectando" : "Sincronizando");
+    if (retry) {
+      const { invalidateCache } = await import("./firestore.js");
+      invalidateCache();
+    }
+
+    const [config, years, health] = await Promise.all([
+      getAppConfig(retry),
+      getActiveYears(retry),
+      getBackendHealth()
+    ]);
+
+    state.config=config;
+    state.years=years;
+
+    console.info("Backend health", health);
+
+    if(!health.connected) {
+      throw new Error("Firebase respondió, pero no fue posible validar Config/app y el perfil institucional.");
+    }
+    if(!years.length) {
+      throw new Error("Firestore está conectado, pero no se encontró una vigencia activa. Revise Vigencias/2026 → isActive = true.");
+    }
+
+    const yearSelect=qs("#yearSelect");
+    yearSelect.innerHTML=years
+      .map((y)=>`<option value="${escapeHtml(y.id)}">Vigencia ${escapeHtml(y.id)}</option>`)
+      .join("");
+
+    const preferred = years[0].id;
+    yearSelect.value=preferred;
+    await loadYear(preferred);
+    renderConfig();
+
+    setSyncState(navigator.onLine?"online":"offline", navigator.onLine ? "Sincronizado" : "Sin conexión");
+    if (retry) showToast("Backend sincronizado", `Vigencia activa: ${preferred}`,"success",3500);
+  }catch(error){
+    console.error("Bootstrap",error);
+    setSyncState("offline","Error");
+    showToast("No fue posible cargar el backend",error.message,"error",7000);
+    renderFatal(error.message);
+  }
+}
+
+async function loadYear(year){
+  setSyncState("loading"); state.selectedYear=String(year); state.portfolio=null; state.summary=null; state.aging=null; state.lines=null; state.payments=null; state.users=null;
+  const result=await getCurrentCycleForYear(year); state.yearDoc=result.year; state.cycle=result.cycle;
+  state.aggregate=state.cycle?await getAggregate(state.cycle.id):null;
+  state.validation=state.cycle?await getValidation(state.cycle.id):null;
+  updateCutBadges();
+  await renderCurrentView(true);
+  setSyncState(navigator.onLine?"online":"offline");
+}
+
+function updateCutBadges(){
+  const text=state.cycle?`Corte ${formatDate(state.cycle.cutoffDate)}`:"Sin corte publicado";
+  ["#currentCutBadge","#summaryCutBadge"].forEach((s)=>{const el=qs(s);if(el)el.textContent=text;});
+}
+
+function empty(title,message,action=""){
+  return `<div class="card"><div class="empty-state"><div class="empty-icon"><i data-lucide="database" size="24"></i></div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(message)}</p>${action}</div></div>`;
+}
+function renderFatal(message){
+  qs("#dayContent").innerHTML = `
+    <div class="card">
+      <div class="empty-state backend-error-state">
+        <div class="empty-icon"><i data-lucide="database-zap" size="24"></i></div>
+        <h3>No fue posible cargar la información</h3>
+        <p>${escapeHtml(message)}</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary btn-sm" data-action="retry-backend">
+            <i data-lucide="refresh-cw" size="16"></i> Reintentar sincronización
+          </button>
+          <button class="btn btn-outline btn-sm" data-action="open-data">
+            Revisar cortes y datos
+          </button>
+        </div>
+      </div>
+    </div>`;
+  refreshIcons();
+}
+
+async function ensurePortfolio(){
+  if(state.portfolio) return state.portfolio;
+  if(!state.cycle) return null;
+  setSyncState("loading","Cargando cartera");
+  const {job,rows}=await getSourceRows(state.cycle.id,"ACRESC_P1");
+  if(!job||!rows.length){setSyncState("online");return null;}
+  const normalized=normalizePortfolioRows(rows);
+  if(!normalized.fields.balance){
+    state.portfolio={...normalized,job,unrecognized:true}; setSyncState("online"); return state.portfolio;
+  }
+  state.portfolio={...normalized,job}; state.summary=portfolioSummary(normalized.rows); state.aging=agingBuckets(normalized.rows); state.lines=groupByLine(normalized.rows);
+  qs("#portfolioCountBadge").textContent=formatNumber(normalized.rows.length);
+  setSyncState("online"); return state.portfolio;
+}
+
+async function ensurePayments(){
+  if(state.payments) return state.payments;
+  if(!state.cycle) return null;
+  const {job,rows}=await getSourceRows(state.cycle.id,"ACREPC1");
+  state.payments=job?{...extractPayments(rows),job}:null; return state.payments;
+}
+
+function kpiCard(label,value,icon,foot="",critical=false){return `<article class="card kpi-card ${critical?"critical":""}"><div class="kpi-top"><div><div class="kpi-label">${escapeHtml(label)}</div><div class="kpi-value">${value}</div></div><div class="kpi-icon"><i data-lucide="${icon}" size="19"></i></div></div><div class="kpi-foot"><span>${foot||"Corte oficial"}</span></div></article>`;}
+
+async function renderDay(){
+  const root=qs("#dayContent");
+  if(!state.cycle){root.innerHTML=empty("Sin corte oficial publicado",`Aún no existe un corte de cartera publicado para la vigencia ${state.selectedYear}.`,hasRole(state.profile,MANAGER_ROLES)?`<button class="btn btn-primary btn-sm" data-action="new-cycle">Gestionar cortes</button>`:"");refreshIcons();return;}
+  const p=await ensurePortfolio();
+  if(!p||p.unrecognized){root.innerHTML=empty("Corte publicado sin resumen financiero",p?.unrecognized?"La fuente ACRESC_P1 existe, pero no se identificó una columna de saldo con los alias financieros configurados.":"El corte oficial todavía no contiene una fuente ACRESC_P1 utilizable.");refreshIcons();return;}
+  const s=state.summary; const top=topExposures(p.rows,5).filter((x)=>x.maxDays>0||x.overdue>0);
+  root.innerHTML=`<div class="kpi-grid">${kpiCard("Cartera total",formatMoney(s.total),"landmark",`Corte ${formatDate(state.cycle.cutoffDate)}`)}${kpiCard("Cartera vencida",formatMoney(s.overdue),"triangle-alert",`${formatPercentRatio(s.overdueRatio)} del total`,s.overdue>0)}${kpiCard("Clientes en mora",formatNumber(s.clientsInArrears),"users-round","Casos que requieren seguimiento",s.clientsInArrears>0)}${kpiCard("Provisión",formatMoney(s.provision),"shield-check","Valor detectado en la fuente")}</div>
+  <div class="dashboard-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Prioridades de gestión</h2><p class="card-subtitle">Mayores exposiciones con mora identificada.</p></div><span class="badge badge-warning">${top.length} prioritarios</span></div><div class="card-body">${top.length?`<div class="priority-list">${top.map((x,i)=>`<div class="priority-item"><div class="priority-rank">${i+1}</div><div><div class="priority-name">${escapeHtml(x.client)}</div><div class="priority-meta">${escapeHtml(x.identification)} · ${formatNumber(x.maxDays)} días de mora</div></div><div class="priority-value">${formatMoney(x.balance)}</div></div>`).join("")}</div>`:`<div class="empty-state"><h3>Sin exposiciones prioritarias</h3><p>No se identificaron clientes en mora dentro de la fuente principal.</p></div>`}</div></article>
+  <div class="stack"><article class="card"><div class="card-header"><div><h2 class="card-title">Estado del corte</h2><p class="card-subtitle">Trazabilidad del corte oficial.</p></div></div><div class="card-body"><div class="priority-list"><div class="priority-item"><div class="priority-rank" style="background:var(--success-soft);color:var(--success)"><i data-lucide="check" size="16"></i></div><div><div class="priority-name">Publicado</div><div class="priority-meta">${formatDate(state.cycle.cutoffDate)}</div></div><span class="badge badge-success">Oficial</span></div><div class="priority-item"><div class="priority-rank" style="background:var(--info-soft);color:var(--info)"><i data-lucide="file-check" size="16"></i></div><div><div class="priority-name">Fuentes importadas</div><div class="priority-meta">${(state.cycle.importedSources||[]).length} de ${(state.config?.sourceTypes||[]).length}</div></div><strong>${formatNumber(state.cycle.importCount||0)}</strong></div></div></div></article></div></div>`;
+  refreshIcons();
+}
+
+async function renderSummary(){
+  const root=qs("#summaryContent");
+  if(!state.cycle){root.innerHTML=empty("Sin corte oficial publicado",`No existe información financiera oficial para ${state.selectedYear}.`);refreshIcons();return;}
+  const p=await ensurePortfolio(); if(!p||p.unrecognized){root.innerHTML=empty("Resumen no disponible","La fuente principal no contiene campos financieros reconocibles para construir el resumen sin inventar datos.");refreshIcons();return;}
+  const s=state.summary, maxA=Math.max(...state.aging.map((a)=>a.amount),1), maxL=Math.max(...state.lines.map((l)=>l.amount),1);
+  const currentPct=s.total?Math.max(0,s.current/s.total*100):100;
+  root.innerHTML=`<div class="kpi-grid">${kpiCard("Cartera total",formatMoney(s.total),"landmark",`${formatNumber(s.obligations)} obligaciones`)}${kpiCard("Cartera vigente",formatMoney(s.current),"circle-check-big",`${formatPercentRatio(s.total?s.current/s.total:0)} del total`)}${kpiCard("Cartera vencida",formatMoney(s.overdue),"circle-alert",`${formatPercentRatio(s.overdueRatio)} ICV`,s.overdue>0)}${kpiCard("Provisión",formatMoney(s.provision),"shield",`${formatNumber(s.clients)} clientes`)}</div>
+  <div class="dashboard-grid"><div class="stack"><article class="card"><div class="card-header"><div><h2 class="card-title">Edades de cartera</h2><p class="card-subtitle">Saldo según días de mora detectados.</p></div></div><div class="chart-area"><div class="bar-list">${state.aging.map((a)=>`<div class="bar-row"><div class="bar-label">${a.label}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(1,a.amount/maxA*100)}%"></div></div><div class="bar-value">${formatMoney(a.amount)}</div></div>`).join("")}</div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Cartera por línea</h2><p class="card-subtitle">Participación de las principales líneas detectadas.</p></div></div><div class="chart-area"><div class="bar-list">${state.lines.slice(0,8).map((l)=>`<div class="bar-row"><div class="bar-label">${escapeHtml(l.label)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(1,l.amount/maxL*100)}%"></div></div><div class="bar-value">${formatMoney(l.amount)}</div></div>`).join("")}</div></div></article></div>
+  <div class="stack"><article class="card"><div class="card-header"><div><h2 class="card-title">Composición</h2><p class="card-subtitle">Vigente frente a vencida.</p></div></div><div class="card-body donut-wrap"><div class="donut" style="background:conic-gradient(var(--infi-primary) 0 ${currentPct}%, var(--warning) ${currentPct}% 100%)"><div class="donut-center"><div><strong>${formatPercentRatio(1-s.overdueRatio)}</strong><span>vigente</span></div></div></div><div class="legend"><div class="legend-item"><span class="legend-dot"></span><span>Cartera vigente</span><strong>${formatMoney(s.current)}</strong></div><div class="legend-item"><span class="legend-dot" style="background:var(--warning)"></span><span>Cartera vencida</span><strong>${formatMoney(s.overdue)}</strong></div></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Concentración</h2><p class="card-subtitle">Mayores exposiciones por cliente.</p></div></div><div class="card-body">${topExposures(p.rows,5).map((x)=>`<div class="priority-item"><div><div class="priority-name">${escapeHtml(x.client)}</div><div class="priority-meta">${escapeHtml(x.identification)}</div></div><div></div><div class="priority-value">${formatMoney(x.balance)}</div></div>`).join("")}</div></article></div></div>`;
+  refreshIcons();
+}
+
+function filteredPortfolioRows(){
+  let rows=state.portfolio?.rows||[]; const search=state.portfolioSearch.toLowerCase().trim();
+  if(search) rows=rows.filter((r)=>[r.client,r.identification,r.obligation,r.line,r.municipality].some((v)=>String(v||"").toLowerCase().includes(search)));
+  if(state.portfolioLine) rows=rows.filter((r)=>r.line===state.portfolioLine);
+  if(state.portfolioMora==="current") rows=rows.filter((r)=>r.daysPastDue===0);
+  if(state.portfolioMora==="late") rows=rows.filter((r)=>r.daysPastDue>0);
+  if(state.portfolioMora==="30") rows=rows.filter((r)=>r.daysPastDue>30);
+  return rows;
+}
+
+async function renderPortfolio(){
+  const root=qs("#portfolioContent"); if(!state.cycle){root.innerHTML=empty("Sin corte publicado","No existe cartera oficial para consultar.");refreshIcons();return;}
+  const p=await ensurePortfolio(); if(!p||p.unrecognized){root.innerHTML=empty("Detalle no disponible","No existe una fuente ACRESC_P1 con campos de cartera reconocibles.");refreshIcons();return;}
+  const lines=[...new Set(p.rows.map((r)=>r.line).filter(Boolean))].sort();
+  const rows=filteredPortfolioRows(); const pages=Math.max(1,Math.ceil(rows.length/state.portfolioPageSize)); state.portfolioPage=Math.min(state.portfolioPage,pages); const start=(state.portfolioPage-1)*state.portfolioPageSize; const page=rows.slice(start,start+state.portfolioPageSize);
+  root.innerHTML=`<div class="filterbar"><div class="field search-grow"><label>Buscar</label><input class="input" id="portfolioSearch" value="${escapeHtml(state.portfolioSearch)}" placeholder="Cliente, identificación, obligación..."></div><div class="field"><label>Línea</label><select class="select" id="portfolioLine"><option value="">Todas</option>${lines.map((l)=>`<option ${state.portfolioLine===l?"selected":""}>${escapeHtml(l)}</option>`).join("")}</select></div><div class="field"><label>Mora</label><select class="select" id="portfolioMora"><option value="all">Todas</option><option value="current" ${state.portfolioMora==="current"?"selected":""}>Al día</option><option value="late" ${state.portfolioMora==="late"?"selected":""}>Con mora</option><option value="30" ${state.portfolioMora==="30"?"selected":""}>>30 días</option></select></div></div>
+  <div class="table-shell"><table><thead><tr><th>Cliente</th><th>Identificación</th><th>Obligación</th><th>Línea</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vencido</th><th style="text-align:right">Días mora</th><th>Calificación</th><th>Municipio</th></tr></thead><tbody>${page.map((r)=>`<tr><td><strong>${escapeHtml(r.client)}</strong></td><td>${escapeHtml(r.identification)}</td><td>${escapeHtml(r.obligation)}</td><td>${escapeHtml(r.line)}</td><td class="numeric">${formatMoney(r.balance)}</td><td class="numeric">${formatMoney(r.overdue)}</td><td class="numeric"><span class="badge ${r.daysPastDue>30?"badge-danger":r.daysPastDue>0?"badge-warning":"badge-success"}">${formatNumber(r.daysPastDue)}</span></td><td>${escapeHtml(r.rating)}</td><td>${escapeHtml(r.municipality)}</td></tr>`).join("")}</tbody></table></div>
+  <div class="pagination"><span>Mostrando ${rows.length?start+1:0}–${Math.min(start+state.portfolioPageSize,rows.length)} de ${formatNumber(rows.length)}</span><div class="pager-actions"><button class="btn btn-outline btn-sm" id="portfolioPrev" ${state.portfolioPage<=1?"disabled":""}>Anterior</button><span class="badge">${state.portfolioPage} / ${pages}</span><button class="btn btn-outline btn-sm" id="portfolioNext" ${state.portfolioPage>=pages?"disabled":""}>Siguiente</button></div></div>`;
+  qs("#portfolioSearch").addEventListener("input",debounce((e)=>{state.portfolioSearch=e.target.value;state.portfolioPage=1;renderPortfolio();},220));
+  qs("#portfolioLine").addEventListener("change",(e)=>{state.portfolioLine=e.target.value;state.portfolioPage=1;renderPortfolio();});
+  qs("#portfolioMora").addEventListener("change",(e)=>{state.portfolioMora=e.target.value;state.portfolioPage=1;renderPortfolio();});
+  qs("#portfolioPrev").addEventListener("click",()=>{state.portfolioPage--;renderPortfolio();}); qs("#portfolioNext").addEventListener("click",()=>{state.portfolioPage++;renderPortfolio();}); refreshIcons();
+}
+
+async function renderClients(){
+  const root=qs("#clientsContent"); const p=await ensurePortfolio(); if(!p||p.unrecognized){root.innerHTML=empty("Clientes no disponibles","Se requiere una fuente de cartera reconocible.");refreshIcons();return;}
+  const clients=state.summary.clientRows;
+  root.innerHTML=`<div class="kpi-grid">${kpiCard("Clientes",formatNumber(clients.length),"users-round","Con exposición identificada")}${kpiCard("Clientes en mora",formatNumber(state.summary.clientsInArrears),"user-round-x","Seguimiento prioritario",state.summary.clientsInArrears>0)}${kpiCard("Mayor exposición",clients[0]?formatMoney(clients[0].balance):formatMoney(0),"building-2",clients[0]?.client||"Sin información")}${kpiCard("Cartera promedio",formatMoney(clients.length?state.summary.total/clients.length:0),"chart-no-axes-column","Promedio por cliente")}</div><div class="table-shell"><table><thead><tr><th>Cliente</th><th>Identificación</th><th style="text-align:right">Obligaciones</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vencido</th><th style="text-align:right">Máx. días mora</th></tr></thead><tbody>${clients.slice(0,200).map((c)=>`<tr><td><strong>${escapeHtml(c.client)}</strong></td><td>${escapeHtml(c.identification)}</td><td class="numeric">${formatNumber(c.count)}</td><td class="numeric">${formatMoney(c.balance)}</td><td class="numeric">${formatMoney(c.overdue)}</td><td class="numeric">${formatNumber(c.maxDays)}</td></tr>`).join("")}</tbody></table></div>`; refreshIcons();
+}
+
+async function renderCollections(){
+  const root=qs("#collectionsContent"); if(!state.cycle){root.innerHTML=empty("Sin corte publicado","No existe una fuente oficial de recaudos para consultar.");refreshIcons();return;}
+  const data=await ensurePayments(); if(!data||!data.rows.length){root.innerHTML=empty("Recaudos no identificados","No existe una importación ACREPC1 con una columna de pago/recaudo reconocible para el corte oficial.");refreshIcons();return;}
+  root.innerHTML=`<div class="kpi-grid">${kpiCard("Recaudo identificado",formatMoney(data.total),"wallet-cards",`${formatNumber(data.rows.length)} movimientos`)}${kpiCard("Promedio por movimiento",formatMoney(data.rows.length?data.total/data.rows.length:0),"calculator","Fuente ACREPC1")}</div><div class="table-shell"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Identificación</th><th>Obligación</th><th style="text-align:right">Recaudo</th></tr></thead><tbody>${data.rows.slice(0,300).map((r)=>`<tr><td>${formatDate(r.date)}</td><td><strong>${escapeHtml(r.client)}</strong></td><td>${escapeHtml(r.identification)}</td><td>${escapeHtml(r.obligation)}</td><td class="numeric">${formatMoney(r.amount)}</td></tr>`).join("")}</tbody></table></div>`;refreshIcons();
+}
+
+async function renderRisk(){
+  const root=qs("#riskContent"); const p=await ensurePortfolio(); if(!p||p.unrecognized){root.innerHTML=empty("Riesgo no disponible","No se pueden construir métricas de riesgo sin una fuente de cartera reconocible.");refreshIcons();return;}
+  const max=Math.max(...state.aging.map((a)=>a.amount),1); const critical=p.rows.filter((r)=>r.daysPastDue>90).sort((a,b)=>b.daysPastDue-a.daysPastDue||b.balance-a.balance).slice(0,20);
+  root.innerHTML=`<div class="kpi-grid">${kpiCard("ICV",formatPercentRatio(state.summary.overdueRatio),"gauge",formatMoney(state.summary.overdue),state.summary.overdueRatio>0.1)}${kpiCard(">90 días",formatMoney(p.rows.filter(r=>r.daysPastDue>90).reduce((s,r)=>s+r.balance,0)),"siren","Exposición crítica")}${kpiCard("Provisión",formatMoney(state.summary.provision),"shield-check","Valor detectado")}${kpiCard("Clientes en mora",formatNumber(state.summary.clientsInArrears),"users-round","Con saldo o días en mora")}</div><div class="dashboard-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Aging</h2><p class="card-subtitle">Distribución por días de mora.</p></div></div><div class="chart-area"><div class="bar-list">${state.aging.map((a)=>`<div class="bar-row"><div class="bar-label">${a.label}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(1,a.amount/max*100)}%;background:${a.min>90?'var(--danger)':'var(--infi-primary)'}"></div></div><div class="bar-value">${formatMoney(a.amount)}</div></div>`).join("")}</div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Casos críticos</h2><p class="card-subtitle">Obligaciones con más de 90 días de mora.</p></div></div><div class="card-body">${critical.length?critical.map((r)=>`<div class="priority-item"><div class="priority-rank">${formatNumber(r.daysPastDue)}</div><div><div class="priority-name">${escapeHtml(r.client)}</div><div class="priority-meta">${escapeHtml(r.obligation)} · ${escapeHtml(r.line)}</div></div><div class="priority-value">${formatMoney(r.balance)}</div></div>`).join(""):`<div class="empty-state"><h3>Sin casos >90 días</h3><p>No se identificaron obligaciones en este rango.</p></div>`}</div></article></div>`;refreshIcons();
+}
+
+async function renderMaturities(){
+  const root=qs("#maturitiesContent"); const p=await ensurePortfolio(); if(!p||p.unrecognized){root.innerHTML=empty("Vencimientos no disponibles","Se requiere una fuente de cartera reconocible.");refreshIcons();return;}
+  const hasDates=!!p.fields.dueDate; let rows=[...p.rows];
+  if(hasDates) rows.sort((a,b)=>new Date(a.dueDate||"9999-12-31")-new Date(b.dueDate||"9999-12-31")); else rows.sort((a,b)=>b.daysPastDue-a.daysPastDue);
+  root.innerHTML=`<div class="notice">${hasDates?"Ordenado por la fecha de vencimiento detectada en ACRESC_P1.":"La fuente no contiene una fecha de vencimiento reconocible; se presenta priorización por días de mora."}</div><div class="table-shell"><table><thead><tr><th>Cliente</th><th>Obligación</th><th>${hasDates?"Vencimiento":"Días mora"}</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vencido</th></tr></thead><tbody>${rows.slice(0,250).map((r)=>`<tr><td><strong>${escapeHtml(r.client)}</strong></td><td>${escapeHtml(r.obligation)}</td><td>${hasDates?formatDate(r.dueDate):formatNumber(r.daysPastDue)}</td><td class="numeric">${formatMoney(r.balance)}</td><td class="numeric">${formatMoney(r.overdue)}</td></tr>`).join("")}</tbody></table></div>`;refreshIcons();
+}
+
+async function renderData(){
+  if(!hasRole(state.profile,MANAGER_ROLES)) return;
+  const root=qs("#dataContent"); state.cycles=await getCycles(true); const activeDraft=state.cycles.find((c)=>c.status==="draft");
+  const sourceTypes=state.config?.sourceTypes||[]; const imported=activeDraft?.importedSources||[];
+  state.importJobs=activeDraft?await getImportJobs(activeDraft.id):[];
+  root.innerHTML=`${activeDraft?`<article class="card" style="margin-bottom:16px"><div class="card-header"><div><h2 class="card-title">Corte en trabajo · ${formatDate(activeDraft.cutoffDate)}</h2><p class="card-subtitle">${escapeHtml(activeDraft.label||activeDraft.id)}</p></div><span class="badge badge-warning">Borrador</span></div><div class="card-body"><div class="source-grid">${sourceTypes.map((s)=>`<div class="source-chip ${imported.includes(s)?"done":""}"><strong>${escapeHtml(s)}</strong><span>${imported.includes(s)?"Cargada":"Pendiente"}</span></div>`).join("")}</div><div class="view-tools" style="margin-top:16px"><button class="btn btn-outline btn-sm" data-validate-cycle="${escapeHtml(activeDraft.id)}">Validar corte</button>${hasRole(state.profile,PUBLISHER_ROLES)?`<button class="btn btn-primary btn-sm" data-publish-cycle="${escapeHtml(activeDraft.id)}">Publicar corte</button>`:""}</div></div></article>`:empty("Sin cortes en borrador","Puede crear un nuevo corte para iniciar la carga de fuentes.",`<button class="btn btn-primary btn-sm" data-action="new-cycle">Nuevo corte</button>`)}
+  <div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Historial de cortes</h2><p class="card-subtitle">Borradores y cortes publicados.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Corte</th><th>Estado</th><th>Fuentes</th><th>Creado</th></tr></thead><tbody>${state.cycles.length?state.cycles.map((c)=>`<tr><td><strong>${formatDate(c.cutoffDate)}</strong><br><span class="muted">${escapeHtml(c.label||c.id)}</span></td><td><span class="badge ${c.status==="published"?"badge-success":"badge-warning"}">${c.status==="published"?"Publicado":"Borrador"}</span></td><td>${(c.importedSources||[]).length} / ${sourceTypes.length}</td><td>${formatDateTime(c.createdAt)}</td></tr>`).join(""):`<tr><td colspan="4">Sin cortes.</td></tr>`}</tbody></table></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Importaciones del borrador</h2><p class="card-subtitle">Archivo, fuente y huella SHA-256.</p></div></div><div class="card-body"><div class="table-shell"><table><thead><tr><th>Fuente</th><th>Archivo</th><th>Filas</th><th>SHA-256</th></tr></thead><tbody>${state.importJobs.length?state.importJobs.map((j)=>`<tr><td><strong>${escapeHtml(j.sourceType)}</strong></td><td>${escapeHtml(j.fileName)}</td><td>${formatNumber(j.rowCount)}</td><td class="mono" title="${escapeHtml(j.sha256)}">${escapeHtml(String(j.sha256||"").slice(0,10))}…</td></tr>`).join(""):`<tr><td colspan="4">Sin importaciones.</td></tr>`}</tbody></table></div></div></article></div>`;
+  qsa("[data-validate-cycle]",root).forEach((b)=>b.addEventListener("click",()=>validateCycleAction(b.dataset.validateCycle)));
+  qsa("[data-publish-cycle]",root).forEach((b)=>b.addEventListener("click",()=>publishCycleAction(b.dataset.publishCycle))); refreshIcons();
+}
+
+async function validateCycleAction(cycleId){
+  try{setSyncState("loading");const v=await recalculateValidation(cycleId);showToast(v.readyToPublish?"Corte listo para publicar":"Validación pendiente",v.readyToPublish?"Todas las fuentes obligatorias están presentes.":`Faltan: ${v.missingSources.join(", ")}`,v.readyToPublish?"success":"warning",6000);await renderData();}
+  catch(e){showToast("Error de validación",e.message,"error");}finally{setSyncState("online");}
+}
+async function publishCycleAction(cycleId){
+  if(!confirm("¿Publicar este corte como oficial? Después de publicarlo quedará protegido contra modificaciones."))return;
+  try{setSyncState("loading");await recalculateValidation(cycleId);await publishCycle(cycleId);showToast("Corte publicado","La vigencia fue actualizada con el nuevo corte oficial.","success");await loadYear(state.selectedYear);await renderData();}
+  catch(e){showToast("No fue posible publicar",e.message,"error",6500);}finally{setSyncState("online");}
+}
+
+async function renderReports(){
+  const root=qs("#reportsContent");
+  root.innerHTML=`<div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Resumen ejecutivo</h2><p class="card-subtitle">KPIs y edades de cartera.</p></div><i data-lucide="file-chart-column" size="22"></i></div><div class="card-body"><p class="muted" style="font-size:12px;line-height:1.5">Genera Excel o PDF con el corte oficial de la vigencia seleccionada.</p><div class="view-tools"><button class="btn btn-outline" data-report="executive-excel">Excel</button><button class="btn btn-primary" data-report="executive-pdf">PDF</button></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Detalle de cartera</h2><p class="card-subtitle">Obligaciones y campos normalizados.</p></div><i data-lucide="sheet" size="22"></i></div><div class="card-body"><p class="muted" style="font-size:12px;line-height:1.5">Exporta el detalle visible del corte ACRESC_P1 a Excel.</p><button class="btn btn-outline" data-report="detail-excel">Exportar Excel</button></div></article></div>`;
+  qsa("[data-report]",root).forEach((b)=>b.addEventListener("click",()=>runReport(b.dataset.report)));refreshIcons();
+}
+
+async function renderUsers(){
+  if(state.profile.role!=="admin")return;const root=qs("#usersContent");state.users=await getUsers();
+  root.innerHTML=`<div class="notice">Firebase Authentication administra las credenciales. Esta pantalla controla exclusivamente el perfil, rol y estado habilitado por Firestore.</div><div class="table-shell"><table><thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>${state.users.map((u)=>`<tr><td><strong>${escapeHtml(u.displayName||"Sin nombre")}</strong></td><td>${escapeHtml(u.email)}</td><td>${escapeHtml(roleLabel(u.role))}</td><td><span class="badge ${u.isActive?"badge-success":"badge-danger"}">${u.isActive?"Activo":"Inactivo"}</span></td><td style="text-align:right"><button class="btn btn-outline btn-sm" data-edit-user="${escapeHtml(u.id)}">Editar</button></td></tr>`).join("")}</tbody></table></div>`;
+  qsa("[data-edit-user]",root).forEach((b)=>b.addEventListener("click",()=>openUserEditor(b.dataset.editUser)));refreshIcons();
+}
+function openUserEditor(id){const u=state.users.find((x)=>x.id===id);if(!u)return;qs("#editUserUid").value=u.id;qs("#editUserName").value=`${u.displayName||""} · ${u.email||""}`;qs("#editUserRole").value=u.role;qs("#editUserActive").value=String(u.isActive===true);qs("#userFormMessage").textContent="";openModal("userModal");}
+
+function renderConfig(){
+  const root=qs("#configContent");if(!root||state.profile.role!=="admin")return;const c=state.config||{};
+  root.innerHTML=`<div class="admin-grid"><article class="card"><div class="card-header"><div><h2 class="card-title">Aplicativo</h2><p class="card-subtitle">Configuración central de Firestore.</p></div></div><div class="card-body"><div class="priority-list"><div class="priority-item"><div><div class="priority-name">Nombre</div><div class="priority-meta">${escapeHtml(c.appName||"—")}</div></div></div><div class="priority-item"><div><div class="priority-name">Schema</div><div class="priority-meta">${escapeHtml(c.schemaVersion||"—")}</div></div></div><div class="priority-item"><div><div class="priority-name">Dominio</div><div class="priority-meta">${escapeHtml(c.allowedDomain||"—")}</div></div></div><div class="priority-item"><div><div class="priority-name">Zona horaria</div><div class="priority-meta">${escapeHtml(c.timezone||"—")}</div></div></div></div></div></article><article class="card"><div class="card-header"><div><h2 class="card-title">Fuentes obligatorias</h2><p class="card-subtitle">Configuradas en Config/app.</p></div></div><div class="card-body"><div class="source-grid">${(c.sourceTypes||[]).map((s)=>`<div class="source-chip"><strong>${escapeHtml(s)}</strong><span>Requerida</span></div>`).join("")}</div></div></article></div>`;refreshIcons();
+}
+
+async function renderCurrentView(force=false){
+  const active=qs(".view.active");if(!active)return;const name=active.id.replace("view-","");
+  try{if(name==="day")await renderDay();if(name==="summary")await renderSummary();if(name==="portfolio")await renderPortfolio();if(name==="clients")await renderClients();if(name==="collections")await renderCollections();if(name==="risk")await renderRisk();if(name==="maturities")await renderMaturities();if(name==="data")await renderData();if(name==="reports")await renderReports();if(name==="users")await renderUsers();if(name==="config")renderConfig();}
+  catch(error){console.error(`Render ${name}`,error);qs(`#${active.id} > div:last-child`)?.replaceChildren();showToast("Error al cargar la vista",error.message,"error");}
+}
+
+async function navigate(view){
+  const target=qs(`#view-${view}`);if(!target||target.hidden)return;qsa(".view").forEach((v)=>v.classList.remove("active"));target.classList.add("active");qsa("[data-view]").forEach((b)=>b.classList.toggle("active",b.dataset.view===view));qs("#pageTitle").textContent=target.dataset.title||"Cartera";qs("#breadcrumb").textContent=target.dataset.crumb||"Cartera";history.replaceState(null,"",`#${view}`);closeMobileSidebar();await renderCurrentView();refreshIcons();
+}
+
+function openMobileSidebar(){qs("#sidebar").classList.add("mobile-open");qs("#mobileOverlay").classList.add("open");}
+function closeMobileSidebar(){qs("#sidebar").classList.remove("mobile-open");qs("#mobileOverlay").classList.remove("open");}
+
+qsa("[data-view]").forEach((b)=>b.addEventListener("click",()=>navigate(b.dataset.view)));
+qs("#yearSelect").addEventListener("change",(e)=>loadYear(e.target.value));
+qs("#logoutButton").addEventListener("click",async()=>{await logout();location.replace("./index.html");});
+qs("#sidebarToggle").addEventListener("click",()=>{document.body.classList.toggle("sidebar-collapsed");localStorage.setItem("cartera.sidebarCollapsed",document.body.classList.contains("sidebar-collapsed")?"1":"0");});
+if(localStorage.getItem("cartera.sidebarCollapsed")==="1")document.body.classList.add("sidebar-collapsed");
+qs("#mobileMenuButton").addEventListener("click",openMobileSidebar);qs("#mobileOverlay").addEventListener("click",closeMobileSidebar);
+
+qs("#createMenuButton").addEventListener("click",()=>{qs("#createMenu").hidden=!qs("#createMenu").hidden;});
+document.addEventListener("click",(e)=>{if(!e.target.closest(".dropdown"))qs("#createMenu").hidden=true;});
+document.addEventListener("click",(e)=>{const b=e.target.closest("[data-action]");if(!b)return;const action=b.dataset.action;if(action==="new-cycle")openCycleModal();if(action==="import-source")openImportModal();});
+qsa("[data-close-modal]").forEach((b)=>b.addEventListener("click",()=>closeModal(b.dataset.closeModal)));
+qsa(".modal-backdrop").forEach((m)=>m.addEventListener("click",(e)=>{if(e.target===m)closeModal(m.id);}));
+document.addEventListener("keydown",(e)=>{if(e.key==="Escape"){qsa(".modal-backdrop:not([hidden])").forEach((m)=>closeModal(m.id));qs("#createMenu").hidden=true;}if(e.key==="/"&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();qs("#globalSearch").focus();}});
+
+qs("#globalSearch").addEventListener("input",debounce((e)=>{state.portfolioSearch=e.target.value;if(e.target.value.trim()){state.portfolioPage=1;navigate("portfolio");}},330));
+qs("#topReportsButton").addEventListener("click",()=>openModal("reportsModal"));
+qs("#exportPortfolioButton").addEventListener("click",async()=>{await ensurePortfolio();exportPortfolioExcel(filteredPortfolioRows(),state.cycle?.id);});
+
+function openCycleModal(){qs("#cycleYear").innerHTML=state.years.map((y)=>`<option value="${escapeHtml(y.id)}">${escapeHtml(y.label||`Vigencia ${y.id}`)}</option>`).join("");qs("#cycleYear").value=state.selectedYear||state.years[0]?.id||"";qs("#cycleDate").value="";qs("#cycleLabel").value="";qs("#cycleFormMessage").textContent="";openModal("cycleModal");refreshIcons();}
+qs("#cycleForm").addEventListener("submit",async(e)=>{e.preventDefault();const year=qs("#cycleYear").value,date=qs("#cycleDate").value,label=qs("#cycleLabel").value.trim();const msg=qs("#cycleFormMessage");if(!date||!date.startsWith(`${year}-`)){msg.textContent=`La fecha debe pertenecer a la vigencia ${year}.`;msg.className="auth-message error";return;}try{qs("#saveCycleButton").disabled=true;const id=await createCycle({year,cutoffDate:date,label});closeModal("cycleModal");showToast("Corte creado",`${formatDate(date)} quedó en estado borrador.`,"success");await openImportModal(id);if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){msg.textContent=error.message;msg.className="auth-message error";}finally{qs("#saveCycleButton").disabled=false;}});
+
+async function openImportModal(preselect=null){
+  try{const cycles=(await getCycles(true)).filter((c)=>c.status==="draft");if(!cycles.length){showToast("No hay cortes en borrador","Cree primero un corte de cartera.","warning");openCycleModal();return;}qs("#importCycle").innerHTML=cycles.map((c)=>`<option value="${escapeHtml(c.id)}">${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");if(preselect&&cycles.some(c=>c.id===preselect))qs("#importCycle").value=preselect;qs("#importSource").innerHTML=(state.config?.sourceTypes||[]).map((s)=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");qs("#importFile").value="";qs("#importAnalysis").innerHTML="";qs("#importLog").textContent="Seleccione fuente y archivo; luego pulse Analizar archivo.";qs("#saveImportButton").disabled=true;state.analyzedImport=null;openModal("importModal");refreshIcons();}catch(e){showToast("No fue posible preparar la importación",e.message,"error");}
+}
+qs("#analyzeImportButton").addEventListener("click",async()=>{const file=qs("#importFile").files[0];try{setSyncState("loading","Analizando");qs("#importLog").textContent="Leyendo el archivo y calculando SHA-256…";const a=await analyzeExcel(file,qs("#importCycle").value,qs("#importSource").value);state.analyzedImport=a;qs("#importAnalysis").innerHTML=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">${kpiCard("Archivo",escapeHtml(a.file.name),"file-spreadsheet")}${kpiCard("Filas",formatNumber(a.rows.length),"rows-3")}${kpiCard("Chunks",formatNumber(a.chunks.length),"layers-3")}${kpiCard("SHA-256",`${a.hash.slice(0,8)}…${a.hash.slice(-8)}`,"fingerprint")}</div><div class="table-shell file-preview"><table><thead><tr>${a.headerMap.slice(0,10).map((h)=>`<th>${escapeHtml(h.source)}</th>`).join("")}</tr></thead><tbody>${a.rows.slice(0,6).map((r)=>`<tr>${a.headerMap.slice(0,10).map((h)=>`<td>${escapeHtml(r[h.key]??"")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;qs("#importLog").textContent=`ANÁLISIS OK\nHoja: ${a.sheetName}\nFilas: ${a.rows.length}\nChunks: ${a.chunks.length}\nSHA-256: ${a.hash}`;qs("#saveImportButton").disabled=false;refreshIcons();}catch(error){state.analyzedImport=null;qs("#saveImportButton").disabled=true;qs("#importLog").textContent=`ERROR\n${error.message}`;showToast("Error de análisis",error.message,"error");}finally{setSyncState("online");}});
+qs("#saveImportButton").addEventListener("click",async()=>{if(!state.analyzedImport)return;try{setSyncState("loading","Guardando");qs("#saveImportButton").disabled=true;qs("#importLog").textContent="Guardando ImportJob y chunks en Firestore…";const result=await saveAnalyzedImport(state.analyzedImport);qs("#importLog").textContent=`IMPORTACIÓN COMPLETADA\nJob: ${result.jobId}\nFuentes faltantes: ${result.validation.missingSources.length?result.validation.missingSources.join(", "):"Ninguna"}`;showToast("Importación completada",`${state.analyzedImport.sourceType}: ${formatNumber(state.analyzedImport.rows.length)} filas.`,"success");state.analyzedImport=null;if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){qs("#importLog").textContent=`ERROR DE IMPORTACIÓN\n${error.code||""}\n${error.message}`;showToast("No fue posible importar",error.message,"error",7000);qs("#saveImportButton").disabled=false;}finally{setSyncState("online");}});
+
+async function runReport(type){
+  if(!state.cycle){showToast("Sin corte publicado","No existe información oficial para exportar.","warning");return;}const p=await ensurePortfolio();if(!p||p.unrecognized){showToast("Sin información","No se encontró una fuente principal exportable.","warning");return;}if(type==="detail-excel")exportPortfolioExcel(filteredPortfolioRows(),state.cycle.id);if(type==="executive-excel")exportExecutiveExcel(state.summary,state.aging,state.cycle.id);if(type==="executive-pdf")printExecutiveReport({cycle:state.cycle,summary:state.summary,aging:state.aging,profile:state.profile});
+}
+qs("#reportExcelButton").addEventListener("click",async()=>{const t=qs("#reportType").value;await runReport(t==="executive"?"executive-excel":"detail-excel");});qs("#reportPdfButton").addEventListener("click",async()=>{const t=qs("#reportType").value;if(t!=="executive"){showToast("PDF ejecutivo","El PDF disponible en v3.3.2 corresponde al resumen ejecutivo. Para detalle utilice Excel.","warning");return;}await runReport("executive-pdf");});
+
+qs("#userForm").addEventListener("submit",async(e)=>{e.preventDefault();const id=qs("#editUserUid").value,msg=qs("#userFormMessage");const role=qs("#editUserRole").value;const isActive=qs("#editUserActive").value==="true";if(id===state.user.uid&&(!isActive||role!=="admin")){msg.textContent="Por seguridad, este administrador no puede desactivarse ni retirarse su propio rol admin desde la interfaz.";msg.className="auth-message error";return;}try{await updateUserProfile(id,{role,isActive});closeModal("userModal");showToast("Perfil actualizado","Los permisos se aplicarán según las reglas de Firestore.","success");await renderUsers();}catch(error){msg.textContent=error.message;msg.className="auth-message error";}});
+
+window.addEventListener("online",()=>setSyncState("online"));window.addEventListener("offline",()=>setSyncState("offline"));
+await 
+document.addEventListener("click", async (event) => {
+  const retry = event.target.closest('[data-action="retry-backend"]');
+  if (retry) {
+    retry.disabled = true;
+    try { await bootstrap({retry:true}); }
+    finally { retry.disabled = false; }
+    return;
+  }
+  const openData = event.target.closest('[data-action="open-data"]');
+  if (openData) {
+    location.hash = "#data";
+  }
+});
+
+window.addEventListener("online", () => {
+  setSyncState("loading","Reconectando");
+  bootstrap({retry:true}).catch(()=>{});
+});
+window.addEventListener("offline", () => setSyncState("offline","Sin conexión"));
+
+bootstrap();
+const initial=location.hash.replace("#","");if(initial&&qs(`#view-${initial}`)&&!qs(`#view-${initial}`).hidden)await navigate(initial);
+
+</script>
+</body>
+</html>
