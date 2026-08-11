@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="cartera-build" content="4.0.1-vigencia-hotfix">
+  <meta name="cartera-build" content="4.0.2-create-cycle-hotfix">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#004651">
   <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
@@ -504,6 +504,15 @@ body.sidebar-collapsed .logout-btn{display:none}
 /* v4.0 · IAS AutoMapper + Modular Portfolio Intelligence */
 .v4-module-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;margin-bottom:14px;border:1px solid #d6e6e7;background:linear-gradient(135deg,#f7fbfb 0%,#eef7f7 100%);border-radius:13px}.v4-module-banner strong{font-size:12px;color:#004651}.v4-module-banner p{font-size:10px;color:var(--text-2);margin:3px 0 0;line-height:1.45}.v4-module-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.v4-source-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;background:#fff;border:1px solid #cfe1e2;color:#006C73;font-size:9px;font-weight:900}.v4-kpi-note{font-size:9px;color:var(--text-2);margin-top:3px}.v4-control-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.v4-control{padding:12px;border:1px solid var(--border);border-radius:11px;background:#fff}.v4-control strong{display:block;font-size:13px;color:var(--text);margin-bottom:3px}.v4-control span{font-size:9px;color:var(--text-2)}.v4-control.ok{border-color:#c9e6d5;background:#f7fcf8}.v4-control.warn{border-color:#eadca9;background:#fffdf5}.v4-control .delta{font-family:var(--font-num);font-weight:900}.v4-empty-module{padding:36px;text-align:center;border:1px dashed #c9dada;border-radius:14px;background:#fbfdfd}.v4-empty-module strong{display:block;font-size:16px;color:#004651;margin-bottom:6px}.v4-empty-module p{font-size:10px;color:var(--text-2);max-width:620px;margin:0 auto 12px}.v4-insight-list{display:grid;gap:8px}.v4-insight{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}.v4-insight i{color:#006C73}.v4-insight strong{display:block;font-size:10px}.v4-insight p{font-size:9px;color:var(--text-2);margin:2px 0 0}.v4-table-tag{font-size:8px;font-weight:900;color:#006C73;background:#edf7f7;border-radius:999px;padding:3px 7px}.v4-module-table .table-shell{max-height:440px}.v4-module-table td,.v4-module-table th{white-space:nowrap}.v4-reg-card{background:linear-gradient(135deg,#004651,#006C73);color:#fff;border-radius:14px;padding:18px}.v4-reg-card h3{font-size:14px;margin:0 0 5px}.v4-reg-card p{font-size:9px;color:rgba(255,255,255,.78);margin:0}.v4-reg-card .big{font-family:var(--font-num);font-size:24px;font-weight:900;margin-top:12px}.v4-golden{border-left:3px solid #CCD400}.v4-ias-badge{background:#006C73;color:#fff;border:0}.v4-mini-table{width:100%;border-collapse:collapse}.v4-mini-table td{padding:7px;border-bottom:1px solid #edf2f2;font-size:9px}.v4-mini-table td:last-child{text-align:right;font-family:var(--font-num);font-weight:800}.v4-map-flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.v4-map-flow span{font-size:8px;padding:4px 7px;border-radius:999px;background:#eef6f6;color:#42676c;border:1px solid #d7e7e7}.v4-map-flow i{color:#7e979b}@media(max-width:980px){.v4-control-grid{grid-template-columns:1fr}.v4-module-banner{align-items:flex-start;flex-direction:column}}
 
+
+/* v4.0.2 · Creación de corte robusta */
+#cycleFormMessage{display:block;min-height:18px;margin:12px 0 0;padding:0;font-size:11px;line-height:1.4;color:var(--text-2)}
+#cycleFormMessage.loading,#cycleFormMessage.success,#cycleFormMessage.error{padding:9px 11px;border-radius:9px;border:1px solid var(--border);font-weight:700}
+#cycleFormMessage.loading{background:#eef7f7;border-color:#cfe4e5;color:#075d63}
+#cycleFormMessage.success{background:#eef8f2;border-color:#cfe7d8;color:#1f6e47}
+#cycleFormMessage.error{background:var(--danger-soft);border-color:#efc9c5;color:#8a312b}
+#saveCycleButton[disabled]{opacity:.65;cursor:wait}
+
 </style>
 </head>
 <body class="app-body">
@@ -716,7 +725,7 @@ body.sidebar-collapsed .logout-btn{display:none}
   <div class="modal-backdrop" id="cycleModal" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="cycleModalTitle">
       <header class="modal-header"><div><h2 id="cycleModalTitle">Nuevo corte de cartera</h2><p>El corte se crea en estado borrador y solo se publica después de validar las fuentes obligatorias.</p></div><button class="icon-btn" type="button" data-close-modal="cycleModal"><i data-lucide="x" size="18"></i></button></header>
-      <form id="cycleForm"><div class="modal-body"><div class="form-grid"><div class="field"><label for="cycleYear">Vigencia</label><select class="select" id="cycleYear" required></select></div><div class="field"><label for="cycleDate">Fecha real de corte</label><input class="input" id="cycleDate" type="date" required></div><div class="field" style="grid-column:1/-1"><label for="cycleLabel">Etiqueta</label><input class="input" id="cycleLabel" placeholder="Ej. Corte julio 2026"></div></div><p class="auth-message" id="cycleFormMessage"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="cycleModal">Cancelar</button><button class="btn btn-primary" id="saveCycleButton" type="submit">Crear corte</button></footer></form>
+      <form id="cycleForm"><div class="modal-body"><div class="form-grid"><div class="field"><label for="cycleYear">Vigencia</label><select class="select" id="cycleYear" required></select></div><div class="field"><label for="cycleDate">Fecha real de corte</label><input class="input" id="cycleDate" type="date" required></div><div class="field" style="grid-column:1/-1"><label for="cycleLabel">Etiqueta</label><input class="input" id="cycleLabel" placeholder="Ej. Corte julio 2026"></div></div><p class="auth-message" id="cycleFormMessage" role="status" aria-live="polite"></p></div><footer class="modal-footer"><button class="btn btn-outline" type="button" data-close-modal="cycleModal">Cancelar</button><button class="btn btn-primary" id="saveCycleButton" type="button">Crear corte</button></footer></form>
     </section>
   </div>
 
@@ -1126,18 +1135,47 @@ async function getCycles(force = false) {
 
 async function createCycle({ year, cutoffDate, label }) {
   const user = auth.currentUser;
-  if (!user) throw new Error("Sesión no disponible.");
-  const cycleId = cutoffDate;
-  const ref = doc(db, "CarteraCycles", cycleId);
-  if ((await getDoc(ref)).exists()) throw new Error(`Ya existe el corte ${cycleId}.`);
-  await setDoc(ref, {
-    cycleId, year:String(year), cutoffDate, label:label || `Corte ${cutoffDate}`, status:"draft",
-    importedSources:[], importCount:0, createdBy:user.uid, createdAt:serverTimestamp(),
-    updatedBy:user.uid, updatedAt:serverTimestamp()
+  if (!user) throw new Error("La sesión de Firebase no está disponible. Vuelva a iniciar sesión.");
+  const cleanYear=String(year||"").trim(), cleanDate=String(cutoffDate||"").trim();
+  if(!/^\d{4}$/.test(cleanYear)) throw new Error("La vigencia seleccionada no es válida.");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) throw new Error("La fecha de corte no es válida.");
+  if(!cleanDate.startsWith(`${cleanYear}-`)) throw new Error(`La fecha debe pertenecer a la vigencia ${cleanYear}.`);
+
+  // Confirmar que la vigencia existe y sigue activa antes de escribir.
+  const yearSnap=await serverFirstDoc(doc(db,"Vigencias",cleanYear));
+  if(!yearSnap.exists()) throw new Error(`No existe la vigencia ${cleanYear} en Firestore.`);
+  const yearData=yearSnap.data()||{};
+  if(!activeFlag(yearData.isActive)) throw new Error(`La vigencia ${cleanYear} no está activa.`);
+
+  const cycleId=cleanDate;
+  const ref=doc(db,"CarteraCycles",cycleId);
+  const existing=await serverFirstDoc(ref);
+  if(existing.exists()){
+    const row={id:existing.id,...existing.data()};
+    if(String(row.year)===cleanYear && row.status==="draft"){
+      return {id:cycleId,resumed:true,cycle:row};
+    }
+    throw new Error(`Ya existe un corte ${formatDate(cleanDate)} (${row.status==="published"?"publicado":"registrado"}). Use otra fecha o abra el corte existente.`);
+  }
+
+  await setDoc(ref,{
+    cycleId,year:cleanYear,cutoffDate:cleanDate,label:label||`Corte ${cleanDate}`,status:"draft",
+    importedSources:[],importCount:0,createdBy:user.uid,createdAt:serverTimestamp(),
+    updatedBy:user.uid,updatedAt:serverTimestamp()
   });
-  await audit("CYCLE_CREATED", "CarteraCycle", cycleId, { year:String(year), cutoffDate, label });
+
+  // Verificación inmediata contra servidor: si la regla impidió la escritura, se informa aquí.
+  const verify=await serverFirstDoc(ref);
+  if(!verify.exists()) throw new Error("Firestore no confirmó la creación del corte. Revise permisos y conexión.");
+
+  // La auditoría no puede bloquear una creación ya confirmada.
+  try{
+    await audit("CYCLE_CREATED","CarteraCycle",cycleId,{year:cleanYear,cutoffDate:cleanDate,label});
+  }catch(auditError){
+    console.warn("El corte fue creado pero no fue posible registrar AuditLogs",auditError);
+  }
   invalidateCache("cycles");
-  return cycleId;
+  return {id:cycleId,resumed:false,cycle:{id:cycleId,...verify.data()}};
 }
 
 async function getAggregate(cycleId, force = false) {
@@ -1801,7 +1839,7 @@ function smartReconstructStoredRows(rows,sourceType=""){
 }
 
 // ===== intelligent-data-fabric.js =====
-const AI_VERSION="4.0.1";
+const AI_VERSION="4.0.2";
 
 const V4_SOURCE_TYPES=Object.freeze(["ACREPC_DES1","ACREPC1","ACRESC_C1","ACRESC_COC1","ACRESC_EDAD1","ACRESC_P1","INDICADORES","FORMATO_514","RESULTADOS"]);
 const V4_MODULES=Object.freeze({
@@ -2825,38 +2863,61 @@ async function openCycleModal(){
   refreshIcons();
   await hydrateCycleYearSelect({forceServer:true});
 }
-qs("#cycleForm").addEventListener("submit",async(e)=>{
-  e.preventDefault();
+let cycleCreateBusy=false;
+function setCycleFormStatus(type="",text=""){
   const msg=qs("#cycleFormMessage");
-  let year=String(qs("#cycleYear").value||"").trim();
-  const date=qs("#cycleDate").value,label=qs("#cycleLabel").value.trim();
+  if(!msg)return;
+  msg.textContent=text;
+  msg.className=`auth-message${type?` ${type}`:""}`;
+}
+function friendlyCycleError(error){
+  const code=String(error?.code||"");
+  if(code.includes("permission-denied")) return "Firebase rechazó la creación por permisos. Verifique que el usuario conserve rol Administrador/Profesional de Cartera activo y que las reglas de Firestore estén publicadas.";
+  if(code.includes("unavailable")) return "No fue posible comunicarse con Firestore. Revise la conexión y vuelva a intentar.";
+  if(code.includes("unauthenticated")) return "La sesión perdió vigencia. Cierre sesión e ingrese nuevamente.";
+  return error?.message||"No fue posible crear el corte.";
+}
+async function handleCreateCycle(){
+  if(cycleCreateBusy)return;
+  const button=qs("#saveCycleButton");
+  let year=String(qs("#cycleYear")?.value||"").trim();
+  const date=String(qs("#cycleDate")?.value||"").trim();
+  const label=String(qs("#cycleLabel")?.value||"").trim();
   if(!year){
     await hydrateCycleYearSelect({forceServer:true});
-    year=String(qs("#cycleYear").value||"").trim();
+    year=String(qs("#cycleYear")?.value||"").trim();
   }
-  if(!year){
-    msg.textContent="Seleccione una vigencia activa antes de crear el corte.";
-    msg.className="auth-message error";
-    return;
-  }
-  if(!date||!date.startsWith(`${year}-`)){
-    msg.textContent=`La fecha debe pertenecer a la vigencia ${year}.`;
-    msg.className="auth-message error";
-    return;
-  }
+  if(!year){setCycleFormStatus("error","Seleccione una vigencia activa antes de crear el corte.");return;}
+  if(!date){setCycleFormStatus("error","Seleccione la fecha real de corte.");return;}
+  if(!date.startsWith(`${year}-`)){setCycleFormStatus("error",`La fecha debe pertenecer a la vigencia ${year}.`);return;}
+
+  cycleCreateBusy=true;
+  if(button){button.disabled=true;button.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></span> Creando…';}
+  setCycleFormStatus("loading","Creando el corte en Firestore y verificando la escritura…");
+  setSyncState("loading","Creando corte");
   try{
-    qs("#saveCycleButton").disabled=true;
-    const id=await createCycle({year,cutoffDate:date,label});
+    const result=await createCycle({year,cutoffDate:date,label});
+    setCycleFormStatus("success",result.resumed?"El corte ya existía en borrador. Se abrirá para continuar.":"Corte creado correctamente.");
+    showToast(result.resumed?"Corte recuperado":"Corte creado",`${formatDate(date)} · ${label||`Corte ${date}`}`,"success",5200);
+    await loadYear(year,result.id);
     closeModal("cycleModal");
-    showToast("Corte creado",`${formatDate(date)} quedó en estado borrador.`,"success");
-    await openImportModal(id);
-    if(qs("#view-data").classList.contains("active"))await renderData();
+    await openImportModal(result.id);
+    if(qs("#view-data")?.classList.contains("active"))await renderData();
   }catch(error){
-    msg.textContent=error.message;msg.className="auth-message error";
+    console.error("CREATE CYCLE",error);
+    const message=friendlyCycleError(error);
+    setCycleFormStatus("error",message);
+    showToast("No fue posible crear el corte",message,"error",7500);
   }finally{
-    qs("#saveCycleButton").disabled=false;
+    cycleCreateBusy=false;
+    if(button){button.disabled=false;button.textContent="Crear corte";}
+    setSyncState(navigator.onLine?"online":"offline");
+    refreshIcons();
   }
-});
+}
+qs("#cycleForm").addEventListener("submit",async(e)=>{e.preventDefault();await handleCreateCycle();});
+qs("#saveCycleButton").addEventListener("click",async(e)=>{e.preventDefault();await handleCreateCycle();});
+qs("#cycleForm").addEventListener("keydown",async(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();await handleCreateCycle();}});
 
 async function openImportModal(preselect=null){
   try{const cycles=(await getCycles(true)).filter((c)=>c.status==="draft");if(!cycles.length){showToast("No hay cortes en borrador","Cree primero un corte de cartera.","warning");openCycleModal();return;}qs("#importCycle").innerHTML=cycles.map((c)=>`<option value="${escapeHtml(c.id)}">${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");if(preselect&&cycles.some(c=>c.id===preselect))qs("#importCycle").value=preselect;qs("#importSource").innerHTML=(effectiveSourceTypes()).map((s)=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");qs("#importFile").value="";qs("#importSheet").innerHTML=`<option value="">Automática · primera hoja</option>`;qs("#importAnalysis").innerHTML="";qs("#importLog").textContent="Modo manual avanzado: seleccione una fuente y una hoja específica. Para diagnóstico automático multishoja use Centro de ingesta IA.";qs("#saveImportButton").disabled=true;state.analyzedImport=null;openModal("importModal");refreshIcons();}catch(e){showToast("No fue posible preparar la importación",e.message,"error");}
