@@ -1,3 +1,4 @@
+<!-- Cartera INFIHUILA v4.2.4 · Mobile Auth Compatibility -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -828,7 +829,7 @@ body.sidebar-collapsed .logout-btn{display:none}
   <div class="toast-region" id="toastRegion"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getAuth, browserLocalPersistence, setPersistence, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, reload, getIdToken } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, reload, getIdToken } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, getDocFromServer, getDocsFromServer, collection, query, where, limit, setDoc, updateDoc, serverTimestamp, arrayUnion, increment, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 // ===== firebase-config.js =====
@@ -846,13 +847,16 @@ const firebaseConfig = Object.freeze({
 
 // ===== firebase-init.js =====
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// v4.2.4: Auth adaptable a escritorio, iOS/Safari, navegadores embebidos y modos con almacenamiento restringido.
+// Firebase selecciona la primera persistencia soportada por el dispositivo y puede migrar una sesión existente.
+const auth = initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence]
+});
 const db = getFirestore(app);
 auth.languageCode = "es";
 
-const persistenceReady = setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.warn("No fue posible establecer persistencia local de Firebase Auth.", error);
-});
+// Se conserva la interfaz histórica, pero ya no bloqueamos el arranque esperando setPersistence().
+const persistenceReady = Promise.resolve("adaptive");
 
 // ===== utils.js =====
 const VALID_ROLES = Object.freeze([
@@ -895,7 +899,15 @@ function normalizeKey(value) {
   return text.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase() || "campo";
 }
 function uid(prefix = "id") {
-  return `${prefix}_${Date.now()}_${crypto.randomUUID().replaceAll("-", "").slice(0, 16)}`;
+  const randomPart = (globalThis.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(16).slice(2)}_${Math.random().toString(16).slice(2)}`).replace(/-/g, "").slice(0, 20);
+  return `${prefix}_${Date.now()}_${randomPart}`;
+}
+function withTimeout(promise, ms = 10000, message = "La operación tardó más de lo esperado.") {
+  let timer;
+  return Promise.race([
+    Promise.resolve(promise).finally(() => clearTimeout(timer)),
+    new Promise((_, reject) => { timer = setTimeout(() => reject(Object.assign(new Error(message), { code:"app/timeout" })), ms); })
+  ]);
 }
 function hasRole(profile, roles) { return !!profile && roles.includes(profile.role); }
 function safeNumber(value) {
@@ -937,14 +949,20 @@ async function getProfile(user) {
   return snap.exists() ? { id:snap.id, ...snap.data() } : null;
 }
 
-async function validateAccess(user, { requireVerified = true } = {}) {
+async function validateAccess(user, { requireVerified = true, refresh = false } = {}) {
   if (!user) return { ok:false, reason:"unauthenticated" };
-  await reload(user);
-  await getIdToken(user, true);
+  // No forzamos reload/token refresh en cada arranque: en Safari móvil esa llamada de red puede retrasar innecesariamente la UI.
+  // Solo se fuerza al comprobar una verificación de correo recién realizada.
+  if (refresh) {
+    await withTimeout(reload(user), 8000, "No fue posible actualizar el estado de la cuenta.");
+    await withTimeout(getIdToken(user, true), 8000, "No fue posible renovar la sesión de Firebase.");
+  } else {
+    await withTimeout(getIdToken(user, false), 8000, "No fue posible recuperar la sesión de Firebase.");
+  }
   const email = String(user.email || "").toLowerCase();
   if (!email.endsWith("@infihuila.gov.co")) return { ok:false, reason:"domain" };
   if (requireVerified && !user.emailVerified) return { ok:false, reason:"unverified" };
-  const profile = await getProfile(user);
+  const profile = await withTimeout(getProfile(user), 9000, "No fue posible consultar el perfil institucional.");
   if (!profile) return { ok:false, reason:"profile_missing" };
   if (profile.isActive !== true) return { ok:false, reason:"inactive" };
   if (String(profile.email || "").toLowerCase() !== email) return { ok:false, reason:"profile_email" };
@@ -990,6 +1008,7 @@ function friendlyAuthError(error) {
   if (["auth/invalid-credential","auth/wrong-password","auth/user-not-found"].includes(code)) return "Correo o contraseña incorrectos.";
   if (code === "auth/too-many-requests") return "Firebase bloqueó temporalmente nuevos intentos. Espere unos minutos antes de volver a intentar.";
   if (code === "auth/network-request-failed") return "No fue posible conectar con Firebase. Revise su conexión a Internet.";
+  if (code === "app/timeout") return "La conexión con Firebase está tardando más de lo esperado. Vuelva a intentar o abra el enlace directamente en Safari/Chrome.";
   if (code === "auth/user-disabled") return "La cuenta de autenticación está deshabilitada.";
   if (code === "auth/invalid-email") return "El correo electrónico no es válido.";
   if (code.startsWith("app/")) return error.message;
@@ -998,28 +1017,38 @@ function friendlyAuthError(error) {
 
 // ===== auth-guard.js =====
 async function requireAuthorizedUser() {
-  await persistenceReady;
   return new Promise((resolve, reject) => {
     let unsubscribe = () => {};
     let settled = false;
-    const timer = setTimeout(() => {
+    const finish = (fn, value) => {
       if (settled) return;
-      settled = true; unsubscribe();
-      reject(new Error("Firebase Authentication no respondió dentro del tiempo esperado."));
-    }, 12000);
+      settled = true; clearTimeout(timer);
+      try { unsubscribe(); } catch {}
+      fn(value);
+    };
+    const timer = setTimeout(() => {
+      finish(reject, Object.assign(new Error("La validación de acceso tardó demasiado. Vuelva al inicio e inicie sesión nuevamente."), { code:"app/timeout" }));
+    }, 15000);
 
     unsubscribe = watchAuth(async (user) => {
       if (settled) return;
-      settled = true; clearTimeout(timer); unsubscribe();
-      if (!user) { location.replace("./index.html"); return; }
+      if (!user) {
+        settled = true; clearTimeout(timer); try { unsubscribe(); } catch {}
+        location.replace("./index.html"); return;
+      }
       try {
-        const access = await validateAccess(user);
-        if (!access.ok) { await logout(); location.replace("./index.html"); return; }
-        resolve(access);
+        const access = await withTimeout(validateAccess(user), 11000, "La validación del perfil institucional tardó demasiado.");
+        if (settled) return;
+        if (!access.ok) {
+          await logout().catch(() => {});
+          settled = true; clearTimeout(timer); try { unsubscribe(); } catch {}
+          location.replace("./index.html"); return;
+        }
+        finish(resolve, access);
       } catch (error) {
         console.error("Auth guard", error);
         await logout().catch(() => {});
-        reject(error);
+        finish(reject, error);
       }
     });
   });
