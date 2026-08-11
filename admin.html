@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="cartera-build" content="3.7.0-spreadsheet-studio">
+  <meta name="cartera-build" content="3.8.0-live-sheets">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#004651">
   <meta name="description" content="Workspace financiero de Cartera INFIHUILA">
@@ -291,7 +291,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 }
 
 
-/* v3.7.0 · Editor operativo */
+/* v3.8.0 · Editor operativo */
 .editor-shell{display:flex;flex-direction:column;gap:12px}
 .editor-toolbar{display:grid;grid-template-columns:minmax(160px,.75fr) minmax(180px,.9fr) minmax(240px,1.4fr) auto;gap:10px;align-items:end}
 .editor-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -329,7 +329,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 @media(max-width:720px){.editor-toolbar{grid-template-columns:1fr}.editor-column-add{width:100%}.editor-column-add .input{width:100%}.editor-footer{align-items:stretch}.editor-pagination{justify-content:space-between;width:100%}}
 
 
-/* v3.7.0 · Eliminación segura de cortes de trabajo */
+/* v3.8.0 · Eliminación segura de cortes de trabajo */
 .draft-delete-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
 .draft-delete-summary .metric{border:1px solid var(--border);border-radius:10px;padding:11px;background:var(--surface-soft)}
 .draft-delete-summary .metric small{display:block;color:var(--text-2);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
@@ -344,7 +344,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 
 
 /* ================================================================
-   v3.7.0 · Vista de trabajo + datos crudos + control administrador
+   v3.8.0 · Vista de trabajo + datos crudos + control administrador
    ================================================================ */
 .cycle-view-control{min-width:205px;max-width:250px;font-size:10px;font-weight:800}
 .work-context-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #d7e7e8;border-radius:10px;background:#f7fbfb;margin-bottom:12px}
@@ -372,7 +372,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 
 
 /* ================================================================
-   v3.7.0 · Analytics + Smart Tables
+   v3.8.0 · Analytics + Smart Tables
    ================================================================ */
 .analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}
 .analytics-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -412,7 +412,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 @media(max-width:820px){.analytics-grid,.analytics-grid.three{grid-template-columns:1fr}.analytics-card.wide,.analytics-grid.three .analytics-card:last-child{grid-column:auto}.chart-donut-layout{grid-template-columns:1fr}.chart-bar-row{grid-template-columns:100px 1fr}.chart-bar-value{grid-column:2;text-align:left;margin-top:-5px}}
 
 
-/* v3.7.0 · Loader institucional premium */
+/* v3.8.0 · Loader institucional premium */
 .auth-gate{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 38%,rgba(0,108,115,.08),transparent 28%),linear-gradient(145deg,#f4f8f8 0%,#edf3f3 100%)}
 .auth-gate-card{width:min(390px,92vw)!important;min-height:245px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 34px 28px!important;border-radius:22px!important;background:#006C73!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 26px 64px rgba(0,70,81,.22)!important;color:#fff!important;position:relative;overflow:hidden}
 .auth-gate-card::before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-92px;bottom:-104px;background:#CCD400;opacity:.18;pointer-events:none}
@@ -423,7 +423,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 .auth-gate-card p{color:rgba(255,255,255,.84)!important;font-size:12px!important;line-height:1.45;margin:8px 0 0!important;position:relative;z-index:1}
 
 
-/* v3.7.0 · Spreadsheet Studio */
+/* v3.8.0 · Spreadsheet Studio */
 .sheet-studio-modal{width:calc(100vw - 28px)!important;height:calc(100vh - 28px)!important;max-height:none!important;display:flex;flex-direction:column;overflow:hidden!important;border-radius:18px!important}
 .sheet-studio-modal .modal-header{flex:0 0 auto;padding:14px 17px}.sheet-studio-modal .modal-body{flex:1 1 auto;min-height:0;padding:12px 14px;overflow:hidden}.sheet-studio-modal .modal-footer{flex:0 0 auto;padding:10px 14px}
 .sheet-studio{height:100%;display:flex;flex-direction:column;gap:9px;min-height:0}
@@ -446,6 +446,36 @@ body.sidebar-collapsed .logout-btn{display:none}
 .sheet-pager{display:flex;align-items:center;gap:6px}.sheet-footnote{font-size:9.5px;color:var(--text-2);line-height:1.35}.sheet-empty{min-height:260px;display:grid;place-items:center;text-align:center;color:var(--text-2);padding:30px}.sheet-empty strong{display:block;color:var(--text);font-size:15px;margin-bottom:5px}
 .sheet-import-action{display:inline-flex;align-items:center;gap:5px}.source-chip.done{position:relative;padding-bottom:40px}.source-chip .source-open{position:absolute;left:9px;right:9px;bottom:8px;height:26px;border-radius:7px;border:1px solid #cfe1e2;background:#fff;color:#006C73;font-size:9px;font-weight:900}.source-chip .source-open:hover{background:#eef7f7}
 @media(max-width:1360px){.sheet-toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.sheet-studio-modal{width:100vw!important;height:100vh!important;border-radius:0!important}.sheet-toolbar{grid-template-columns:1fr 1fr}.sheet-actions-left,.sheet-actions-right{width:100%}}
+
+
+/* ================================================================
+   v3.8.0 · Live Sheets · ventana dedicada + sincronización online
+   ================================================================ */
+.sheet-window-actions{display:flex;align-items:center;gap:7px;margin-left:auto}
+.sheet-live-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #cfe5d8;background:#eff9f3;color:#1f6b42;border-radius:999px;padding:6px 9px;font-size:9.5px;font-weight:900;white-space:nowrap}
+.sheet-live-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:#2a9961;box-shadow:0 0 0 3px rgba(42,153,97,.10)}
+.sheet-live-pill.saving{border-color:#eadba6;background:#fff9e9;color:#7b641b}.sheet-live-pill.saving::before{background:#c99c20}
+.sheet-live-pill.offline{border-color:#ebc4c0;background:#fff4f2;color:#9a3027}.sheet-live-pill.offline::before{background:#ba493f}
+.sheet-autosave{display:inline-flex;align-items:center;gap:6px}.sheet-autosave input{accent-color:#006C73}
+.sheet-fullscreen-btn{white-space:nowrap}
+.sheet-window-mode{overflow:hidden!important;background:#eef3f3!important}
+.sheet-window-mode #appShell,.sheet-window-mode #mobileOverlay{display:none!important}
+.sheet-window-mode #authGate[hidden]{display:none!important}
+.sheet-window-mode #dataEditorModal{display:grid!important;position:fixed!important;inset:0!important;padding:0!important;background:#edf3f3!important;backdrop-filter:none!important;z-index:9999!important}
+.sheet-window-mode .sheet-studio-modal{width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;border-radius:0!important;border:0!important;box-shadow:none!important}
+.sheet-window-mode .sheet-studio-modal .modal-header{background:#006C73;color:#fff;border-bottom:0;padding:10px 14px}
+.sheet-window-mode .sheet-studio-modal .modal-header h2,.sheet-window-mode .sheet-studio-modal .modal-header p{color:#fff!important}
+.sheet-window-mode .sheet-studio-modal .modal-header p{opacity:.80}
+.sheet-window-mode .sheet-studio-modal .modal-header .icon-btn,.sheet-window-mode .sheet-studio-modal .modal-header .btn{border-color:rgba(255,255,255,.28)!important;background:rgba(255,255,255,.08)!important;color:#fff!important}
+.sheet-window-mode .sheet-studio-modal .modal-header .btn:hover,.sheet-window-mode .sheet-studio-modal .modal-header .icon-btn:hover{background:rgba(255,255,255,.16)!important}
+.sheet-window-mode .sheet-studio-modal .modal-body{padding:8px 10px;background:#f5f8f8}
+.sheet-window-mode .sheet-studio-modal .modal-footer{padding:7px 10px;background:#fff}
+.sheet-window-mode .sheet-grid-shell{border-radius:3px;box-shadow:none}
+.sheet-window-mode .sheet-toolbar{background:#fff;border:1px solid #dbe6e7;border-radius:7px;padding:7px}
+.sheet-window-mode .sheet-actions{background:#fff;border:1px solid #dbe6e7;border-radius:7px;padding:6px 8px}
+.sheet-window-mode .sheet-meta-bar{border-radius:7px}
+.delete-ready-hint{display:flex;gap:8px;align-items:flex-start;margin-top:8px;color:#7d4b20;font-size:9.5px;line-height:1.4}
+@media(max-width:900px){.sheet-window-actions .sheet-live-pill{display:none}.sheet-fullscreen-btn .btn-label{display:none}}
 
 </style>
 </head>
@@ -654,7 +684,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 
   <div class="modal-backdrop" id="dataEditorModal" hidden>
     <section class="modal sheet-studio-modal" role="dialog" aria-modal="true" aria-labelledby="dataEditorTitle">
-      <header class="modal-header"><div><h2 id="dataEditorTitle">Spreadsheet Studio · Cartera INFIHUILA</h2><p id="editorSubtitle">Previsualice, trabaje, guarde y descargue las fuentes cargadas sin salir del aplicativo.</p></div><button class="icon-btn" type="button" data-close-modal="dataEditorModal"><i data-lucide="x" size="18"></i></button></header>
+      <header class="modal-header"><div><h2 id="dataEditorTitle">Spreadsheet Studio · Cartera INFIHUILA</h2><p id="editorSubtitle">Previsualice, trabaje, guarde y descargue las fuentes cargadas sin salir del aplicativo.</p></div><div class="sheet-window-actions"><span class="sheet-live-pill" id="editorLiveBadge">En línea</span><button class="btn btn-outline btn-sm sheet-fullscreen-btn" id="editorPopout" type="button"><i data-lucide="maximize-2" size="14"></i><span class="btn-label">Ventana completa</span></button><button class="icon-btn" id="editorCloseButton" type="button" aria-label="Cerrar"><i data-lucide="x" size="18"></i></button></div></header>
       <div class="modal-body"><div class="sheet-studio">
         <div class="sheet-toolbar">
           <div class="field"><label for="editorCycle">Corte</label><select class="select" id="editorCycle"></select></div>
@@ -664,13 +694,13 @@ body.sidebar-collapsed .logout-btn{display:none}
           <div class="field"><label for="editorFilterValue">Valor del filtro</label><input class="input" id="editorFilterValue" placeholder="Contiene..."></div>
           <div class="field"><label for="editorPageSize">Filas</label><select class="select" id="editorPageSize"><option>25</option><option selected>50</option><option>100</option><option>250</option></select></div>
         </div>
-        <div class="sheet-meta-bar"><div class="sheet-meta-left"><span class="badge badge-info" id="editorFileBadge">Sin archivo</span><span class="badge" id="editorSheetBadge">Hoja —</span><span class="badge" id="editorRowCount">0 filas</span><span class="badge" id="editorColumnCount">0 columnas</span><span class="badge badge-success" id="editorModeBadge">Vista</span></div><div class="sheet-meta-right"><label class="badge"><input id="editorShowDeleted" type="checkbox" style="accent-color:var(--infi-primary)"> Eliminadas</label><select class="select" id="editorViewMode" style="height:31px;width:auto;font-size:10px"><option value="original">Hoja almacenada</option><option value="smart">Vista inteligente</option></select></div></div>
+        <div class="sheet-meta-bar"><div class="sheet-meta-left"><span class="badge badge-info" id="editorFileBadge">Sin archivo</span><span class="badge" id="editorSheetBadge">Hoja —</span><span class="badge" id="editorRowCount">0 filas</span><span class="badge" id="editorColumnCount">0 columnas</span><span class="badge badge-success" id="editorModeBadge">Vista</span></div><div class="sheet-meta-right"><label class="badge sheet-autosave"><input id="editorAutoSave" type="checkbox" checked> Guardado en línea</label><label class="badge"><input id="editorShowDeleted" type="checkbox" style="accent-color:var(--infi-primary)"> Eliminadas</label><select class="select" id="editorViewMode" style="height:31px;width:auto;font-size:10px"><option value="original">Hoja almacenada</option><option value="smart">Vista inteligente</option></select></div></div>
         <div class="sheet-actions"><div class="sheet-actions-left"><button class="btn btn-primary btn-sm" id="editorAddRow" type="button"><i data-lucide="plus" size="14"></i>Fila</button><button class="btn btn-outline btn-sm" id="editorBulkImport" type="button"><i data-lucide="file-up" size="14"></i>Carga masiva</button><button class="btn btn-outline btn-sm" id="editorAddColumn" type="button"><i data-lucide="columns-3" size="14"></i>Columna</button><button class="btn btn-outline btn-sm" id="editorUndo" type="button"><i data-lucide="undo-2" size="14"></i></button><button class="btn btn-outline btn-sm" id="editorRedo" type="button"><i data-lucide="redo-2" size="14"></i></button><button class="btn btn-ghost btn-sm" id="editorClearFilters" type="button">Limpiar filtros</button></div><div class="sheet-actions-right"><button class="btn btn-outline btn-sm" id="editorDownloadCsv" type="button"><i data-lucide="file-down" size="14"></i>CSV</button><button class="btn btn-outline btn-sm" id="editorDownloadXlsx" type="button"><i data-lucide="sheet" size="14"></i>XLSX</button><span class="badge badge-warning" id="editorDirtyCount">0 cambios</span><button class="btn btn-primary btn-sm" id="editorSave" type="button"><i data-lucide="save" size="14"></i>Guardar</button></div></div>
         <div class="sheet-status" id="editorStatus"><i data-lucide="info" size="15"></i><span id="editorStatusText">Seleccione un corte y una fuente para comenzar.</span></div>
         <div id="editorGridHost" class="sheet-grid-shell"><div class="sheet-empty"><div><strong>Hoja de cálculo lista</strong>Seleccione una fuente cargada para previsualizarla.</div></div></div>
         <div class="editor-footer"><div class="sheet-pager"><button class="btn btn-outline btn-sm" id="editorPrev" type="button">Anterior</button><span class="badge" id="editorPageLabel">1 / 1</span><button class="btn btn-outline btn-sm" id="editorNext" type="button">Siguiente</button></div><div class="sheet-footnote">Borradores: edición y guardado. Publicados: solo lectura. XLSX/CSV se reconstruyen desde los datos persistidos en Firestore.</div></div>
       </div></div>
-      <footer class="modal-footer"><button class="btn btn-outline" id="editorDiscard" type="button">Recargar hoja</button><button class="btn btn-outline" type="button" data-close-modal="dataEditorModal">Cerrar</button></footer>
+      <footer class="modal-footer"><button class="btn btn-outline" id="editorDiscard" type="button">Recargar hoja</button><button class="btn btn-outline" id="editorFooterClose" type="button">Cerrar</button></footer>
     </section>
   </div>
 
@@ -696,6 +726,7 @@ body.sidebar-collapsed .logout-btn{display:none}
         <div class="field">
           <label for="deleteCycleConfirmation" id="deleteCycleConfirmationLabel">Escriba <strong>ELIMINAR</strong> para confirmar</label>
           <input class="input" id="deleteCycleConfirmation" autocomplete="off" placeholder="ELIMINAR">
+          <div class="delete-ready-hint" id="deleteCycleReadyHint"><i data-lucide="shield-check" size="14"></i><span>Escriba <strong>ELIMINAR</strong> exactamente para habilitar el botón.</span></div>
         </div>
         <div class="data-log" id="deleteCycleLog">El corte publicado oficial nunca se elimina desde esta herramienta.</div>
       </div>
@@ -710,7 +741,7 @@ body.sidebar-collapsed .logout-btn{display:none}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import { getAuth, browserLocalPersistence, setPersistence, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, reload, getIdToken } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, getDocFromServer, getDocsFromServer, collection, query, where, limit, setDoc, updateDoc, serverTimestamp, arrayUnion, increment, writeBatch } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, getDocFromServer, getDocsFromServer, collection, query, where, limit, setDoc, updateDoc, serverTimestamp, arrayUnion, increment, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 // ===== firebase-config.js =====
 // Firebase Web configuration for project "cartera-infi".
@@ -1810,7 +1841,7 @@ async function openDeleteCycleModal(cycleId) {
 
   pendingDeleteCycleId=cycleId;
   pendingDeleteStatus=cycle.status;
-  pendingDeletePhrase=isPublished?"ELIMINAR PUBLICADO":"ELIMINAR";
+  pendingDeletePhrase="ELIMINAR";
 
   qs("#deleteCycleTitle").textContent=isPublished?"Eliminar corte confirmado":"Eliminar corte de trabajo";
   qs("#deleteCycleSubtitle").textContent=isPublished
@@ -1819,7 +1850,7 @@ async function openDeleteCycleModal(cycleId) {
   const warning=qs("#deleteCycleWarning");
   warning.classList.toggle("published-danger",isPublished);
   warning.innerHTML=isPublished
-    ?`<strong>Advertencia crítica.</strong> Está eliminando un corte confirmado/publicado. Esta opción existe para correcciones administrativas y ambientes de prueba. AuditLogs se conserva.`
+    ?`<strong>Advertencia crítica.</strong> Está eliminando un corte confirmado/publicado. Para confirmar escriba únicamente ELIMINAR. La acción es exclusiva de Administrador y AuditLogs se conserva.`
     :`<strong>Acción irreversible.</strong> El corte de trabajo desaparecerá junto con sus datos asociados. AuditLogs se conserva.`;
 
   qs("#deleteCycleDate").textContent=formatDate(cycle.cutoffDate);
@@ -1837,7 +1868,13 @@ async function openDeleteCycleModal(cycleId) {
 }
 
 qs("#deleteCycleConfirmation").addEventListener("input",(e)=>{
-  qs("#confirmDeleteCycleButton").disabled = e.target.value.trim().toUpperCase() !== pendingDeletePhrase;
+  const ready=e.target.value.trim().toUpperCase()===pendingDeletePhrase;
+  qs("#confirmDeleteCycleButton").disabled=!ready;
+  const hint=qs("#deleteCycleReadyHint");
+  if(hint) hint.innerHTML=ready
+    ? `<i data-lucide="check-circle-2" size="14"></i><span>Confirmación correcta. Ya puede ejecutar la eliminación.</span>`
+    : `<i data-lucide="shield-check" size="14"></i><span>Escriba <strong>ELIMINAR</strong> exactamente para habilitar el botón.</span>`;
+  refreshIcons();
 });
 
 qs("#confirmDeleteCycleButton").addEventListener("click", async()=>{
@@ -1848,7 +1885,7 @@ qs("#confirmDeleteCycleButton").addEventListener("click", async()=>{
   try {
     button.disabled = true;
     setSyncState("loading","Eliminando corte");
-    qs("#deleteCycleLog").textContent = "Eliminando dependencias del borrador de forma segura…";
+    qs("#deleteCycleLog").textContent = pendingDeleteStatus==="published" ? "Eliminando dependencias del corte publicado de forma segura…" : "Eliminando dependencias del borrador de forma segura…";
     const cycleId = pendingDeleteCycleId;
     const counts = await purgeCycle(cycleId);
     pendingDeleteCycleId = null;
@@ -1890,13 +1927,13 @@ function filteredEditorRows(){if(!state.editor)return[];const {rows,columns}=edi
 function syncEditorColumnFilter(){if(!state.editor)return;const s=qs("#editorFilterColumn"),current=state.editor.filterColumn||"",cols=editorDisplaySource().columns;s.innerHTML=`<option value="">Todas</option>${cols.map(key=>`<option value="${escapeHtml(key)}">${escapeHtml(editorLabel(key))}</option>`).join("")}`;if(cols.includes(current))s.value=current;else{state.editor.filterColumn="";s.value="";}}
 function syncEditorButtons(){if(!state.editor)return;const writable=editorWritable();["#editorAddRow","#editorAddColumn","#editorBulkImport","#editorSave"].forEach(sel=>{const el=qs(sel);if(el)el.disabled=!writable;});qs("#editorUndo").disabled=!writable||!state.editor.history.length;qs("#editorRedo").disabled=!writable||!state.editor.future.length;qs("#editorShowDeleted").disabled=editorIsSmart();qs("#editorDirtyCount").textContent=`${formatNumber(editorDirtyCount())} cambios`;const st=qs("#editorStatus");st.classList.toggle("readonly",!writable);st.classList.toggle("dirty",editorDirtyCount()>0);}
 function renderEditorGrid(){const host=qs("#editorGridHost");if(!host||!state.editor)return;const filtered=filteredEditorRows(),{columns}=editorDisplaySource(),size=Number(state.editor.pageSize||50),pages=Math.max(1,Math.ceil(filtered.length/size));state.editor.page=Math.max(1,Math.min(Number(state.editor.page||1),pages));const start=(state.editor.page-1)*size,pageRows=filtered.slice(start,start+size),writable=editorWritable();qs("#editorRowCount").textContent=`${formatNumber(filtered.length)} filas`;qs("#editorColumnCount").textContent=`${formatNumber(columns.length)} columnas`;qs("#editorPageLabel").textContent=`${state.editor.page} / ${pages}`;qs("#editorPrev").disabled=state.editor.page<=1;qs("#editorNext").disabled=state.editor.page>=pages;syncEditorButtons();if(!pageRows.length){host.innerHTML=`<div class="sheet-empty"><div><strong>Sin filas visibles</strong>Ajuste filtros, cree una fila o realice una carga masiva.</div></div>`;return;}host.innerHTML=`<table class="sheet-grid"><thead><tr><th>#</th>${columns.map(key=>{const active=state.editor.sortKey===key,arrow=active?(state.editor.sortDir==="asc"?"↑":"↓"):"";return `<th><div class="sheet-header-wrap"><button class="sheet-header-sort" type="button" data-editor-sort="${escapeHtml(key)}"><span class="sheet-header-label">${escapeHtml(editorLabel(key))}</span><span>${arrow}</span></button>${writable?`<span class="sheet-header-tools"><button class="sheet-header-icon" type="button" data-editor-rename="${escapeHtml(key)}"><i data-lucide="pencil" size="12"></i></button></span>`:""}</div></th>`;}).join("")}<th>Acción</th></tr></thead><tbody>${pageRows.map(({row,index},pi)=>`<tr class="${!editorIsSmart()?`${row._dirty?"sheet-row-dirty":""} ${row._deleted?"sheet-row-deleted":""}`:""}" data-editor-index="${index}"><td>${start+pi+1}</td>${columns.map(key=>{const v=row?.[key]??"",num=numericEditorField(key,v)?"1":"0";return `<td><input class="sheet-cell" data-editor-cell="${escapeHtml(key)}" data-editor-index="${index}" data-numeric="${num}" value="${escapeHtml(rawCell(v))}" ${(!writable||row._deleted)?"disabled":""}></td>`;}).join("")}<td><div class="sheet-row-actions">${writable?`<button class="btn ${row._deleted?"btn-outline":"btn-danger"} btn-sm" type="button" data-editor-delete="${index}">${row._deleted?"Restaurar":"Eliminar"}</button>`:`<span class="badge">Lectura</span>`}</div></td></tr>`).join("")}</tbody></table>`;refreshIcons();}
-function editorUpdateStatus(){if(!state.editor)return;const cycle=state.editor.cycle,w=editorWritable(),smart=editorIsSmart();qs("#editorModeBadge").textContent=smart?"Vista inteligente":(cycle?.status==="draft"?"Editable":"Solo lectura");qs("#editorModeBadge").className=`badge ${smart?"badge-info":cycle?.status==="draft"?"badge-warning":"badge-success"}`;qs("#editorFileBadge").textContent=state.editor.job?.fileName||state.editor.sourceType||"Fuente";qs("#editorSheetBadge").textContent=`Hoja ${state.editor.job?.sheetName||state.editor.sourceType||"—"}`;qs("#editorSubtitle").textContent=cycle?.status==="draft"?"Edite la hoja de trabajo con trazabilidad; guarde cuando termine.":"Corte publicado protegido: previsualización y descarga en modo solo lectura.";qs("#editorStatusText").textContent=smart?"Vista inteligente reconstruida por Smart Table Engine. Es solo lectura para preservar la correspondencia con la hoja almacenada.":w?"Edición activa. Puede escribir, pegar desde Excel, agregar filas/columnas, renombrar encabezados y guardar.":"Vista protegida. Puede buscar, ordenar, filtrar y descargar; la edición está deshabilitada.";syncEditorButtons();}
+function editorUpdateStatus(){if(!state.editor)return;const cycle=state.editor.cycle,w=editorWritable(),smart=editorIsSmart();qs("#editorModeBadge").textContent=smart?"Vista inteligente":(cycle?.status==="draft"?"Editable":"Solo lectura");qs("#editorModeBadge").className=`badge ${smart?"badge-info":cycle?.status==="draft"?"badge-warning":"badge-success"}`;qs("#editorFileBadge").textContent=state.editor.job?.fileName||state.editor.sourceType||"Fuente";qs("#editorSheetBadge").textContent=`Hoja ${state.editor.job?.sheetName||state.editor.sourceType||"—"}`;qs("#editorSubtitle").textContent=cycle?.status==="draft"?"Edite la hoja de trabajo con trazabilidad; guarde cuando termine.":"Corte publicado protegido: previsualización y descarga en modo solo lectura.";qs("#editorStatusText").textContent=smart?"Vista inteligente reconstruida por Smart Table Engine. Es solo lectura para preservar la correspondencia con la hoja almacenada.":w?"Edición en línea activa. Al salir de una celda, los cambios se guardan automáticamente en Firestore y actualizan el aplicativo.":"Vista protegida. Puede buscar, ordenar, filtrar y descargar; la edición está deshabilitada.";const auto=qs("#editorAutoSave");if(auto){auto.disabled=!w;if(!w)auto.checked=false;else if(auto.dataset.initialized!=="1"){auto.checked=true;auto.dataset.initialized="1";}}const pop=qs("#editorPopout .btn-label");if(pop)pop.textContent=state.standaloneSheet?"Vista dedicada":"Ventana completa";setEditorLiveState(navigator.onLine?"online":"offline");syncEditorButtons();}
 async function loadEditorWorkspace(){const cycleId=qs("#editorCycle").value,sourceType=qs("#editorSource").value;if(!cycleId||!sourceType)return;setSyncState("loading","Abriendo hoja");const [workspace,structured,cycle,columnLabels]=await Promise.all([getSourceWorkspace(cycleId,sourceType,{includeDeleted:true}),getSourceRows(cycleId,sourceType,true),getCycle(cycleId),getSourceColumnLabels(cycleId,sourceType)]);const smartRows=structured?.rows||[],smartColumns=rawColumns(smartRows);state.editor={cycleId,sourceType,cycle,job:workspace.job,rows:workspace.rows.map(row=>({...row,_dirty:false,_new:false})),columns:editorColumns(workspace.rows,workspace.job,sourceType),columnLabels,labelsDirty:false,readOnly:cycle?.status!=="draft",smartRows,smartColumns,smart:structured?.smart||null,viewMode:"original",search:"",filterColumn:"",filterValue:"",sortKey:"",sortDir:"asc",page:1,pageSize:Number(qs("#editorPageSize").value||50),history:[],future:[],cellStart:null,applyingHistory:false};qs("#editorSearch").value="";qs("#editorFilterValue").value="";qs("#editorShowDeleted").checked=false;qs("#editorViewMode").value="original";qs("#editorViewMode").querySelector('option[value="smart"]').disabled=!smartRows.length;syncEditorColumnFilter();editorUpdateStatus();renderEditorGrid();setSyncState("online");refreshIcons();}
-async function openDataEditor(preferredSource="",preferredCycleId=""){if(!state.profile)return;const cycles=(await getCycles(true)).filter(c=>String(c.year)===String(state.selectedYear)),cycleId=preferredCycleId||state.cycle?.id||cycles[0]?.id||"";if(!cycleId){showToast("Sin corte","Cree o seleccione un corte antes de abrir una hoja.","warning");return;}qs("#editorCycle").innerHTML=cycles.map(c=>`<option value="${escapeHtml(c.id)}">${c.status==="draft"?"Trabajo":"Publicado"} · ${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");qs("#editorCycle").value=cycleId;const cycle=cycles.find(c=>c.id===cycleId)||await getCycle(cycleId),configured=state.config?.sourceTypes||[],present=[...(cycle?.importedSources||[]),...(cycle?.manualSources||[])],sources=[...new Set([...present,...configured])];qs("#editorSource").innerHTML=sources.map(source=>`<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("");const defaultSource=preferredSource||present[0]||sources[0]||"";if(defaultSource)qs("#editorSource").value=defaultSource;openModal("dataEditorModal");await loadEditorWorkspace();}
+async function openDataEditor(preferredSource="",preferredCycleId=""){if(!state.profile)return;const cycles=(await getCycles(true)).filter(c=>String(c.year)===String(state.selectedYear)),cycleId=preferredCycleId||state.cycle?.id||cycles[0]?.id||"";if(!cycleId){showToast("Sin corte","Cree o seleccione un corte antes de abrir una hoja.","warning");return;}qs("#editorCycle").innerHTML=cycles.map(c=>`<option value="${escapeHtml(c.id)}">${c.status==="draft"?"Trabajo":"Publicado"} · ${formatDate(c.cutoffDate)} · ${escapeHtml(c.label||c.id)}</option>`).join("");qs("#editorCycle").value=cycleId;const cycle=cycles.find(c=>c.id===cycleId)||await getCycle(cycleId),configured=state.config?.sourceTypes||[],present=[...(cycle?.importedSources||[]),...(cycle?.manualSources||[])],sources=[...new Set([...present,...configured])];qs("#editorSource").innerHTML=sources.map(source=>`<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("");const defaultSource=preferredSource||present[0]||sources[0]||"";if(defaultSource)qs("#editorSource").value=defaultSource;if(state.standaloneSheet)document.body.classList.add("sheet-window-mode");openModal("dataEditorModal");startLiveCycleSync(cycleId);await loadEditorWorkspace();}
 function newManualEditorRow(){const row={_rowId:uid("manual"),_origin:"manual",_manualDocId:uid("manualrow"),_deleted:false,_edited:true,_dirty:true,_new:true};for(const key of state.editor.columns)row[key]=null;return row;}
-function addEditorRow(){if(!editorWritable())return;const row=newManualEditorRow();state.editor.rows.unshift(row);state.editor.page=1;editorPushHistory({type:"addRow",row:{...row}});renderEditorGrid();}
-function addEditorColumn(){if(!editorWritable())return;const raw=prompt("Nombre de la nueva columna:","Observación");if(!raw)return;let key=normalizeKey(raw)||`columna_${state.editor.columns.length+1}`,suffix=2,base=key;while(state.editor.columns.includes(key))key=`${base}_${suffix++}`;state.editor.columns.push(key);state.editor.columnLabels[key]=raw.trim();for(const row of state.editor.rows){row[key]=null;row._dirty=true;}state.editor.labelsDirty=true;editorPushHistory({type:"addColumn",key,label:raw.trim()});syncEditorColumnFilter();renderEditorGrid();}
-function renameEditorColumn(key){if(!editorWritable())return;const before=state.editor.columnLabels[key]||humanizeColumn(key),value=prompt("Nuevo nombre visible del encabezado:",before);if(!value||value.trim()===before)return;state.editor.columnLabels[key]=value.trim();state.editor.labelsDirty=true;editorPushHistory({type:"label",key,before,after:value.trim()});syncEditorColumnFilter();renderEditorGrid();}
+function addEditorRow(){if(!editorWritable())return;const row=newManualEditorRow();state.editor.rows.unshift(row);state.editor.page=1;editorPushHistory({type:"addRow",row:{...row}});renderEditorGrid();scheduleEditorAutosave();}
+function addEditorColumn(){if(!editorWritable())return;const raw=prompt("Nombre de la nueva columna:","Observación");if(!raw)return;let key=normalizeKey(raw)||`columna_${state.editor.columns.length+1}`,suffix=2,base=key;while(state.editor.columns.includes(key))key=`${base}_${suffix++}`;state.editor.columns.push(key);state.editor.columnLabels[key]=raw.trim();for(const row of state.editor.rows){row[key]=null;row._dirty=true;}state.editor.labelsDirty=true;editorPushHistory({type:"addColumn",key,label:raw.trim()});syncEditorColumnFilter();renderEditorGrid();scheduleEditorAutosave();}
+function renameEditorColumn(key){if(!editorWritable())return;const before=state.editor.columnLabels[key]||humanizeColumn(key),value=prompt("Nuevo nombre visible del encabezado:",before);if(!value||value.trim()===before)return;state.editor.columnLabels[key]=value.trim();state.editor.labelsDirty=true;editorPushHistory({type:"label",key,before,after:value.trim()});syncEditorColumnFilter();renderEditorGrid();scheduleEditorAutosave();}
 function editorApplyAction(action,direction){if(!state.editor||!action)return;state.editor.applyingHistory=true;const undo=direction==="undo";if(action.type==="cell"){const row=state.editor.rows[action.index];if(row){row[action.key]=undo?action.before:action.after;row._dirty=true;}}else if(action.type==="bulkCells"){for(const c of action.changes){const row=state.editor.rows[c.index];if(row){row[c.key]=undo?c.before:c.after;row._dirty=true;}}}else if(action.type==="delete"){const row=state.editor.rows[action.index];if(row){row._deleted=undo?action.before:action.after;row._dirty=true;}}else if(action.type==="addRow"){if(undo){const i=state.editor.rows.findIndex(r=>r._rowId===action.row._rowId);if(i>=0)state.editor.rows.splice(i,1);}else state.editor.rows.unshift({...action.row,_dirty:true});}else if(action.type==="addColumn"){if(undo){state.editor.columns=state.editor.columns.filter(k=>k!==action.key);delete state.editor.columnLabels[action.key];for(const row of state.editor.rows)delete row[action.key];}else{state.editor.columns.push(action.key);state.editor.columnLabels[action.key]=action.label;for(const row of state.editor.rows){row[action.key]=null;row._dirty=true;}}state.editor.labelsDirty=true;}else if(action.type==="label"){state.editor.columnLabels[action.key]=undo?action.before:action.after;state.editor.labelsDirty=true;}state.editor.applyingHistory=false;syncEditorColumnFilter();renderEditorGrid();}
 function editorUndo(){if(!editorWritable()||!state.editor.history.length)return;const a=state.editor.history.pop();state.editor.future.push(a);editorApplyAction(a,"undo");syncEditorButtons();}
 function editorRedo(){if(!editorWritable()||!state.editor.future.length)return;const a=state.editor.future.pop();state.editor.history.push(a);editorApplyAction(a,"redo");syncEditorButtons();}
@@ -1905,8 +1942,29 @@ function editorExportColumns(rows){return editorIsSmart()?(state.editor.smartCol
 function editorWorksheet(){const rows=editorExportRows(),columns=editorExportColumns(rows),header=columns.map(key=>editorIsSmart()?humanizeColumn(key):editorLabel(key)),aoa=[header,...rows.map(row=>columns.map(key=>row?.[key]??null))],ws=XLSX.utils.aoa_to_sheet(aoa);if(ws["!ref"]){ws["!autofilter"]={ref:ws["!ref"]};ws["!freeze"]={xSplit:0,ySplit:1};}ws["!cols"]=columns.map((key,i)=>{let max=Math.min(42,Math.max(12,String(header[i]||key).length+2));for(const row of rows.slice(0,80))max=Math.min(42,Math.max(max,String(row?.[key]??"").length+1));return{wch:max};});return{ws,rows,columns};}
 async function editorDownloadXlsx(){if(!state.editor)return;const {ws}=editorWorksheet(),wb=XLSX.utils.book_new(),sheetName=String(state.editor.sourceType||"Datos").slice(0,31);XLSX.utils.book_append_sheet(wb,ws,sheetName);XLSX.writeFile(wb,`${filenameBase(state.editor.cycleId,`${state.editor.sourceType}_${editorIsSmart()?"Vista_Inteligente":"Hoja"}`)}.xlsx`);await audit("SOURCE_EXPORTED_XLSX","CarteraSource",sourceKey(state.editor.cycleId,state.editor.sourceType),{cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,viewMode:state.editor.viewMode});}
 async function editorDownloadCsv(){if(!state.editor)return;const {ws}=editorWorksheet(),csv=XLSX.utils.sheet_to_csv(ws),blob=new Blob(["\ufeff",csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`${filenameBase(state.editor.cycleId,`${state.editor.sourceType}_${editorIsSmart()?"Vista_Inteligente":"Hoja"}`)}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);await audit("SOURCE_EXPORTED_CSV","CarteraSource",sourceKey(state.editor.cycleId,state.editor.sourceType),{cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,viewMode:state.editor.viewMode});}
-async function saveEditorWorkspace(){if(!state.editor||!editorWritable())return;const rowDirty=state.editor.rows.filter(r=>r._dirty).length;if(!rowDirty&&!state.editor.labelsDirty){showToast("Sin cambios","No existen modificaciones pendientes.","info");return;}try{qs("#editorSave").disabled=true;setSyncState("loading","Guardando hoja");if(rowDirty)await saveOperationalRows({cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,rows:state.editor.rows});if(state.editor.labelsDirty)await saveSourceColumnLabels(state.editor.cycleId,state.editor.sourceType,state.editor.columnLabels);await audit("SOURCE_SPREADSHEET_SAVED","CarteraSource",sourceKey(state.editor.cycleId,state.editor.sourceType),{cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,rowsChanged:rowDirty,labelsChanged:state.editor.labelsDirty});showToast("Hoja guardada",`${rowDirty} fila(s) actualizadas con trazabilidad.`,"success",5500);sourceDataCache.delete(`${state.editor.cycleId}|${state.editor.sourceType}`);await loadEditorWorkspace();if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){console.error("Spreadsheet Studio",error);showToast("No fue posible guardar",error.message,"error",7000);}finally{setSyncState("online");syncEditorButtons();}}
-function pasteMatrixIntoEditor(event,input){if(!editorWritable())return;const text=event.clipboardData?.getData("text/plain")||"";if(!text.includes("\t")&&!text.includes("\n"))return;event.preventDefault();const startIndex=Number(input.dataset.editorIndex),startKey=input.dataset.editorCell,startCol=state.editor.columns.indexOf(startKey);if(startIndex<0||startCol<0)return;const matrix=text.replace(/\r/g,"").split("\n").filter((_,i,a)=>i<a.length-1||a[i]!=="").map(line=>line.split("\t")),changes=[];for(let r=0;r<matrix.length;r++){const ti=startIndex+r;while(ti>=state.editor.rows.length)state.editor.rows.push(newManualEditorRow());const row=state.editor.rows[ti];for(let c=0;c<matrix[r].length;c++){let ci=startCol+c;while(ci>=state.editor.columns.length){const key=`columna_${state.editor.columns.length+1}`;state.editor.columns.push(key);state.editor.columnLabels[key]=humanizeColumn(key);for(const rr of state.editor.rows)if(!(key in rr))rr[key]=null;state.editor.labelsDirty=true;}const key=state.editor.columns[ci],before=row[key]??null,after=parseEditorValue(matrix[r][c],before);if(String(before??"")===String(after??""))continue;row[key]=after;row._dirty=true;changes.push({index:ti,key,before,after});}}if(changes.length)editorPushHistory({type:"bulkCells",changes});syncEditorColumnFilter();renderEditorGrid();}
+async function saveEditorWorkspace({silent=false,keepPosition=false}={}){
+  if(!state.editor||!editorWritable())return;
+  const dirtyRows=state.editor.rows.filter(r=>r._dirty),rowDirty=dirtyRows.length,labelsDirty=state.editor.labelsDirty===true;
+  if(!rowDirty&&!labelsDirty){if(!silent)showToast("Sin cambios","No existen modificaciones pendientes.","info");return;}
+  try{
+    qs("#editorSave").disabled=true;
+    state.liveMuteUntil=Date.now()+2200;
+    setSyncState("loading","Guardando");setEditorLiveState("saving");
+    if(rowDirty)await saveOperationalRows({cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,rows:state.editor.rows});
+    if(labelsDirty)await saveSourceColumnLabels(state.editor.cycleId,state.editor.sourceType,state.editor.columnLabels);
+    await audit("SOURCE_SPREADSHEET_SAVED","CarteraSource",sourceKey(state.editor.cycleId,state.editor.sourceType),{cycleId:state.editor.cycleId,sourceType:state.editor.sourceType,rowsChanged:rowDirty,labelsChanged:labelsDirty,mode:silent?"autosave":"manual"});
+    for(const row of dirtyRows){row._dirty=false;row._new=false;}
+    state.editor.labelsDirty=false;state.editor.history=[];state.editor.future=[];
+    sourceDataCache.delete(`${state.editor.cycleId}|${state.editor.sourceType}`);historicalAnalyticsCache.delete(String(state.selectedYear||""));
+    if(!silent)showToast("Hoja guardada",`${rowDirty} fila(s) actualizadas en línea.`,"success",4200);
+    if(!keepPosition)await loadEditorWorkspace();else{syncEditorButtons();renderEditorGrid();editorUpdateStatus();}
+    if(!state.standaloneSheet)await renderCurrentView(true).catch(()=>{});
+    setEditorLiveState("online","Guardado en línea");
+  }catch(error){
+    console.error("Spreadsheet Studio",error);setEditorLiveState(navigator.onLine?"online":"offline",navigator.onLine?"Error al guardar":"Sin conexión");showToast("No fue posible guardar",error.message,"error",7000);throw error;
+  }finally{setSyncState(navigator.onLine?"online":"offline");syncEditorButtons();}
+}
+function pasteMatrixIntoEditor(event,input){if(!editorWritable())return;const text=event.clipboardData?.getData("text/plain")||"";if(!text.includes("\t")&&!text.includes("\n"))return;event.preventDefault();const startIndex=Number(input.dataset.editorIndex),startKey=input.dataset.editorCell,startCol=state.editor.columns.indexOf(startKey);if(startIndex<0||startCol<0)return;const matrix=text.replace(/\r/g,"").split("\n").filter((_,i,a)=>i<a.length-1||a[i]!=="").map(line=>line.split("\t")),changes=[];for(let r=0;r<matrix.length;r++){const ti=startIndex+r;while(ti>=state.editor.rows.length)state.editor.rows.push(newManualEditorRow());const row=state.editor.rows[ti];for(let c=0;c<matrix[r].length;c++){let ci=startCol+c;while(ci>=state.editor.columns.length){const key=`columna_${state.editor.columns.length+1}`;state.editor.columns.push(key);state.editor.columnLabels[key]=humanizeColumn(key);for(const rr of state.editor.rows)if(!(key in rr))rr[key]=null;state.editor.labelsDirty=true;}const key=state.editor.columns[ci],before=row[key]??null,after=parseEditorValue(matrix[r][c],before);if(String(before??"")===String(after??""))continue;row[key]=after;row._dirty=true;changes.push({index:ti,key,before,after});}}if(changes.length)editorPushHistory({type:"bulkCells",changes});syncEditorColumnFilter();renderEditorGrid();scheduleEditorAutosave();}
 
 // ===== admin.js =====
 window.__CARTERA_ASSET_BOOT__ = true;
@@ -1919,8 +1977,16 @@ const state = {
   officialCycle:null, cycle:null, cycleOptions:[],
   aggregate:null, validation:null, portfolio:null, summary:null, aging:null, lines:null,
   payments:null, cycles:[], importJobs:[], users:null, analyzedImport:null, editor:null,
+  liveUnsubs:[], liveCycleId:null, liveMuteUntil:0, standaloneSheet:false,
   portfolioPage:1, portfolioPageSize:25, portfolioSearch:"", portfolioLine:"", portfolioMora:"all"
 };
+
+const standaloneSheetParams = new URLSearchParams(location.search);
+const requestedStandaloneSheet = standaloneSheetParams.get("sheet") === "1";
+const requestedStandaloneCycle = standaloneSheetParams.get("cycle") || "";
+const requestedStandaloneSource = standaloneSheetParams.get("source") || "";
+state.standaloneSheet=requestedStandaloneSheet;
+if(requestedStandaloneSheet)document.body.classList.add("sheet-window-mode");
 
 let access;
 try {
@@ -1946,6 +2012,55 @@ function setupRoleUI(){
   qs("#profileAvatar").textContent = initials(state.profile.displayName || state.user.email);
 }
 setupRoleUI();
+
+function stopLiveCycleSync(){
+  for(const unsub of (state.liveUnsubs||[])){try{unsub();}catch{}}
+  state.liveUnsubs=[];state.liveCycleId=null;
+}
+function invalidateLiveData(){
+  sourceDataCache.clear();historicalAnalyticsCache.clear();state.aggregate=null;state.validation=null;resetCycleDerivedState();
+}
+const scheduleLiveRefresh=debounce(async()=>{
+  if(Date.now()<Number(state.liveMuteUntil||0))return;
+  invalidateLiveData();
+  if(state.editor){
+    if(editorDirtyCount()>0){showToast("Cambio en línea detectado","Otra sesión actualizó esta fuente. Guarde o recargue antes de incorporar los cambios externos.","warning",6000);}
+    else if(state.editor.cycleId===state.liveCycleId){await loadEditorWorkspace().catch(()=>{});}
+  }
+  if(!state.standaloneSheet)await renderCurrentView(true).catch(()=>{});
+},550);
+function watchAfterInitial(refOrQuery){
+  let first=true;
+  const unsub=onSnapshot(refOrQuery,()=>{if(first){first=false;return;}scheduleLiveRefresh();},error=>console.warn("Live sync",error));
+  state.liveUnsubs.push(unsub);
+}
+function startLiveCycleSync(cycleId){
+  stopLiveCycleSync();if(!cycleId)return;state.liveCycleId=cycleId;
+  watchAfterInitial(doc(db,"CarteraCycles",cycleId));
+  watchAfterInitial(doc(db,"CarteraAggregates",cycleId));
+  watchAfterInitial(query(collection(db,"ImportJobs"),where("cycleId","==",cycleId),limit(200)));
+  watchAfterInitial(query(collection(db,"CarteraRowEdits"),where("cycleId","==",cycleId),limit(1000)));
+  watchAfterInitial(query(collection(db,"CarteraManualRows"),where("cycleId","==",cycleId),limit(1000)));
+}
+function setEditorLiveState(mode,text=""){
+  const badge=qs("#editorLiveBadge");if(!badge)return;
+  badge.classList.toggle("saving",mode==="saving");badge.classList.toggle("offline",mode==="offline");
+  badge.textContent=text||(mode==="saving"?"Guardando…":mode==="offline"?"Sin conexión":"En línea");
+}
+function spreadsheetWindowUrl(){
+  if(!state.editor)return"";
+  const url=new URL("./admin.html",location.href);url.search="";url.hash="";
+  url.searchParams.set("sheet","1");url.searchParams.set("cycle",state.editor.cycleId);url.searchParams.set("source",state.editor.sourceType);
+  return url.href;
+}
+function openSpreadsheetWindow(){const url=spreadsheetWindowUrl();if(url)window.open(url,"_blank","noopener,noreferrer");}
+function closeSpreadsheetStudio(){stopEditorAutosave();if(state.standaloneSheet){window.close();return;}closeModal("dataEditorModal");}
+let editorAutosaveTimer=null;
+function stopEditorAutosave(){if(editorAutosaveTimer){clearTimeout(editorAutosaveTimer);editorAutosaveTimer=null;}}
+function scheduleEditorAutosave(){
+  if(!state.editor||!editorWritable()||!qs("#editorAutoSave")?.checked)return;
+  stopEditorAutosave();editorAutosaveTimer=setTimeout(()=>saveEditorWorkspace({silent:true,keepPosition:true}).catch(()=>{}),900);
+}
 
 async function bootstrap({retry=false} = {}){
   try{
@@ -2009,6 +2124,7 @@ async function selectCycleForView(cycleId, { render=true } = {}) {
   state.validation = state.cycle ? await getValidation(state.cycle.id, true) : null;
   updateCutBadges();
   updateEditingControls();
+  startLiveCycleSync(state.cycle?.id || "");
   if (render) await renderCurrentView(true);
 }
 async function loadYear(year, preferredCycleId=null){
@@ -2312,7 +2428,7 @@ document.addEventListener("click",(e)=>{const b=e.target.closest("[data-action]"
 document.addEventListener("click",(e)=>{const b=e.target.closest("[data-edit-source]");if(!b)return;openDataEditor(b.dataset.editSource||"",state.cycle?.id||"");});
 document.addEventListener("click",(e)=>{const b=e.target.closest("[data-preview-source]");if(!b)return;openDataEditor(b.dataset.previewSource||"",b.dataset.previewCycle||state.cycle?.id||"");});
 qsa("[data-close-modal]").forEach((b)=>b.addEventListener("click",()=>closeModal(b.dataset.closeModal)));
-qsa(".modal-backdrop").forEach((m)=>m.addEventListener("click",(e)=>{if(e.target===m)closeModal(m.id);}));
+qsa(".modal-backdrop").forEach((m)=>m.addEventListener("click",(e)=>{if(e.target!==m)return;if(m.id==="dataEditorModal"&&state.standaloneSheet)return;closeModal(m.id);}));
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape"){qsa(".modal-backdrop:not([hidden])").forEach((m)=>closeModal(m.id));qs("#createMenu").hidden=true;}if(e.key==="/"&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();qs("#globalSearch").focus();}});
 
 qs("#globalSearch").addEventListener("input",debounce((e)=>{state.portfolioSearch=e.target.value;if(e.target.value.trim()){state.portfolioPage=1;navigate("portfolio");}},330));
@@ -2336,24 +2452,28 @@ ${error.message}`;showToast("Error de análisis",error.message,"error");}finally
 qs("#saveImportButton").addEventListener("click",async()=>{if(!state.analyzedImport)return;try{setSyncState("loading","Guardando");qs("#saveImportButton").disabled=true;qs("#importLog").textContent="Guardando ImportJob y chunks en Firestore…";const importedCycleId=state.analyzedImport.cycleId, importedSource=state.analyzedImport.sourceType, importedRows=state.analyzedImport.rows.length;const result=await saveAnalyzedImport(state.analyzedImport);qs("#importLog").textContent=`IMPORTACIÓN COMPLETADA\nJob: ${result.jobId}\nFuentes faltantes: ${result.validation.missingSources.length?result.validation.missingSources.join(", "):"Ninguna"}\n\nLa información ya está disponible en los módulos sin publicar el corte.`;showToast("Importación disponible",`${importedSource}: ${formatNumber(importedRows)} filas. Ya puede consultarlas sin confirmar el corte.`,"success",6500);state.analyzedImport=null;await loadYear(state.selectedYear,importedCycleId);if(qs("#view-data").classList.contains("active"))await renderData();}catch(error){qs("#importLog").textContent=`ERROR DE IMPORTACIÓN\n${error.code||""}\n${error.message}`;showToast("No fue posible importar",error.message,"error",7000);qs("#saveImportButton").disabled=false;}finally{setSyncState("online");}});
 
 
-qs("#editorCycle").addEventListener("change",async()=>{const cycle=await getCycle(qs("#editorCycle").value),configured=state.config?.sourceTypes||[],present=[...(cycle?.importedSources||[]),...(cycle?.manualSources||[])],sources=[...new Set([...present,...configured])];qs("#editorSource").innerHTML=sources.map(source=>`<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("");if(present[0])qs("#editorSource").value=present[0];await loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error"));});
-qs("#editorSource").addEventListener("change",()=>loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error")));
+qs("#editorCycle").addEventListener("change",async()=>{const cycleId=qs("#editorCycle").value,cycle=await getCycle(cycleId),configured=state.config?.sourceTypes||[],present=[...(cycle?.importedSources||[]),...(cycle?.manualSources||[])],sources=[...new Set([...present,...configured])];qs("#editorSource").innerHTML=sources.map(source=>`<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("");if(present[0])qs("#editorSource").value=present[0];startLiveCycleSync(cycleId);if(state.standaloneSheet){const url=new URL(location.href);url.searchParams.set("cycle",cycleId);url.searchParams.set("source",qs("#editorSource").value||"");history.replaceState(null,"",url.href);}await loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error"));});
+qs("#editorSource").addEventListener("change",()=>{if(state.standaloneSheet){const url=new URL(location.href);url.searchParams.set("source",qs("#editorSource").value);history.replaceState(null,"",url.href);}loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error"));});
 qs("#editorSearch").addEventListener("input",debounce(e=>{if(!state.editor)return;state.editor.search=e.target.value;state.editor.page=1;renderEditorGrid();},160));
 qs("#editorFilterColumn").addEventListener("change",e=>{if(!state.editor)return;state.editor.filterColumn=e.target.value;state.editor.page=1;renderEditorGrid();});
 qs("#editorFilterValue").addEventListener("input",debounce(e=>{if(!state.editor)return;state.editor.filterValue=e.target.value;state.editor.page=1;renderEditorGrid();},160));
 qs("#editorPageSize").addEventListener("change",e=>{if(!state.editor)return;state.editor.pageSize=Number(e.target.value);state.editor.page=1;renderEditorGrid();});
 qs("#editorShowDeleted").addEventListener("change",()=>{if(!state.editor)return;state.editor.page=1;renderEditorGrid();});
+qs("#editorAutoSave").addEventListener("change",e=>{if(e.target.checked)scheduleEditorAutosave();else stopEditorAutosave();});
+qs("#editorPopout").addEventListener("click",()=>{if(state.standaloneSheet){showToast("Vista dedicada","Ya está trabajando en la ventana completa.","info");return;}openSpreadsheetWindow();});
+qs("#editorCloseButton").addEventListener("click",closeSpreadsheetStudio);
+qs("#editorFooterClose").addEventListener("click",closeSpreadsheetStudio);
 qs("#editorViewMode").addEventListener("change",e=>{if(!state.editor)return;state.editor.viewMode=e.target.value;state.editor.page=1;state.editor.sortKey="";state.editor.filterColumn="";state.editor.filterValue="";qs("#editorFilterValue").value="";syncEditorColumnFilter();editorUpdateStatus();renderEditorGrid();});
 qs("#editorAddRow").addEventListener("click",addEditorRow);qs("#editorAddColumn").addEventListener("click",addEditorColumn);qs("#editorUndo").addEventListener("click",editorUndo);qs("#editorRedo").addEventListener("click",editorRedo);
 qs("#editorClearFilters").addEventListener("click",()=>{if(!state.editor)return;state.editor.search="";state.editor.filterColumn="";state.editor.filterValue="";state.editor.sortKey="";qs("#editorSearch").value="";qs("#editorFilterColumn").value="";qs("#editorFilterValue").value="";state.editor.page=1;renderEditorGrid();});
 qs("#editorPrev").addEventListener("click",()=>{if(!state.editor)return;state.editor.page=Math.max(1,state.editor.page-1);renderEditorGrid();});qs("#editorNext").addEventListener("click",()=>{if(!state.editor)return;state.editor.page+=1;renderEditorGrid();});
-qs("#editorDiscard").addEventListener("click",()=>loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error")));qs("#editorSave").addEventListener("click",saveEditorWorkspace);qs("#editorDownloadXlsx").addEventListener("click",()=>editorDownloadXlsx().catch(e=>showToast("Descarga",e.message,"error")));qs("#editorDownloadCsv").addEventListener("click",()=>editorDownloadCsv().catch(e=>showToast("Descarga",e.message,"error")));
+qs("#editorDiscard").addEventListener("click",()=>loadEditorWorkspace().catch(e=>showToast("Spreadsheet Studio",e.message,"error")));qs("#editorSave").addEventListener("click",()=>saveEditorWorkspace({silent:false,keepPosition:true}));qs("#editorDownloadXlsx").addEventListener("click",()=>editorDownloadXlsx().catch(e=>showToast("Descarga",e.message,"error")));qs("#editorDownloadCsv").addEventListener("click",()=>editorDownloadCsv().catch(e=>showToast("Descarga",e.message,"error")));
 qs("#editorBulkImport").addEventListener("click",async()=>{if(!state.editor||!editorWritable())return;const cycle=state.editor.cycleId,source=state.editor.sourceType;closeModal("dataEditorModal");await openImportModal(cycle);qs("#importSource").value=source;});
 qs("#editorGridHost").addEventListener("focusin",e=>{const input=e.target.closest("[data-editor-cell]");if(!input||!state.editor||!editorWritable())return;const index=Number(input.dataset.editorIndex),key=input.dataset.editorCell;state.editor.cellStart={index,key,value:state.editor.rows[index]?.[key]??null};});
 qs("#editorGridHost").addEventListener("input",e=>{const input=e.target.closest("[data-editor-cell]");if(!input||!state.editor||!editorWritable())return;const index=Number(input.dataset.editorIndex),row=state.editor.rows[index];if(!row)return;const key=input.dataset.editorCell;row[key]=parseEditorValue(input.value,row[key]);row._dirty=true;syncEditorButtons();});
-qs("#editorGridHost").addEventListener("change",e=>{const input=e.target.closest("[data-editor-cell]");if(!input||!state.editor||!editorWritable())return;const index=Number(input.dataset.editorIndex),key=input.dataset.editorCell,row=state.editor.rows[index],s=state.editor.cellStart;if(!row||!s||s.index!==index||s.key!==key)return;const after=row[key]??null;if(String(s.value??"")!==String(after??""))editorPushHistory({type:"cell",index,key,before:s.value,after});state.editor.cellStart=null;renderEditorGrid();});
+qs("#editorGridHost").addEventListener("change",e=>{const input=e.target.closest("[data-editor-cell]");if(!input||!state.editor||!editorWritable())return;const index=Number(input.dataset.editorIndex),key=input.dataset.editorCell,row=state.editor.rows[index],s=state.editor.cellStart;if(!row||!s||s.index!==index||s.key!==key)return;const after=row[key]??null;if(String(s.value??"")!==String(after??""))editorPushHistory({type:"cell",index,key,before:s.value,after});state.editor.cellStart=null;renderEditorGrid();scheduleEditorAutosave();});
 qs("#editorGridHost").addEventListener("paste",e=>{const input=e.target.closest("[data-editor-cell]");if(input)pasteMatrixIntoEditor(e,input);});
-qs("#editorGridHost").addEventListener("click",e=>{const del=e.target.closest("[data-editor-delete]");if(del&&state.editor&&editorWritable()){const index=Number(del.dataset.editorDelete),row=state.editor.rows[index];if(row){const before=!!row._deleted,after=!before;row._deleted=after;row._dirty=true;editorPushHistory({type:"delete",index,before,after});renderEditorGrid();}return;}const rename=e.target.closest("[data-editor-rename]");if(rename){renameEditorColumn(rename.dataset.editorRename);return;}const sort=e.target.closest("[data-editor-sort]");if(sort&&state.editor){const key=sort.dataset.editorSort;if(state.editor.sortKey===key)state.editor.sortDir=state.editor.sortDir==="asc"?"desc":"asc";else{state.editor.sortKey=key;state.editor.sortDir="asc";}state.editor.page=1;renderEditorGrid();}});
+qs("#editorGridHost").addEventListener("click",e=>{const del=e.target.closest("[data-editor-delete]");if(del&&state.editor&&editorWritable()){const index=Number(del.dataset.editorDelete),row=state.editor.rows[index];if(row){const before=!!row._deleted,after=!before;row._deleted=after;row._dirty=true;editorPushHistory({type:"delete",index,before,after});renderEditorGrid();scheduleEditorAutosave();}return;}const rename=e.target.closest("[data-editor-rename]");if(rename){renameEditorColumn(rename.dataset.editorRename);return;}const sort=e.target.closest("[data-editor-sort]");if(sort&&state.editor){const key=sort.dataset.editorSort;if(state.editor.sortKey===key)state.editor.sortDir=state.editor.sortDir==="asc"?"desc":"asc";else{state.editor.sortKey=key;state.editor.sortDir="asc";}state.editor.page=1;renderEditorGrid();}});
 
 async function runReport(type){
   if(!state.cycle){showToast("Sin corte seleccionado","No existe información para exportar.","warning");return;}const p=await ensurePortfolio();if(!p||p.unrecognized){showToast("Sin información","No se encontró una fuente principal exportable.","warning");return;}if(type==="detail-excel")exportPortfolioExcel(filteredPortfolioRows(),state.cycle.id);if(type==="executive-excel")exportExecutiveExcel(state.summary,state.aging,state.cycle.id);if(type==="executive-pdf")printExecutiveReport({cycle:state.cycle,summary:state.summary,aging:state.aging,profile:state.profile});
@@ -2362,7 +2482,7 @@ qs("#reportExcelButton").addEventListener("click",async()=>{const t=qs("#reportT
 
 qs("#userForm").addEventListener("submit",async(e)=>{e.preventDefault();const id=qs("#editUserUid").value,msg=qs("#userFormMessage");const role=qs("#editUserRole").value;const isActive=qs("#editUserActive").value==="true";if(id===state.user.uid&&(!isActive||role!=="admin")){msg.textContent="Por seguridad, este administrador no puede desactivarse ni retirarse su propio rol admin desde la interfaz.";msg.className="auth-message error";return;}try{await updateUserProfile(id,{role,isActive});closeModal("userModal");showToast("Perfil actualizado","Los permisos se aplicarán según las reglas de Firestore.","success");await renderUsers();}catch(error){msg.textContent=error.message;msg.className="auth-message error";}});
 
-window.addEventListener("online",()=>setSyncState("online"));window.addEventListener("offline",()=>setSyncState("offline"));
+window.addEventListener("online",()=>{setSyncState("online");setEditorLiveState("online");});window.addEventListener("offline",()=>{setSyncState("offline");setEditorLiveState("offline");});
 await 
 document.addEventListener("click", async (event) => {
   const retry = event.target.closest('[data-action="retry-backend"]');
@@ -2378,14 +2498,20 @@ document.addEventListener("click", async (event) => {
   }
 });
 
+window.addEventListener("beforeunload",(event)=>{if(state.editor&&editorDirtyCount()>0){event.preventDefault();event.returnValue="";}stopLiveCycleSync();});
+
 window.addEventListener("online", () => {
   setSyncState("loading","Reconectando");
   bootstrap({retry:true}).catch(()=>{});
 });
-window.addEventListener("offline", () => setSyncState("offline","Sin conexión"));
+window.addEventListener("offline", () => {setSyncState("offline","Sin conexión");setEditorLiveState("offline");});
 
-bootstrap();
-const initial=location.hash.replace("#","");if(initial&&qs(`#view-${initial}`)&&!qs(`#view-${initial}`).hidden)await navigate(initial);
+await bootstrap();
+if(requestedStandaloneSheet){
+  await openDataEditor(requestedStandaloneSource,requestedStandaloneCycle).catch(error=>showToast("No fue posible abrir la hoja",error.message,"error",7000));
+}else{
+  const initial=location.hash.replace("#","");if(initial&&qs(`#view-${initial}`)&&!qs(`#view-${initial}`).hidden)await navigate(initial);
+}
 
 </script>
 </body>
