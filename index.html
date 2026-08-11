@@ -1,9 +1,9 @@
-<!-- Cartera INFIHUILA v4.2.5 · Mobile Auth Compatibility -->
+<!-- Cartera INFIHUILA v4.2.6 · Login Visibility Fix -->
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="cartera-build" content="4.0.3-bootstrap-fix">
+  <meta name="cartera-build" content="4.2.6-login-visibility-fix">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Acceso institucional al Workspace de Cartera INFIHUILA">
   <meta name="theme-color" content="#006c72">
@@ -339,6 +339,11 @@ tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fbfdfd}td.nume
 .login-loader-card .loader-mark{width:58px!important;height:72px!important;object-fit:contain!important;margin:0 auto 16px!important;position:relative;z-index:1}
 .login-loader-card .spinner{width:31px;height:31px;margin:0 auto 14px;border:3px solid rgba(255,255,255,.26);border-top-color:#CCD400;position:relative;z-index:1}
 .login-loader-card strong{color:#fff!important;font-size:16px!important;font-weight:900!important;position:relative;z-index:1}
+/* v4.2.6 · FIX CRÍTICO: el atributo hidden debe prevalecer incluso sobre el display:grid!important del loader.
+   En v4.2.5, .login-loader{display:grid!important} anulaba [hidden]{display:none!important}
+   por aparecer después con igual especificidad; por eso el loader tapaba el login en equipos nuevos. */
+.login-loader[hidden]{display:none!important}
+.login-loader:not([hidden]){display:grid!important}
 
 </style>
 </head>
@@ -420,7 +425,7 @@ tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fbfdfd}td.nume
     </section>
   </div>
 <script type="module">
-// v4.2.5 · Cargador resiliente Firebase con proveedor alterno.
+// v4.2.6 · Login visible + cargador resiliente Firebase con proveedor alterno.
 // El login queda visible aunque un CDN falle; primero intenta Google y luego jsDelivr.
 const FIREBASE_VERSION = "12.16.0";
 function importWithTimeout(url, ms = 7000) {
@@ -671,7 +676,7 @@ function setBusy(busy) { loginButton.disabled = busy; loginButton.textContent = 
 function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
 
 window.addEventListener("DOMContentLoaded", refreshIcons);
-// v4.2.5: el login debe mostrarse incluso si el almacenamiento o la restauración de sesión se retrasan en móvil.
+// v4.2.6: el login queda realmente visible porque el loader respeta [hidden], incluso antes de resolver Firebase.
 let authResolved = false;
 let unsubscribe = () => {};
 const authSafetyTimer = setTimeout(() => {
