@@ -1,4 +1,4 @@
-/* CARTERA INFIHUILA v4.3.2 · Executive Editorial Engine
+/* CARTERA INFIHUILA v4.3.3 · Executive Editorial Engine · Word + Excel
    Browser-native DOCX/XLSX with executive-only tables, formulas and native Excel charts. */
 (function(global){
 'use strict';
